@@ -4,9 +4,9 @@ load_code("merchantLogic");
 load_code("mageLogic");
 load_code("rangerLogic");
 
-var autoPlay = true;
-var aloneCheck = false;
-var started = false;
+var autoPlay = false;
+var aloneChecking = false;
+var farmingModeActive = false;
 
 const farmMonsterName = "arcticbee";
 const farmMap = "winterland";
@@ -17,6 +17,7 @@ const merchantName = "LotusMerch";
 const mageName = "LotusMage";
 const rangerName = "LotusRanger";
 const priestName = "LotusPriest";
+const partyLeader = priestName;
 
 map_key("1", "snippet", "loadCharacters()")
 map_key("2", "snippet", "initParty()")
@@ -49,63 +50,21 @@ function main()
 	
     usePotions(healthPotThreshold, manaPotThreshold);
     loot();
-	//followLeader();
-	//personalSpace();
 	
 	if(character.ctype != "merchant")
 	{
-		if(!autoPlay)
-		{
-			return;
-		}
+        if(character.name == partyLeader && !autoPlay)
+        {
+            return;
+        }
 
-		if(!partyPresent() && !aloneCheck)
-		{
-			aloneCheck = true;
-			//log(character.name + " looking for party...");
-			
-			setTimeout(function()
-			{
-				if(!isInTown() && !partyPresent())
-				{
-					log(character.name + " returning to town.");
-					
-					if(character.map == "main" && !isInTown())
-					{
-						if(get_targeted_monster())
-							goTo("main");
-						else
-							use("use_town");						
-					}
-					else
-					{
-						if(get_targeted_monster())
-							goTo("main");
-						else
-						{
-							use("use_town");
-							setTimeout(goTo("main"), 5000);							
-						}
-					}
-				}
-				
-				aloneCheck = false;
-				
-			}, 15000);
-			
-			return;
-		}
-
-		if(!readyToGo() || !partyPresent() || aloneCheck)
-		{			
-			return;		
-		}
-		
-		if(character.ctype === "priest" && !started)
-			return;
-	}
+        if(aloneCheck() || !autoPlay || !readyToGo())
+        {
+            return;
+        }
+    }
 	
-	let target = getTarget(farmMonsterName);
+	let target = getMonsterFarmTarget(farmMonsterName);
 	
 	if(character.ctype === "priest")
 	{
@@ -144,7 +103,7 @@ function main()
 
 function lateUpdate()
 {
-	if(parent.party_list.length < 4 || !autoPlay)
+	if(!autoPlay)
 		return;
 	
 	if(is_moving(character) || smart.moving)
@@ -160,23 +119,54 @@ function lateUpdate()
 		setTimeout(merchantLateUpdate, 1000);
 	}
 	
-	if(!readyToGo())
+	if(character.name == partyLeader && readyToGo())
 	{
-		if(character.ctype === "priest" && partyPresent() && !started)
+        if(partyPresent() && !farmingModeActive)
+        {
+            letsGo();
+        }
+    }
+    else if(!readyToGo())
+	{
+		if(character.name == partyLeader && partyPresent() && !farmingModeActive)
 		{
 			readyCheck();
 		}
 	}
-	else if(readyToGo())
-	{
-		if(character.ctype === "priest")
-		{
-			if(partyPresent() && !started)
-			{
-				letsGo();
-			}
-		}
-	}
+}
+
+function aloneCheck(msToWait = 15000)
+{
+    if(!partyPresent() && !aloneChecking)
+    {
+        aloneChecking = true;
+
+        setTimeout(function()
+        {
+            if(!isInTown() && !partyPresent())
+            {
+                log(character.name + " is lost & returning to town.");
+                
+                if(get_targeted_monster())
+                {
+                    goTo("main");
+                }
+                else
+                    use("use_town");
+                }
+
+            aloneChecking = false;
+            aloneCheck();
+
+        }, msToWait);
+        
+        return true;
+    }
+
+    if(!partyPresent() || aloneChecking)
+    {			
+        return true;
+    }
 }
 
 function letsGo()
@@ -186,16 +176,20 @@ function letsGo()
 	send_cm(mageName, {message:"letsgo"});
 	send_cm(rangerName, {message:"letsgo"});	
 	
-	started = true;
+	farmingModeActive = true;
 }
 
 function toggleAutoPlay()
 {
-	autoPlay = autoPlay;
-	log("autoPlay: " + autoPlay);
-}
+    autoPlay = !autoPlay;
+    
+    if(character.name == partyLeader)
+    {
+        send_cm(mageName, {message:"autoToggle",auto:autoPlay});
+        send_cm(rangerName, {message:"autoToggle",auto:autoPlay});
 
-function getAutoPlay()
-{
-	return autoPlay;
+        log("sending autoPlayToggle to Mage & Ranger");
+    }
+
+    log("autoPlay: " + autoPlay);
 }

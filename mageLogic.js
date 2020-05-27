@@ -28,7 +28,7 @@ function mageAuto(target)
 	
 	if(target)
 	{	
-		autoFight(target);
+		autoAttack(target);
 	}
 }
 

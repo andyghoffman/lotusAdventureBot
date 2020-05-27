@@ -6,8 +6,7 @@ function rangerAuto(target)
 		return;
 	
 	if(target)
-	{
-		
+	{	
 		if(character.mp >= G.skills.huntersmark.mp && !is_on_cooldown("huntersmark")
 		  && !target.s.huntersmark && target.hp > target.max_hp*0.5)
 		{
@@ -26,7 +25,7 @@ function rangerAuto(target)
 		//useSkillOnTarget("huntersmark", target);
 		//useSkillOnTarget("supershot", target);
 
-		autoFight(target);
+		autoAttack(target);
 	}
 }
 

@@ -8,13 +8,10 @@ const whiteList = ["LotusPriest", "LotusMage", "LotusRanger", "LotusMerch"];
 
 function loadCharacters()
 {
+    log("Loading Characters...");
+
 	start_character(mageName, "main");
 	start_character(rangerName, "main");
-
-	failedAttempts = 0;
-	
-	log("Loading Characters...");
-	setTimeout(initParty, 5000);
 }
 
 function initParty()
@@ -48,7 +45,7 @@ function on_cm(name, data)
 		log(character.name + " recieved unexpected cm format from " + name);
 		return;
 	}
-	
+    
 	if(data.message == "target")
 	{
 		targetToFocus = data.target;
@@ -59,8 +56,12 @@ function on_cm(name, data)
 	{
 		log(character.name + " recieved readycheck from " + name);
 		whosReady = {priest:false,mage:false,ranger:false};
-		ready =	checkBuffs() && checkPotionInventory();
-		
+        ready =	checkBuffs() && checkPotionInventory();
+        if(ready)
+            log(character.name + " is ready!");
+        else
+            log(character.name + " is not ready!"); 
+
 		if(name == priestName)
 			whosReady.priest = data.isReady;
 		else if(name == mageName)
@@ -86,9 +87,16 @@ function on_cm(name, data)
 	}
 	else if(data.message == "letsgo")
 	{
+        log("Let's go!");
 		whosReady = {priest:true,mage:true,ranger:true};
 		return;
-	}
+    }
+    else if(data.message == "autoToggle")
+    {
+        autoPlay = data.auto;
+        log("autoPlay: " + autoPlay);
+        return;
+    }
 	
 	if(character.ctype === "merchant")
 	{
@@ -168,11 +176,16 @@ function readyCheck()
 		
 		if(!isInTown())
 		{
-			use("use_town");
+            if(!get_targeted_monster())
+                use("use_town");
+            else
+                goTo("main");
 		}
 		
-		if(parent.party_list.length < 4)
+        if(!partyPresent())
+        {
 			initParty();
+        }
 	}
 }
 
@@ -331,7 +344,7 @@ function followLeader()
 	}
 }
 
-function getTarget(farmTarget)
+function getMonsterFarmTarget(farmTarget)
 {
 	let target = get_targeted_monster();
 	if(target) return target;
@@ -343,7 +356,7 @@ function getTarget(farmTarget)
 			target:character.name
 		});
 		
-		if(character.ctype === "priest" && target)
+		if(character.name == partyLeader && target)
 		{
 			change_target(target);
 
@@ -359,9 +372,9 @@ function getTarget(farmTarget)
 				
 			return target;
 		}
-		else
+		else if(!partyLeader)
 		{
-			target = get_nearest_monster({target:priestName});	
+			target = get_nearest_monster({target:partyLeader});	
 			if(target)
 			{
 				change_target(target);
@@ -395,18 +408,7 @@ function getTarget(farmTarget)
 	}
 }
 
-function useSkillOnTarget(skill, target)
-{
-	if(character.mp >= G.skills.skill.mp &&
-	!is_on_cooldown(skill) 
-	&& !target.s.skill && target.hp > target.max_hp*0.5)
-	{
-		use_skill(skill);
-		reduce_cooldown(skill, character.ping);
-	}
-}
-
-function autoFight(target)
+function autoAttack(target)
 {
     if(!is_in_range(target, "attack"))
 	{
