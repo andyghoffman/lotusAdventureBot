@@ -197,15 +197,36 @@ function readyToGo()
 
 function personalSpace()
 {
-    target = get_targeted_monster();
+    target = get_nearest_monster();
 
     if(target)
     {
-        if(distance(character, target) < 20)
+        if(distance(character, target) < 10)
         {
-            smart_move(character.x + (target.x - character.x) * 1.5,
-            character.y + (target.y - character.y) * 1.5)
+            let right = 0;
+            let up = 0
+
+            if(target.x < character.x)
+                right = -5;
+            else
+                right = 5;
+            if(target.y < character.y)
+                up = 5;
+            else
+                up = -5;
+    
+            smart_move(character.x + right, character.y + up);
         }
+    }
+}
+
+function tetherToLeader()
+{
+    leader = get_player(partyLeader);
+
+    if(leader && distance(character, leader) > 10)
+    {
+        followLeader();
     }
 }
 
@@ -373,6 +394,10 @@ function getMonsterFarmTarget(farmTarget)
             if(target)
             {
                 change_target(target, true);
+
+                if(character.name == partyLeader)
+                    broadCastTarget(target);
+
                 return target;
             }
         });
@@ -382,27 +407,12 @@ function getMonsterFarmTarget(farmTarget)
             change_target(target, true);
             broadCastTarget(target);
 			return target;
-		}
-		else if(!partyLeader)
-		{
-            let leader = get_player(partyLeader);
-            if(leader && leader.target)
-            {
-                change_target(leader.target);
-                return;
-            }
-            else
-            {
-                target = get_nearest_monster({target:partyLeader});
-            }
-            
-			if(target)
-			{
-				change_target(target, true);
-				return target;
-			}
-		}
-		
+        }
+        else if(target)
+        {
+            return target;
+        }
+	
 		target = get_nearest_monster
 		({
 			target:character.name
@@ -448,7 +458,7 @@ function goTo(mapName = "main", coords = {x:0,y:0} , oncomplete = null)
 {
 	if(character.map != mapName)
 	{
-		if(oncomplete)
+		if(oncomplete != null)
 		{
 			smart_move(mapName,function(){smart_move(coords, oncomplete);});		
 		}
@@ -459,7 +469,7 @@ function goTo(mapName = "main", coords = {x:0,y:0} , oncomplete = null)
 	}
 	else
 	{
-        if(oncomplete)
+        if(oncomplete != null)
         {
 			smart_move(coords, oncomplete);
         }

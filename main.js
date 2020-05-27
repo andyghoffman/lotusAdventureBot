@@ -27,7 +27,7 @@ map_key("5", "snippet", "toggleAutoPlay()")
 map_key("0", "snippet", "test()")
 
 setInterval(main, 250);
-setInterval(lateUpdate, 15000);
+setInterval(lateUpdate, 5000);
 
 function test()
 {
@@ -75,7 +75,7 @@ function main()
     
     if(target)
     {
-        personalSpace();
+        //personalSpace();
     }
 	
 	if(character.ctype === "priest")
@@ -86,6 +86,7 @@ function main()
 		}
 		else
 		{
+            log(character.name + "going to map... ");
 			goTo(farmMap, farmCoords);
 		}
 	}
@@ -95,11 +96,7 @@ function main()
 	}
 	else
 	{
-        leader = get_player(partyLeader);
-        if(!leader)
-            log("!!!");
-
-		if(target && leader)
+		if(target)
 		{
 			if(character.ctype === "ranger")
 			{
@@ -108,12 +105,15 @@ function main()
 			else if(character.ctype === "mage")
 			{
 				mageAuto(target);
-			}
+            }
 		}
 		else
 		{
+            log(character.name + "going to map... ");
             goTo(farmMap, farmCoords);
-		}
+        }
+        
+        //tetherToLeader();
 	}
 }
 
