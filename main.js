@@ -186,9 +186,7 @@ function aloneCheck(msToWait = 15000)
             {
                 log(character.name + " is lost & returning to town.");
 
-                farmingModeActive = false;
-                whosReady = {priest:false,mage:false,ranger:false};
-                ready = false;
+                stopFarmMode();
 
                 if(get_targeted_monster())
                 {

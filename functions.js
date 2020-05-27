@@ -1,5 +1,5 @@
 var ready = false;
-var whosReady = {priest:false,mage:false,ranger:false};
+var whosReady = {priest:false,mage:false,ranger:false,merchant:false};
 const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
 const lowPotions = 100;
@@ -16,9 +16,16 @@ function loadCharacters()
 
 function initParty()
 {
-	send_party_invite(merchantName);
-	send_party_invite(mageName);
-	send_party_invite(rangerName);
+	partyMembers = parent.party_list;
+
+	if(!partyMembers.includes(merchantName))
+		send_party_invite(merchantName);
+
+	if(!partyMembers.includes(mageName))	
+		send_party_invite(mageName);
+
+	if(!partyMembers.includes(merchantName))
+		send_party_invite(merchantName);
 
 	log("Party Invites sent!");
 }
@@ -28,12 +35,23 @@ function stopCharacters()
 	stop_character(mageName);
     stop_character(rangerName);
 
-    farmingModeActive = false;
-    whosReady = {priest:false,mage:false,ranger:false};
-    ready = false;
+	stopFarmMode();
+	
     autoPlay = false;
 
 	log("Characters stopped!");
+}
+
+function stopFarmMode()
+{
+	if(is_moving(character) || smart.moving)
+	{
+		stop("move");
+	}
+
+    farmingModeActive = false;
+    whosReady = {priest:false,mage:false,ranger:false,merchant:false};
+    ready = false;
 }
 
 function on_cm(sender, data)
@@ -65,7 +83,8 @@ function on_cm(sender, data)
 	else if(data.message == "readycheck")
 	{
 		log(character.name + " recieved readycheck from " + sender);
-		whosReady = {priest:false,mage:false,ranger:false};
+
+		stopFarmMode();
 		ready =	checkBuffs() && checkPotionInventory();
 
 		if(sender == priestName)
@@ -74,6 +93,17 @@ function on_cm(sender, data)
 			whosReady.mage = data.isReady;
 		else if(sender == rangerName)
 			whosReady.ranger = data.isReady;
+		else if(sender == merchantName)
+			whosReady.merchant = data.isReady;
+
+		if(character.name == priestName)
+			whosReady.priest = ready;
+		else if(character.name == mageName)
+			whosReady.mage = ready;
+		else if(character.name == rangerName)
+			whosReady.ranger = ready;
+		else if(character.name == merchantName)
+			whosReady.merchant = ready;
 
 		send_cm(sender, {message:"readyreply",isReady:ready});
 		return;
@@ -144,13 +174,8 @@ function on_magiport(name)
 
 function readyCheck()
 {
-	if(character.ctype === "merchant")
-	{
-		log("shouldn't happen");
-		return;
-	}
+	stopFarmMode();
 
-	whosReady = {priest:false,mage:false,ranger:false};
 	ready =	checkBuffs() && checkPotionInventory();
 
 	if(character.ctype === "priest")
@@ -192,7 +217,7 @@ function readyCheck()
 
 function readyToGo()
 {
-	return (whosReady.priest && whosReady.mage && whosReady.ranger);
+	return (whosReady.priest && whosReady.mage && whosReady.ranger && whosReady.merchant);
 }
 
 function personalSpace()
@@ -201,30 +226,53 @@ function personalSpace()
 
     if(target)
     {
-        if(distance(character, target) < 20)
+        if(distance(character, target) < spaceToKeep*2)
         {
             let right = 0;
             let up = 0
 
             if(target.x < character.x)
-                right = -20;
+                right = -spaceToKeep * 1.5;
             else
-                right = 20;
-            if(target.y < character.y)
-                up = 20;
-            else
-                up = -20;
+                right = spaceToKeep * 1.5;
 
-            smart_move(character.x + right, character.y + up);
+			if(target.y < character.y)
+                up = spaceToKeep * 1.5;
+            else
+				up = -spaceToKeep * 1.5;
+			
+			adjustment = {x:character.x+right, y:character.y+up};
+	
+			if(character.name != partyLeader)
+			{
+				let leader = parent.entities[get_player(partyLeader)];
+
+				//	make sure you dont run away from party
+				if(leader && distance(adjustment, leader) < spaceToKeep*2)
+				{
+					smart_move(adjustment);
+					return;
+				}
+				else if(leader)
+				{
+					followLeader();
+					return;
+				}
+			}
+
+			smart_move(adjustment);
         }
     }
 }
 
 function tetherToLeader()
 {
+	if(character.name == partyLeader)
+		return;
+
     leader = get_player(partyLeader);
 
-    if(leader && distance(character, leader) > 20)
+    if(leader && distance(character, leader) > spaceToKeep*2)
     {
         followLeader();
     }
@@ -263,9 +311,7 @@ function requestMagiPort()
 
 function usePotions(healthPotThreshold = 0.9, manaPotThreshold = 0.9)
 {
-    if(!character.rip
-        && (character.hp < (character.max_hp * healthPotThreshold)
-        || character.mp < (character.max_mp * manaPotThreshold)))
+    if(!character.rip && (character.hp < (character.max_hp * healthPotThreshold) || character.mp < (character.max_mp * manaPotThreshold)))
 	{
 		use_hp_or_mp();
 	}
@@ -293,10 +339,7 @@ function checkPotionInventory()
 	{
 		let healthPotsNeeded = healthPotionsToHave - hPotions;
 		let manaPotsNeeded = manaPotionsToHave - mPotions;
-
-		let potsList =
-			{message:"buyPots", hPots:healthPotsNeeded, mPots:manaPotsNeeded};
-
+		let potsList = {message:"buyPots", hPots:healthPotsNeeded, mPots:manaPotsNeeded};
 		send_cm(merchantName, potsList);
 
 		log(character.name + " sending request for potions");
@@ -314,19 +357,22 @@ function transferAllToMerchant()
 	if(character.ctype === "merchant")
 		return;
 
-    let merchant = get_player(merchantName);
+	let merchant = get_player(merchantName);
+	let exclude = ["hpot0","mpot0"];
 
-    if(character.ctype !== "merchant" && merchant
-       && merchant.owner === character.owner
-       && distance(character, merchant) < 400)
+    if(character.ctype !== "merchant" && merchant && merchant.owner === character.owner && distance(character, merchant) < 400)
 	{
-        send_gold(merchant, character.gold)
-        //if(character.items.filter(element => element).length > 4){
-        for(let i = 0; i <= 34; i++)
+		send_gold(merchant, character.gold)
+		
+        for(let i = 0; i < character.items.length; i++)
 		{
-			send_item(merchant, i, 9999);
+			if(character.items[i] && !exclude.includes(character.items[i]))
+			{
+				send_item(merchant, i, character.items[i].quantity);
+			}
 		}
-        log(character.name + " sent items to merchant.");
+
+        log(character.name + " sent gold & items to merchant.");
 	}
 }
 
