@@ -53,7 +53,7 @@ function main()
 
 	if(character.ctype != "merchant")
 	{
-        if(!autoPlay)
+        if(!autoPlay || !farmingModeActive)
         {
             if(character.name != partyLeader)
             {
@@ -162,10 +162,13 @@ function aloneCheck(msToWait = 15000)
         {
 			initParty();
         }
-        else
+        else if(character.name != partyLeader)
         {
             if(get_player(partyLeader))
+            {
+                followLeader();
                 return false;
+            }
         }
 
         aloneChecking = true;
@@ -197,7 +200,6 @@ function aloneCheck(msToWait = 15000)
                 }
 
             aloneChecking = false;
-            aloneCheck();
 
         }, msToWait);
 
