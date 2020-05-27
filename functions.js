@@ -19,7 +19,7 @@ function initParty()
 	send_party_invite(merchantName);
 	send_party_invite(mageName);
 	send_party_invite(rangerName);
-	
+
 	log("Party Invites sent!");
 }
 
@@ -27,7 +27,7 @@ function stopCharacters()
 {
 	stop_character(mageName);
     stop_character(rangerName);
-    
+
     farmingModeActive = false;
     whosReady = {priest:false,mage:false,ranger:false};
     ready = false;
@@ -39,18 +39,18 @@ function stopCharacters()
 function on_cm(sender, data)
 {
 	//log(character.name + " recieved cm from " + name);
-	
+
 	if(!whiteList.includes(sender))
 	{
 		log(character.name + " recieved unexpected cm from " + sender);
-		return;		
+		return;
 	}
 	else if(!data.message)
 	{
 		log(character.name + " recieved unexpected cm format from " + sender);
 		return;
 	}
-    
+
 	if(data.message == "target")
 	{
         target = get_entity(data.targetId);
@@ -66,7 +66,7 @@ function on_cm(sender, data)
 	{
 		log(character.name + " recieved readycheck from " + sender);
 		whosReady = {priest:false,mage:false,ranger:false};
-        ready =	checkBuffs() && checkPotionInventory();
+		ready =	checkBuffs() && checkPotionInventory();
 
 		if(sender == priestName)
 			whosReady.priest = data.isReady;
@@ -74,21 +74,21 @@ function on_cm(sender, data)
 			whosReady.mage = data.isReady;
 		else if(sender == rangerName)
 			whosReady.ranger = data.isReady;
-		
+
 		send_cm(sender, {message:"readyreply",isReady:ready});
 		return;
 	}
 	else if(data.message == "readyreply")
 	{
 		log(character.name + " recieved readyreply from " + sender + ". " + sender + " is " + (data.ready?"ready!":"not ready."));
-		
+
 		if(sender == priestName)
 			whosReady.priest = data.isReady;
 		else if(sender == mageName)
 			whosReady.mage = data.isReady;
 		else if(sender == rangerName)
-			whosReady.ranger = data.isReady;	
-		
+			whosReady.ranger = data.isReady;
+
 		return;
 	}
 	else if(data.message == "letsgo")
@@ -104,7 +104,7 @@ function on_cm(sender, data)
         log("autoPlay: " + autoPlay);
         return;
     }
-	
+
 	if(character.ctype === "merchant")
 	{
 		merchant_on_cm(sender, data);
@@ -123,7 +123,7 @@ function on_cm(sender, data)
 	}
 }
 
-function on_party_invite(name) 
+function on_party_invite(name)
 {
     if (whiteList.includes(name) && parent.party_list.length == 0)
 	{
@@ -137,7 +137,7 @@ function on_magiport(name)
 	{
 		if(character.ctype === "merchant")
 		{
-			merchant_on_magiport(name);			
+			merchant_on_magiport(name);
 		}
 	}
 }
@@ -149,10 +149,10 @@ function readyCheck()
 		log("shouldn't happen");
 		return;
 	}
-	
+
 	whosReady = {priest:false,mage:false,ranger:false};
 	ready =	checkBuffs() && checkPotionInventory();
-	
+
 	if(character.ctype === "priest")
 		whosReady.priest = ready;
 	if(character.ctype === "mage")
@@ -163,7 +163,7 @@ function readyCheck()
 	if(ready)
 	{
 		log(character.name + " is ready!");
-		
+
 		if(!readyToGo())
 		{
 			parent.party_list.forEach(function(otherPlayerName)
@@ -179,7 +179,7 @@ function readyCheck()
 	else if(!ready)
 	{
 		log(character.name + " is not ready!");
-		
+
 		if(!isInTown())
 		{
             if(!get_targeted_monster())
@@ -201,20 +201,20 @@ function personalSpace()
 
     if(target)
     {
-        if(distance(character, target) < 10)
+        if(distance(character, target) < 20)
         {
             let right = 0;
             let up = 0
 
             if(target.x < character.x)
-                right = -5;
+                right = -20;
             else
-                right = 5;
+                right = 20;
             if(target.y < character.y)
-                up = 5;
+                up = 20;
             else
-                up = -5;
-    
+                up = -20;
+
             smart_move(character.x + right, character.y + up);
         }
     }
@@ -224,7 +224,7 @@ function tetherToLeader()
 {
     leader = get_player(partyLeader);
 
-    if(leader && distance(character, leader) > 10)
+    if(leader && distance(character, leader) > 20)
     {
         followLeader();
     }
@@ -239,16 +239,16 @@ function partyPresent()
 {
 	if(parent.party_list.length < 4)
 		return false;
-	
+
 	return (get_player(priestName) || character.name === priestName) &&
-			(get_player(mageName) || character.name === mageName) && 
+			(get_player(mageName) || character.name === mageName) &&
 			(get_player(rangerName) || character.name === rangerName);
 }
 
 function requestMluck()
 {
 	log(character.name + " requesting Mluck");
-	
+
 	let merchReq = {message:"mluck",name:character.name};
 	send_cm(merchantName, merchReq);
 }
@@ -256,7 +256,7 @@ function requestMluck()
 function requestMagiPort()
 {
 	log(character.name + " requesting MagiPort");
-	
+
 	let magiReq = {message:"magiPort",name:character.name};
 	send_cm(mageName, magiReq);
 }
@@ -267,7 +267,7 @@ function usePotions(healthPotThreshold = 0.9, manaPotThreshold = 0.9)
         && (character.hp < (character.max_hp * healthPotThreshold)
         || character.mp < (character.max_mp * manaPotThreshold)))
 	{
-		use_hp_or_mp();		
+		use_hp_or_mp();
 	}
 }
 
@@ -288,32 +288,32 @@ function checkPotionInventory()
 {
 	let	hPotions = quantity("hpot0");
 	let mPotions = quantity("mpot0");
-	
+
 	if(mPotions < lowPotions || hPotions < lowPotions)
 	{
 		let healthPotsNeeded = healthPotionsToHave - hPotions;
 		let manaPotsNeeded = manaPotionsToHave - mPotions;
-			
-		let potsList = 
+
+		let potsList =
 			{message:"buyPots", hPots:healthPotsNeeded, mPots:manaPotsNeeded};
-		
+
 		send_cm(merchantName, potsList);
-		
+
 		log(character.name + " sending request for potions");
-		
+
 		return false;
 	}
 	else
 	{
-		return true;		
+		return true;
 	}
 }
 
 function transferAllToMerchant()
 {
-	if(character.ctype === "merchant") 
+	if(character.ctype === "merchant")
 		return;
-	
+
     let merchant = get_player(merchantName);
 
     if(character.ctype !== "merchant" && merchant
@@ -334,7 +334,7 @@ function followLeader()
 {
 	if(character.ctype === "merchant" || character.name == partyLeader)
 		return;
-	
+
 	var leader = get_player(partyLeader);
 
 	if(leader)
@@ -347,7 +347,7 @@ function followLeader()
             	character.real_y+(leader.y-character.real_y) / 2
         	);
 		}
-		
+
 		return true;
 	}
 	else
@@ -364,7 +364,7 @@ function broadCastTarget(broadCastTarget)
         if(otherPlayerName != character.name)
         {
             let partyMember = parent.entities[otherPlayerName];
-        
+
             if(partyMember && partyMember.name != merchantName && partyMember.name != broadCastTarget.name)
             {
                 send_cm(partyMember.name, {message:"target",targetId:broadCastTarget.id});
@@ -376,55 +376,70 @@ function broadCastTarget(broadCastTarget)
 function getMonsterFarmTarget(farmTarget)
 {
     let target = get_targeted_monster();
-    
+
+	//	if already have target, keep it
     if(target)
     {
-        if(character.name == partyLeader)
-        {
-           broadCastTarget(target);
-        }
-
         return target;
-    }	
+	}
+	//	find a target
 	else if(!target)
 	{
-        parent.party_list.forEach(partyMemberName => 
+		//	party leader checks for nearest monster to itself
+        if(character.name == partyLeader)
         {
-            target = get_nearest_monster({target:partyMemberName});	
-            if(target)
-            {
-                change_target(target, true);
+			target = get_nearest_monster
+			({
+				target:character.name
+			});
 
-                if(character.name == partyLeader)
-                    broadCastTarget(target);
-
-                return target;
-            }
-        });
-		
-		if(target && character.name == partyLeader)
+			if(target)
+			{
+				return target;
+			}
+		}
+		//	other party members check if leader has a target
+		else
 		{
-            change_target(target, true);
-            broadCastTarget(target);
-			return target;
-        }
-        else if(target)
-        {
-            return target;
-        }
-	
+			let leader = get_player(parent.entities[partyLeader]);
+			if(leader && leader.target != null)
+			{
+				target = leader.targetId;
+				change_target(target, true);
+				return target;
+			}
+		}
+
+		//	target a monster that is targeting another party member
+		if(!target)
+		{
+			parent.party_list.forEach(partyMemberName =>
+			{
+					target = get_nearest_monster({target:partyMemberName});
+					if(target)
+					{
+						change_target(target, true);
+						return target;
+					}
+			});
+		}
+
+		//	target nearest monster to yourself that is targeting you
 		target = get_nearest_monster
 		({
 			target:character.name
         });
-		
-		//Returns any monster that targets nobody
-		target = get_nearest_monster
-		({
-			type:farmTarget,
-			no_target:true
-		});
-		
+
+		//	target nearest monster that has no target
+		if(!target)
+		{
+			target = get_nearest_monster
+			({
+				type:farmTarget,
+				no_target:true
+			});
+		}
+
 		if(target)
 		{
 			change_target(target, true);
@@ -444,10 +459,10 @@ function autoAttack(target)
     }
     else if (!is_on_cooldown("attack"))
 	{
-        attack(target).then((message) => 
+        attack(target).then((message) =>
 		{
             reduce_cooldown("attack", character.ping);
-        }).catch((message) => 
+        }).catch((message) =>
 		{
             //log(character.name + " attack failed: " + message.reason);
         });
@@ -460,11 +475,11 @@ function goTo(mapName = "main", coords = {x:0,y:0} , oncomplete = null)
 	{
 		if(oncomplete != null)
 		{
-			smart_move(mapName,function(){smart_move(coords, oncomplete);});		
+			smart_move(mapName,function(){smart_move(coords, oncomplete);});
 		}
 		else
 		{
-			smart_move(mapName,function(){smart_move(coords);});	
+			smart_move(mapName,function(){smart_move(coords);});
 		}
 	}
 	else

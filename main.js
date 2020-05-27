@@ -32,25 +32,25 @@ setInterval(lateUpdate, 5000);
 function test()
 {
 	/*let item = locate_item("staff");
-	
+
 	if(item_properties(character.items[item]).level < 7)
 		upgrade(item, locate_item("scroll0"));*/
-	
+
 	let message = {message:"test",content:"oh"};
 	send_cm("LotusMage", message);
 }
 
 function main()
 {
-    if (character.rip) 
-		setTimeout(respawn, 15000);  
-    
+    if (character.rip)
+		setTimeout(respawn, 15000);
+
     if(is_moving(character) || smart.moving)
 		return;
-	
+
     usePotions(healthPotThreshold, manaPotThreshold);
     loot();
-	
+
 	if(character.ctype != "merchant")
 	{
         if(!autoPlay)
@@ -72,12 +72,12 @@ function main()
     }
 
     let target = getMonsterFarmTarget(farmMonsterName);
-    
+
     if(target)
     {
-        //personalSpace();
+        personalSpace();
     }
-	
+
 	if(character.ctype === "priest")
 	{
 		if(target)
@@ -112,8 +112,8 @@ function main()
             log(character.name + "going to map... ");
             goTo(farmMap, farmCoords);
         }
-        
-        //tetherToLeader();
+
+        tetherToLeader();
 	}
 }
 
@@ -121,10 +121,10 @@ function lateUpdate()
 {
 	if(!autoPlay && character.ctype != "merchant")
 		return;
-	
+
 	if(is_moving(character) || smart.moving)
 		return;
-	
+
 	if(character.ctype != "merchant")
 	{
 		checkPotionInventory();
@@ -134,10 +134,10 @@ function lateUpdate()
 	{
 		setTimeout(merchantLateUpdate, 1000);
 	}
-	
+
 	if(character.name == partyLeader && readyToGo())
 	{
-        if(partyPresent() && !farmingModeActive)
+        if(partyPresent() && !farmingModeActive && !aloneChecking)
         {
             letsGo();
         }
@@ -155,7 +155,7 @@ function aloneCheck(msToWait = 15000)
 {
     if(is_moving(character) || smart.moving)
         return false;
-        
+
     if(!partyPresent() && !aloneChecking)
     {
         if(character.name == partyLeader)
@@ -174,6 +174,7 @@ function aloneCheck(msToWait = 15000)
         {
             if(character.name != partyLeader && get_player(partyLeader))
             {
+                aloneChecking = false;
                 followLeader();
                 return false;
             }
@@ -199,12 +200,12 @@ function aloneCheck(msToWait = 15000)
             aloneCheck();
 
         }, msToWait);
-        
+
         return true;
     }
 
     if(!partyPresent() || aloneChecking)
-    {			
+    {
         return true;
     }
     else
@@ -216,10 +217,10 @@ function aloneCheck(msToWait = 15000)
 function letsGo()
 {
 	log("Let's go!");
-		
+
 	send_cm(mageName, {message:"letsgo"});
-	send_cm(rangerName, {message:"letsgo"});	
-	
+	send_cm(rangerName, {message:"letsgo"});
+
 	farmingModeActive = true;
 }
 
