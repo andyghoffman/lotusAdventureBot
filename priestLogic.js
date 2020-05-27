@@ -9,13 +9,12 @@ function priestAuto(target)
 	{
 		let partyMember = parent.entities[otherPlayerName];
 		
-		if(partyMember)
+		if(partyMember && !partyMember.rip)
 		{
-			if(character.hp < character.max_hp * healThreshold)
+			if(character.hp < character.max_hp * healThreshold && !character.rip)
 				damagedPartyMembers++;
 
-			if(partyMember.hp < (partyMember.max_hp * healThreshold) &&
-			   !partyMember.rip && is_in_range(partyMember, "heal"))
+			if(partyMember.hp < (partyMember.max_hp * healThreshold) && !partyMember.rip && is_in_range(partyMember, "heal"))
 			{
 				damagedPartyMembers++;
 				
@@ -28,13 +27,14 @@ function priestAuto(target)
                     					
 					return;
 				}
-				else if(!is_on_cooldown("heal"))
+				else if(!is_on_cooldown("heal") && character.mp >= G.skills.heal.mp)
 				{
                     log("Priest is healing " + partyMember.name);
 
+                    reduce_cooldown("heal", character.ping);
 					heal(partyMember).then((message) =>
 					{
-						reduce_cooldown("heal", character.ping);
+                        
 					}).catch((message) =>
 					{
 						log(character.name + " Heal failed: " + message.reason);
@@ -53,8 +53,7 @@ function priestAuto(target)
 		return;
     }
 	
-	if(character.mp >= G.skills.partyheal.mp && !is_on_cooldown("curse") &&
-	   !target.s.curse && target.hp > target.max_hp*0.5)
+	if(character.mp >= G.skills.partyheal.mp && !is_on_cooldown("curse") && !target.s.curse && target.hp > target.max_hp*0.5)
 	{
 		use_skill("curse");
 		reduce_cooldown("curse", character.ping);

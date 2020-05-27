@@ -144,9 +144,11 @@ function returnToTown(delay)
 		setTimeout(function()
 		{
 			use("use_town");
-			setTimeout(goTo("main",
-							{x:merchantStand_X,y:merchantStand_Y},
-							openMerchantStand), 10000);			
+            setTimeout(function()
+            {
+                goTo("main",{x:merchantStand_X,y:merchantStand_Y},openMerchantStand);
+            }, 10000);
+            
 		}, delay);
 	}
 }
