@@ -1,16 +1,25 @@
-var lowScrolls = 10;
-var scrollsToStock = 100;
-var vendorMode = false;	//	true when in town with shop, false when busy delivering items
+var lowScrolls = 0;
+var scrollsToStock = 10;
+var vendorMode = false;			//	true when in town with shop, false when busy delivering items
 var returningToTown = false;	//	true when merchant is on it's way back to town
-var deliveryMode = false;
+var deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
 var potionShipments = [];
 var deliveryRequests = [];
 
+const scrolls = ["scroll0","scroll1","cscroll0"];
+
 function merchantAuto(target)
 {
-	if(isInTown() && !vendorMode && !returningToTown && !deliveryMode)
+	if(!vendorMode && !returningToTown && !deliveryMode)
 	{
-		enableVendorMode();
+		if(isInTown())
+		{
+			enableVendorMode();
+		}
+		else
+		{
+			returnToTown();
+		}
 	}
 
 	if(!vendorMode && parent.stand)
@@ -70,7 +79,7 @@ function merchantLateUpdate()
 		returnToTown();
 	}
 
-	if(vendorMode && craftingEnabled)
+	if(vendorMode && craftingEnabled && character.gold > minimumGold)
 	{
 		craftUpgradedWeapon(locate_item(itemToCraft), upgradeLevelToStop);
 	}
@@ -155,13 +164,24 @@ function checkPotionShipments(name)
 
 function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 {
-	let itemName = character.items[itemInvSlot].name;
 	let item = item_properties(character.items[itemInvSlot]);
 
-	if(item.level < upgradeLevel)
+	if(!item)
 	{
-		log("Upgrading " + itemName + "...");
-		upgrade(itemInvSlot, locate_item("scroll0"));
+		log("Buying another " + itemToCraft);
+		buy_with_gold(itemToCraft);
+	}
+	else if(item.level < upgradeLevel)
+	{
+		log("Upgrading " + itemToCraft + "...");
+
+		let scroll = "scroll0";
+		if(item.level >= 7)
+		{
+			scroll = "scroll1";
+		}
+
+		upgrade(itemInvSlot, locate_item(scroll));
 	}
 	else
 	{
@@ -178,35 +198,29 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 
 		if(lastEmpty != -1)
 		{
-			log("Moving +"+upgradeLevel + " " + itemName + " to last empty item slot");
+			log("Moving +"+upgradeLevel + " " + itemToCraft + " to last empty item slot");
 			swap(itemInvSlot, lastEmpty);
 		}
 
 		if(emptySlots > 0)
 		{
-			log("Buying another " + itemName);
-			buy_with_gold(itemName);
+			log("Buying another " + itemToCraft);
+			buy_with_gold(itemToCraft);
 		}
 	}
 }
 
 function stockScrolls()
 {
-	let	scrolla = quantity("scroll0");
-	let scrollb = quantity("cscroll0");
-
-	if(scrolla < lowScrolls)
+	for(let i = 0; i < scrolls.length; i++)
 	{
-		let scrollaAmount = scrollsToStock-scrolla;
-		buy_with_gold("scroll0", scrollaAmount);
-		log("Buying " + scrollaAmount + " upgrade scrolls");
-	}
-
-	if(scrollb < lowScrolls)
-	{
-		let scrollbAmount = scrollsToStock-scrolla;
-		buy_with_gold("cscroll0", scrollbAmount);
-		log("Buying " + scrollbAmount + " compound scrolls");
+		let s = scrolls[i];
+		let amount = quantity(s);
+		if(amount <= lowScrolls)
+		{
+			buy_with_gold(s, scrollsToStock);
+			log("Buying " + scrollsToStock + " " + s);
+		}
 	}
 }
 
@@ -219,26 +233,12 @@ function returnToTown(delay)
 
 	returningToTown = true;
 
-	if(character.map == "main")
-	{
-		setTimeout(function()
-		{
-			use("use_town");
-		}, delay);
-	}
-	else
-	{
-		setTimeout(function()
-		{
-			use("use_town");
+	use("use_town");
 
-            setTimeout(function()
-            {
-                goTo("main",{x:merchantStand_X,y:merchantStand_Y});
-            }, 7500);
-
-		}, delay);
-	}
+	setTimeout(function()
+	{
+		goTo(merchantStandMap,{x:merchantStand_X,y:merchantStand_Y},()=>{returningToTown=false});
+	}, 7500);
 }
 
 function buyPotionsFor(name, healthPots, manaPots)

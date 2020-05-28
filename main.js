@@ -6,8 +6,9 @@ load_code("rangerLogic");
 
 ///     crafting settings       ///
 const craftingEnabled = true;
-const itemToCraft = "staff";
-const upgradeLevelToStop = 7;
+const itemToCraft = "bow";
+const upgradeLevelToStop = 8;
+const minimumGold = 5000000;
 //////
 
 ///     farming settings        ///
@@ -15,6 +16,7 @@ const farmMonsterName = "arcticbee";
 const farmMap = "winterland";
 const farmMonsterNr = 6;
 const farmCoords = {x:1312.8,y:-853.8}
+const specialMonsters = ["snowman"];
 const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
 //////
 
@@ -68,7 +70,7 @@ function main()
         {
             if(character.name != partyLeader)
             {
-                followLeader();
+                aloneCheck();
             }
             else if(character.name == partyLeader)
             {
@@ -87,7 +89,12 @@ function main()
         return;
 	}
 
-    let target = getMonsterFarmTarget(farmMonsterName);
+    let target = getMonsterFarmTarget(specialMonsters[0]);
+
+    if(!target)
+    {
+        target = getMonsterFarmTarget(farmMonsterName);
+    }
 
     if(target && !is_moving(character) && !smart.moving)
     {

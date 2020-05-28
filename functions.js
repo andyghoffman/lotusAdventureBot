@@ -406,17 +406,17 @@ function checkBuffs()
 
 function checkPotionInventory()
 {
-	if(sentRequests.find(x=>x.message=="potions"))
-	{
-		log(character.name + " waiting for potions...");
-		return;
-	}
-
 	let	hPotions = quantity("hpot0");
 	let mPotions = quantity("mpot0");
 
 	if(mPotions < lowPotions || hPotions < lowPotions)
 	{
+		if(sentRequests.find(x=>x.message=="potions"))
+		{
+			log(character.name + " waiting for potions...");
+			return;
+		}
+
 		let healthPotsNeeded = healthPotionsToHave - hPotions;
 		let manaPotsNeeded = manaPotionsToHave - mPotions;
 		let potsList = {message:"buyPots", hPots:healthPotsNeeded, mPots:manaPotsNeeded};
@@ -449,7 +449,7 @@ function transferAllToMerchant()
 		{
 			if(character.items[i] && !exclude.includes(character.items[i]))
 			{
-				send_item(merchant, i, character.items[i].quantity);
+				send_item(merchant, i, quantity(character.items[i]));
 			}
 		}
 
