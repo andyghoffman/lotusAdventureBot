@@ -77,12 +77,6 @@ function merchantLateUpdate()
 		}
 	}
 
-	if(deliveryMode && !returningToTown && vendorMode)
-	{
-		disableVendorMode();
-		requestMagiPort();
-	}
-
 	if(vendorMode && craftingOn && character.gold > minimumGold)
 	{
 		sellVendorTrash();
@@ -160,8 +154,11 @@ function checkRequests()
 
 		for(let i = 0; i < deliveryRequests.length; i++)
 		{
+			//	deliver potions or mluck
 			if(deliveryRequests[i].shipment || deliveryRequests[i].request == "mluck")
 			{
+				disableVendorMode();
+
 				let recipient = parent.entities[deliveryRequests[i].sender];
 				if(recipient)
 				{
@@ -176,8 +173,10 @@ function checkRequests()
 				}
 
 			}
+			//	go buy potions
 			else if(deliveryRequests[i].request == "potions")
 			{
+				disableVendorMode();
 				buyPotionsFor(deliveryRequests[i].sender, deliveryRequests[i].hPots, deliveryRequests[i].mPots);
 			}
 		}
