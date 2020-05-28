@@ -5,8 +5,10 @@ load_code("mageLogic");
 load_code("rangerLogic");
 
 ///     crafting settings       ///
-var itemToCraft = "wshield";
+var itemToUpgrade = "wshield";
 var upgradeLevelToStop = 7;
+var itemsToCompound = ["intring","strring","dexring","vitring"];
+var compoundLevelToStop = 2;
 const craftingEnabled = false;
 const minimumGold = 5000000;
 //////
@@ -15,7 +17,7 @@ const minimumGold = 5000000;
 const farmMonsterName = "arcticbee";
 const farmMap = "winterland";
 const farmMonsterNr = 6;
-const farmCoords = {x:1312.8,y:-853.8}
+const farmCoords = {x:1312.8, y:-853.8}
 const specialMonsters = ["snowman"];
 const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
 //////
@@ -27,8 +29,7 @@ const rangerName = "LotusRanger";
 const priestName = "LotusPriest";
 const partyLeader = priestName;
 const merchantStandMap = "main";
-const merchantStand_X = -118;
-const merchantStand_Y = 11;
+const merchantStandCoords = {x:-118, y:11};
 //////
 
 map_key("1", "snippet", "initParty()")

@@ -10,6 +10,62 @@ const scrolls = ["scroll0","scroll1","cscroll0"];
 
 function merchantAuto(target)
 {
+	if(!vendorMode && parent.stand)
+	{
+		parent.close_merchant();
+	}
+
+	if(!character.s.mluck || character.s.mluck.f != merchantName)
+	{
+		log("mlucking self");
+		use_skill("mluck", character);
+	}
+
+	for(other in parent.entities)
+	{
+		let partyMember = parent.party_list.includes(other);
+		let target = parent.entities[other];
+
+		if(partyMember)
+		{
+			if(is_in_range(target, "mluck"))
+			{
+				if(!target.s.mluck || target.s.mluck.f != merchantName)
+				{
+					log("Giving mluck to " + target.name);
+					use_skill("mluck", target);
+				}
+				else if(checkPotionShipments(target.name))
+				{
+					deliverPotions();
+				}
+			}
+			else if(deliveryMode && !returningToTown)
+			{
+				log("Moving closer");
+
+				smart_move(
+					character.x + (target.x - character.x) * 0.3,
+					character.y + (target.y - character.y) * 0.3
+				);
+			}
+		}
+		else if(target)
+		{
+			if((!target.s.mluck || target.s.mluck.f != merchantName) && is_in_range(other, "mluck"))
+			{
+				log("Giving mluck to " + target.name);
+				use_skill("mluck", target);
+			}
+		}
+	}
+}
+
+function merchantLateUpdate()
+{
+	stockScrolls();
+	checkRequests();
+
 	if(!vendorMode && !returningToTown && !deliveryMode)
 	{
 		if(isInTown())
@@ -22,66 +78,15 @@ function merchantAuto(target)
 		}
 	}
 
-	if(!vendorMode && parent.stand)
-	{
-		parent.close_merchant();
-	}
-
-	if(!character.s.mluck)
-		use_skill("mluck", character);
-
-	parent.party_list.forEach(function(otherPlayerName)
-	{
-		let partyMember = parent.entities[otherPlayerName];
-
-		if(partyMember)
-		{
-			if(!partyMember.s.mluck || checkPotionShipments(partyMember.name))
-			{
-				if(is_in_range(partyMember, "mluck"))
-				{
-					if(!partyMember.s.mluck)
-					{
-						log("Giving mluck to " + partyMember.name);
-						use_skill("mluck", partyMember);
-					}
-					else if(checkPotionShipments(partyMember.name))
-					{
-						deliverPotions();
-					}
-
-				}
-				else
-				{
-					smart_move(
-						character.x + (partyMember.x - character.x) * 0.3,
-						character.y + (partyMember.y - character.y) * 0.3
-					);
-				}
-			}
-		}
-	});
-}
-
-function merchantLateUpdate()
-{
-	stockScrolls();
-	checkRequests();
-
-	if(deliveryMode && !returningToTown)
+	if(deliveryMode && !returningToTown && vendorMode)
 	{
 		disableVendorMode();
 		requestMagiPort();
 	}
 
-	if(!isInTown() && !returningToTown && !deliveryMode)
-	{
-		returnToTown();
-	}
-
 	if(vendorMode && craftingOn && character.gold > minimumGold)
 	{
-		craftUpgradedWeapon(locate_item(itemToCraft), upgradeLevelToStop);
+		craftUpgradedWeapon(locate_item(itemToUpgrade), upgradeLevelToStop);
 	}
 }
 
@@ -134,7 +139,19 @@ function checkRequests()
 		{
 			if(deliveryRequests[i].shipment || deliveryRequests[i].request == "mluck")
 			{
-				requestMagiPort();
+				let recipient = parent.entities[deliveryRequests[i].sender];
+				if(recipient)
+				{
+					smart_move(
+						character.x + (recipient.x - character.x) * 0.3,
+						character.y + (recipient.y - character.y) * 0.3
+					);
+				}
+				else
+				{
+					requestMagiPort();
+				}
+
 			}
 			else if(deliveryRequests[i].request == "potions")
 			{
@@ -181,14 +198,14 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 
 		if(lastEmpty != -1 && item)
 		{
-			log("Moving +"+upgradeLevel + " " + itemToCraft + " to last empty item slot");
+			log("Moving +"+upgradeLevel + " " + itemToUpgrade + " to last empty item slot");
 			swap(itemInvSlot, lastEmpty);
 		}
 
 		if(emptySlots > 0)
 		{
-			log("Buying another " + itemToCraft);
-			buy_with_gold(itemToCraft);
+			log("Buying another " + itemToUpgrade);
+			buy_with_gold(itemToUpgrade);
 		}
 		else
 		{
@@ -198,7 +215,7 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 	}
 	else if(item.level < upgradeLevel)
 	{
-		log("Upgrading " + itemToCraft + "...");
+		log("Upgrading " + itemToUpgrade + "...");
 
 		let scroll = "scroll0";
 		if(item.level >= 7)
@@ -237,19 +254,20 @@ function returnToTown(delay)
 
 	setTimeout(function()
 	{
-		goTo(merchantStandMap,{x:merchantStand_X,y:merchantStand_Y},()=>{returningToTown=false});
+		goTo(merchantStandMap,merchantStandCoords,()=>{returningToTown=false});
 	}, 7500);
 }
 
 function buyPotionsFor(name, healthPots, manaPots)
 {
-	if(!isInTown())
+	let request = deliveryRequests.find((x)=>
 	{
-		returnToTown();
-		return;
-	}
+		if(x.sender == name && x.request == "potions")
+		{
+			return x;
+		}
+	});
 
-	let request = deliveryRequests.find(x=>x.sender == name && x.request == "potions");
 	if(!request)
 	{
 		log("Attempting to buy potions but don't have request");
@@ -258,6 +276,13 @@ function buyPotionsFor(name, healthPots, manaPots)
 	else if(request.shipment)
 	{
 		log("Already fulfilled potion request.");
+		return;
+	}
+
+	if(!isInTown())
+	{
+		log("Returning to buy potions...");
+		returnToTown();
 		return;
 	}
 
@@ -286,6 +311,8 @@ function buyPotionsFor(name, healthPots, manaPots)
 
 function deliverPotions()
 {
+	log("Delivering potions");
+
 	if(potionShipments == null || potionShipments == [])
 	{
 		log("deliverPotions called but shopping list is empty!");
@@ -302,6 +329,18 @@ function deliverPotions()
 			{
 				if(partyMember.name == potionShipments[i].name)
 				{
+					let has_hPots = character.items[locate_item("hpot0")].q >= potionShipments[i].hPots;
+					let has_mPots = character.items[locate_item("mpot0")].q >= potionShipments[i].mPots;
+
+					if(!(has_hPots && has_mPots))
+					{
+						log("Tried to deliver potions but don't have shipment, returning to town.");
+						returnToTown();
+						return;
+					}
+
+					log("Giving potions to " + otherPlayerName);
+
 					send_item(partyMember,locate_item("hpot0"), potionShipments[i].hPots);
 					send_item(partyMember,locate_item("mpot0"), potionShipments[i].mPots);
 					potionShipments.splice(i);
@@ -326,7 +365,7 @@ function enableVendorMode()
 	}
 	else
 	{
-		smart_move({x: merchantStand_X, y: merchantStand_Y}, function()
+		smart_move(merchantStandCoords, function()
 		{
 			log("Merchant entered vendor mode.");
 			parent.open_merchant(locate_item("stand0"));

@@ -18,7 +18,7 @@ function initParty()
 	}
 	if(characterOffline(priestName))
 	{
-		start_character(priestName, "main");
+		start_character(priestName, 0);
 	}
 
 	if(!partyMembers.includes(merchantName))
@@ -27,7 +27,7 @@ function initParty()
 	}
 	if(characterOffline(merchantName))
 	{
-		start_character(merchantName, "main");
+		start_character(merchantName, 0);
 	}
 
 	if(!partyMembers.includes(mageName))
@@ -36,7 +36,7 @@ function initParty()
 	}
 	if(characterOffline(mageName))
 	{
-		start_character(mageName, "main");
+		start_character(mageName, 0);
 	}
 
 	if(!partyMembers.includes(rangerName))
@@ -45,7 +45,7 @@ function initParty()
 	}
 	if(characterOffline(rangerName))
 	{
-		start_character(rangerName, "main");
+		start_character(rangerName, 0);
 	}
 
 	log("Initializing Party...");
@@ -160,7 +160,7 @@ function on_cm(sender, data)
 	}
 	else if(data.message == "readyreply")
 	{
-		let reason = character.name + " recieved readyreply from " + sender + ". " + sender + " is " + (data.isReady?"ready!":"not ready.")
+		let reason = character.name + " recieved readyreply from " + sender + ". " + sender + " is " + (data.isReady?"ready!":"not ready. ")
 
 		if(sender != merchantName)
 		{
@@ -360,7 +360,7 @@ function tetherToLeader()
 
 function isInTown()
 {
-	return (character.map === merchantStandMap && distance(character,{x:merchantStand_X,y:merchantStand_Y}) < 200);
+	return (character.map === merchantStandMap && distance(character,merchantStandCoords) < 200);
 }
 
 function partyPresent()
@@ -377,16 +377,16 @@ function requestMluck()
 {
 	if(sentRequests.find(x=>x.message=="mluck"))
 	{
-		log(character.name + " waiting for Mluck...");
-		return;
+		log(character.name + " waiting for Mluck, resending request...");
 	}
-
-	log(character.name + " requesting Mluck");
+	else
+	{
+		log(character.name + " requesting Mluck");
+		sentRequests.push({message:"mluck",name:merchantName});
+	}
 
 	let merchReq = {message:"mluck",name:character.name};
 	send_cm(merchantName, merchReq);
-
-	sentRequests.push({message:"mluck",name:merchantName});
 }
 
 function requestMagiPort()
@@ -403,6 +403,8 @@ function checkSentRequests()
 	{
 		return;
 	}
+
+	log("Checking request status...");
 
 	for(let i = sentRequests.length-1; i >= 0; i--)
 	{
@@ -437,7 +439,8 @@ function usePotions(healthPotThreshold = 0.9, manaPotThreshold = 0.9)
 
 function checkBuffs()
 {
-	if(!character.s.mluck)
+	//	check that you have mLuck from merchant
+	if(!character.s.mluck || !character.s.mluck.f != merchantName)
 	{
 		requestMluck();
 		return false;
@@ -455,19 +458,20 @@ function checkPotionInventory()
 
 	if(mPotions < lowPotions || hPotions < lowPotions)
 	{
-		if(sentRequests.find(x=>x.message=="potions"))
-		{
-			log(character.name + " waiting for potions...");
-			return;
-		}
-
 		let healthPotsNeeded = healthPotionsToHave - hPotions;
 		let manaPotsNeeded = manaPotionsToHave - mPotions;
 		let potsList = {message:"buyPots", hPots:healthPotsNeeded, mPots:manaPotsNeeded};
 		send_cm(merchantName, potsList);
 
-		log(character.name + " sending request for potions");
-		sentRequests.push({message:"potions",name:merchantName});
+		if(sentRequests.find(x=>x.message=="potions"))
+		{
+			log(character.name + " waiting for potions, resending request... ");
+		}
+		else
+		{
+			log(character.name + " sending request for potions");
+			sentRequests.push({message:"potions",name:merchantName});
+		}
 
 		return false;
 	}
@@ -491,9 +495,9 @@ function transferAllToMerchant()
 
         for(let i = 0; i < character.items.length; i++)
 		{
-			if(item_properties(character.items[i]) && !exclude.includes(character.items[i]))
+			if(item_properties(character.items[i]) && !exclude.includes(character.items[i].name))
 			{
-				send_item(merchant, i, quantity(character.items[i]));
+				send_item(merchant, i, character.items[i].q);
 			}
 		}
 
