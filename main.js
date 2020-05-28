@@ -5,14 +5,14 @@ load_code("mageLogic");
 load_code("rangerLogic");
 
 ///     crafting settings       ///
+const craftingEnabled = true;
+const minimumGold = 5000000;
 var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap"];
 var upgradingBuyableItem = [false,false,false,false,false]; //  if true will attempt to buy base items to continue crafting
 var upgradeLevelToStop = 7;
 var itemsToCompound = ["intring","strring","dexring","vitring","ringsj"];
 var compoundLevelToStop = 2;
 var vendorTrash = ["cclaw","hpamulet","hpbelt"];
-const craftingEnabled = true;
-const minimumGold = 5000000;
 //////
 
 ///     farming settings        ///
@@ -80,6 +80,7 @@ function main()
     if (character.rip)
     {
         setTimeout(respawn, 15000);
+        return;
     }
 
     if(is_moving(character) || smart.moving || returningToTown)
@@ -139,7 +140,7 @@ function main()
     }
 
     //  party leader standard routine
-	if(character.ctype === "priest")
+	if(character.name == partyLeader)
 	{
 		if(target)
 		{
@@ -174,7 +175,10 @@ function main()
         //  if leader is too far away approach him
         if(!traveling)
         {
-            tetherToLeader();
+            if(parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) > spaceToKeep*2)
+            {
+                followLeader();
+            }
         }
 	}
 }
@@ -182,6 +186,11 @@ function main()
 // called every 5000ms
 function lateUpdate()
 {
+    if(character.rip)
+    {
+        return;
+    }
+
     checkSentRequests();
 
     if(character.name == partyLeader && !partyPresent())
@@ -189,29 +198,26 @@ function lateUpdate()
         initParty();
     }
 
-	if(!autoPlay && character.ctype != "merchant")
-		return;
-
-	if(is_moving(character) || smart.moving)
-		return;
-
-	if(character.ctype != "merchant")
-	{
-        //  check if you need anything
-		checkPotionInventory();
-        checkBuffs();
-
-        //  if the merchant is nearby, send him your items
-        if(parent.entities[merchantName])
-        {
-            transferAllToMerchant();
-        }
-	}
-	else if(character.ctype === "merchant")
+    if(character.ctype === "merchant")
 	{
         //  merchant update is delayed an additional 1000ms so if requests are sent in the same interval merchant doesnt have to wait an additioanl interval
-		setTimeout(merchantLateUpdate, 1000);
+        setTimeout(merchantLateUpdate, 1000);
+        return;
 	}
+
+    //  don't do anything past here if autoPlay is off, or if you are moving
+	if(!autoPlay || is_moving(character) || smart.moving)
+        return;
+
+    //  check if you need anything
+    checkPotionInventory();
+    checkBuffs();
+
+    //  if the merchant is nearby, send him your items
+    if(parent.entities[merchantName])
+    {
+        transferAllToMerchant();
+    }
 
     //  party leader keeps things in check
 	if(character.name == partyLeader)
@@ -220,7 +226,7 @@ function lateUpdate()
         {
             letsGo();
         }
-        else if(character.name == partyLeader && partyPresent() && !farmingModeActive)
+        else if(partyPresent() && !farmingModeActive)
 		{
 			readyCheck();
 		}

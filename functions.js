@@ -447,19 +447,6 @@ function personalSpace()
     }
 }
 
-function tetherToLeader()
-{
-	if(character.name == partyLeader)
-		return;
-
-    leader = get_player(partyLeader);
-
-    if(leader && distance(character, leader) > spaceToKeep*2)
-    {
-        followLeader();
-    }
-}
-
 function isInTown()
 {
 	return (character.map === merchantStandMap && distance(character,merchantStandCoords) < 200);

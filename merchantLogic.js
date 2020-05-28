@@ -14,7 +14,7 @@ function merchantAuto(target)
 		parent.close_merchant();
 	}
 
-	if(!character.s.mluck || character.s.mluck.f != merchantName)
+	if(!checkMluck(character))
 	{
 		log("mlucking self");
 		use_skill("mluck", character);
@@ -22,14 +22,14 @@ function merchantAuto(target)
 
 	for(other in parent.entities)
 	{
-		let partyMember = parent.party_list.includes(other);
+		let isPartyMember = parent.party_list.includes(other);
 		let target = parent.entities[other];
 
-		if(partyMember)
+		if(isPartyMember)
 		{
 			if(is_in_range(target, "mluck"))
 			{
-				if(!target.s.mluck || target.s.mluck.f != merchantName)
+				if(!checkMluck(target))
 				{
 					log("Giving mluck to " + target.name);
 					use_skill("mluck", target);
@@ -51,7 +51,7 @@ function merchantAuto(target)
 		}
 		else if(target)
 		{
-			if((!target.s.mluck || target.s.mluck.f != merchantName) && is_in_range(other, "mluck"))
+			if(!checkMluck(target) && is_in_range(target, "mluck"))
 			{
 				log("Giving mluck to " + target.name);
 				use_skill("mluck", target);
@@ -132,6 +132,19 @@ function merchant_on_magiport(name)
 	}
 }
 
+//	returns true if mluck is present & from your own merchant. target should be a player object, not a name
+function checkMluck(target)
+{
+	if(!target.s.mluck || target.s.mluck.f != merchantName)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 function sellVendorTrash()
 {
 	for(let i = 0; i < character.items.length; i++)
@@ -184,6 +197,7 @@ function checkRequests()
 	}
 }
 
+//	returns true if holding a shipment for delivery to the given name
 function checkPotionShipments(name)
 {
 	if(potionShipments.length == 0)
