@@ -260,7 +260,15 @@ function readyToGo()
 
 function personalSpace()
 {
-    target = get_nearest_monster();
+	let target = get_nearest_monster
+	({
+		target:character.name
+	});
+
+	if(!target)
+	{
+	    target = get_nearest_monster();
+	}
 
     if(target)
     {
