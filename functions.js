@@ -15,44 +15,58 @@ function initParty()
 	if(!partyMembers.includes(priestName))
 	{
 		send_party_invite(priestName);
-
-		if(parent.X.characters.includes((x)=>{x.name==priestName && x.online == 0}))
-		{
-			start_character(priestName, "main");
-		}
+	}
+	if(characterOffline(priestName))
+	{
+		start_character(priestName, "main");
 	}
 
 	if(!partyMembers.includes(merchantName))
 	{
 		send_party_invite(merchantName);
-
-		if(parent.X.characters.includes((x)=>{x.name==merchantName && x.online == 0}) )
-		{
-			start_character(merchantName, "main");
-		}
+	}
+	if(characterOffline(merchantName))
+	{
+		start_character(merchantName, "main");
 	}
 
 	if(!partyMembers.includes(mageName))
 	{
 		send_party_invite(mageName);
-
-		if(parent.X.characters.includes((x)=>{x.name==mageName && x.online == 0}))
-		{
-			start_character(mageName, "main");
-		}
+	}
+	if(characterOffline(mageName))
+	{
+		start_character(mageName, "main");
 	}
 
 	if(!partyMembers.includes(rangerName))
 	{
 		send_party_invite(rangerName);
-
-		if(parent.X.characters.includes((x)=>{x.name==rangerName && x.online == 0}))
-		{
-			start_character(rangerName, "main");
-		}
+	}
+	if(characterOffline(rangerName))
+	{
+		start_character(rangerName, "main");
 	}
 
-	log("Party Invites sent!");
+	log("Initializing Party...");
+}
+
+//	returns true if character is offline
+function characterOffline(name)
+{
+	if(parent.X.characters.filter((x)=>{return x.name==name && x.online == 0}).length == 0)
+	{
+		return false;
+	}
+
+	if(!get_active_characters()[name])
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 function stopCharacters()

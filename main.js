@@ -74,12 +74,19 @@ function main()
 
 	if(character.ctype != "merchant")
 	{
+        //  autofollow leader when not auto-farming
+        if(character.name != partyLeader && !farmingModeActive && parent.entities[partyLeader])
+        {
+            followLeader();
+            return;
+        }
+
         //  make sure party is together
         if(!autoPlay || !readyToGo() || !farmingModeActive)
         {
             if((character.name != partyLeader) || (character.name == partyLeader && autoPlay))
             {
-                aloneCheck(15000)
+                aloneCheck();
             }
 
             return;
@@ -158,6 +165,11 @@ function lateUpdate()
 {
     checkSentRequests();
 
+    if(character.name == partyLeader && !partyPresent())
+    {
+        initParty();
+    }
+
 	if(!autoPlay && character.ctype != "merchant")
 		return;
 
@@ -171,7 +183,7 @@ function lateUpdate()
         checkBuffs();
 
         //  if the merchant is nearby, send him your items
-        if(parent.entities[get_player(merchantName)])
+        if(parent.entities[merchantName])
         {
             transferAllToMerchant();
         }
@@ -207,13 +219,9 @@ function aloneCheck(msToWait = 15000)
 
     if(!partyPresent() && !aloneChecking)
     {
-        if(character.name == partyLeader)
+        if(character.name != partyLeader)
         {
-            initParty();
-        }
-        else if(character.name != partyLeader)
-        {
-            if(parent.entities[get_player(partyLeader)])
+            if(parent.entities[partyLeader])
             {
                 followLeader();
                 return false;
