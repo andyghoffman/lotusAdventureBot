@@ -151,14 +151,13 @@ function checkRequests()
 	if(deliveryRequests.length > 0)
 	{
 		deliveryMode = true;
+		disableVendorMode();
 
 		for(let i = 0; i < deliveryRequests.length; i++)
 		{
 			//	deliver potions or mluck
 			if(deliveryRequests[i].shipment || deliveryRequests[i].request == "mluck")
 			{
-				disableVendorMode();
-
 				let recipient = parent.entities[deliveryRequests[i].sender];
 				if(recipient)
 				{
@@ -171,12 +170,10 @@ function checkRequests()
 				{
 					requestMagiPort();
 				}
-
 			}
 			//	go buy potions
 			else if(deliveryRequests[i].request == "potions")
 			{
-				disableVendorMode();
 				buyPotionsFor(deliveryRequests[i].sender, deliveryRequests[i].hPots, deliveryRequests[i].mPots);
 			}
 		}
