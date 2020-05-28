@@ -8,29 +8,49 @@ const lowPotions = 100;
 const spaceToKeep = 10;
 const whiteList = ["LotusPriest", "LotusMage", "LotusRanger", "LotusMerch"];
 
-function loadCharacters()
-{
-    log("Loading Characters...");
-
-	start_character(mageName, "main");
-	start_character(rangerName, "main");
-}
-
 function initParty()
 {
 	partyMembers = parent.party_list;
 
 	if(!partyMembers.includes(priestName))
+	{
 		send_party_invite(priestName);
 
+		if(parent.X.characters.includes((x)=>{x.name==priestName && x.online == 0}))
+		{
+			start_character(priestName, "main");
+		}
+	}
+
 	if(!partyMembers.includes(merchantName))
+	{
 		send_party_invite(merchantName);
 
+		if(parent.X.characters.includes((x)=>{x.name==merchantName && x.online == 0}) )
+		{
+			start_character(merchantName, "main");
+		}
+	}
+
 	if(!partyMembers.includes(mageName))
+	{
 		send_party_invite(mageName);
 
+		if(parent.X.characters.includes((x)=>{x.name==mageName && x.online == 0}))
+		{
+			start_character(mageName, "main");
+		}
+	}
+
 	if(!partyMembers.includes(rangerName))
+	{
 		send_party_invite(rangerName);
+
+		if(parent.X.characters.includes((x)=>{x.name==rangerName && x.online == 0}))
+		{
+			start_character(rangerName, "main");
+		}
+	}
 
 	log("Party Invites sent!");
 }
@@ -365,27 +385,29 @@ function requestMagiPort()
 
 function checkSentRequests()
 {
-	if(sentRequests.length > 0)
+	if(sentRequests.length == 0)
 	{
-		for(let i = sentRequests.length-1; i >= 0; i--)
+		return;
+	}
+
+	for(let i = sentRequests.length-1; i >= 0; i--)
+	{
+		if(sentRequests[i].message == "mluck")
 		{
-			if(sentRequests[i].message == "mluck")
+			if(character.s.mluck)
 			{
-				if(character.s.mluck)
-				{
-					log("Mluck recieved. Thank you!");
-					send_cm(sentRequests[i].name, {message:"thanks",request:"mluck"});
-					sentRequests.splice(i);
-				}
+				log("Mluck recieved. Thank you!");
+				send_cm(sentRequests[i].name, {message:"thanks",request:"mluck"});
+				sentRequests.splice(i);
 			}
-			else if(sentRequests[i].message == "potions")
+		}
+		else if(sentRequests[i].message == "potions")
+		{
+			if(checkPotionInventory())
 			{
-				if(checkPotionInventory())
-				{
-					log("Potions recieved. Thank you!");
-					send_cm(sentRequests[i].name, {message:"thanks",request:"potions"});
-					sentRequests.splice(i);
-				}
+				log("Potions recieved. Thank you!");
+				send_cm(sentRequests[i].name, {message:"thanks",request:"potions"});
+				sentRequests.splice(i);
 			}
 		}
 	}
@@ -455,7 +477,7 @@ function transferAllToMerchant()
 
         for(let i = 0; i < character.items.length; i++)
 		{
-			if(character.items[i] && !exclude.includes(character.items[i]))
+			if(item_properties(character.items[i]) && !exclude.includes(character.items[i]))
 			{
 				send_item(merchant, i, quantity(character.items[i]));
 			}
@@ -463,6 +485,12 @@ function transferAllToMerchant()
 
         log(character.name + " sent gold & items to merchant.");
 	}
+}
+
+function toggleCraftingMode()
+{
+	craftingOn = !craftingOn;
+	log("Crafting Mode " + craftingOn);
 }
 
 function followLeader()

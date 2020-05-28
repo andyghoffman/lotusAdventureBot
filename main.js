@@ -5,9 +5,9 @@ load_code("mageLogic");
 load_code("rangerLogic");
 
 ///     crafting settings       ///
-const craftingEnabled = true;
-const itemToCraft = "bow";
-const upgradeLevelToStop = 8;
+var itemToCraft = "wshield";
+var upgradeLevelToStop = 7;
+const craftingEnabled = false;
 const minimumGold = 5000000;
 //////
 
@@ -27,20 +27,22 @@ const rangerName = "LotusRanger";
 const priestName = "LotusPriest";
 const partyLeader = priestName;
 const merchantStandMap = "main";
-const merchantStand_X = -123.05;
-const merchantStand_Y = 59.89;
+const merchantStand_X = -118;
+const merchantStand_Y = 11;
 //////
 
-map_key("1", "snippet", "loadCharacters()")
+map_key("1", "snippet", "initParty()")
 map_key("2", "snippet", "initParty()")
 map_key("3", "snippet", "stopCharacters()")
 map_key("4", "snippet", "transferAllToMerchant()")
 map_key("5", "snippet", "toggleAutoPlay()")
+map_key("6", "snippet", "toggleCraftingMode()")
 map_key("0", "snippet", "test()")
 
 var autoPlay = false;
 var aloneChecking = false;
 var farmingModeActive = false;
+var craftingOn = craftingEnabled;
 
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
@@ -53,42 +55,64 @@ function test()
 		upgrade(item, locate_item("scroll0"));
 }
 
+//  called every 250ms
 function main()
 {
     if (character.rip)
+    {
         setTimeout(respawn, 15000);
+    }
 
     if(is_moving(character) || smart.moving)
+    {
 		return;
+    }
 
+    //  standard routine
     usePotions(healthPotThreshold, manaPotThreshold);
     loot();
 
 	if(character.ctype != "merchant")
 	{
-        if(aloneCheck(15000) || !autoPlay || !readyToGo() || !farmingModeActive)
+        //  make sure party is together
+        if(!autoPlay || !readyToGo() || !farmingModeActive)
         {
+            if((character.name != partyLeader) || (character.name == partyLeader && autoPlay))
+            {
+                aloneCheck(15000)
+            }
+
             return;
         }
     }
+    //  merchant standard routine
     else if(character.ctype === "merchant")
 	{
         merchantAuto();
         return;
 	}
 
-    let target = getMonsterFarmTarget(specialMonsters[0]);
+    let target = null;
 
+    //  look for any special targets
+    for(let i = 0; i < specialMonsters.length; i++)
+    {
+        target = getMonsterFarmTarget(specialMonsters[i]);
+    }
+
+    //  look for the monster you are farming
     if(!target)
     {
         target = getMonsterFarmTarget(farmMonsterName);
     }
 
+    //  try to keep monsters away from your face
     if(target && !is_moving(character) && !smart.moving)
     {
         personalSpace();
     }
 
+    //  party leader standard routine
 	if(character.ctype === "priest")
 	{
 		if(target)
@@ -100,7 +124,8 @@ function main()
             log(character.name + " going to map... ");
 			goTo(farmMap, farmCoords);
 		}
-	}
+    }
+    //  party follower routines
 	else
 	{
 		if(target)
@@ -120,13 +145,15 @@ function main()
             goTo(farmMap, farmCoords);
         }
 
-        if(!is_moving(character) && !smart.moving)
+        //  if leader is too far away approach him
+        if(!traveling)
         {
             tetherToLeader();
         }
 	}
 }
 
+// called every 5000ms
 function lateUpdate()
 {
     checkSentRequests();
@@ -139,30 +166,38 @@ function lateUpdate()
 
 	if(character.ctype != "merchant")
 	{
+        //  check if you need anything
 		checkPotionInventory();
-		checkBuffs();
+        checkBuffs();
+
+        //  if the merchant is nearby, send him your items
+        if(parent.entities[get_player(merchantName)])
+        {
+            transferAllToMerchant();
+        }
 	}
 	else if(character.ctype === "merchant")
 	{
+        //  merchant update is delayed an additional 1000ms so if requests are sent in the same interval merchant doesnt have to wait an additioanl interval
 		setTimeout(merchantLateUpdate, 1000);
 	}
 
-	if(character.name == partyLeader && readyToGo())
+    //  party leader keeps things in check
+	if(character.name == partyLeader)
 	{
-        if(partyPresent() && !farmingModeActive && !aloneChecking)
+        if(readyToGo() && partyPresent() && !farmingModeActive && !aloneChecking)
         {
             letsGo();
         }
-    }
-    else if(!readyToGo())
-	{
-		if(character.name == partyLeader && partyPresent() && !farmingModeActive)
+        else if(character.name == partyLeader && partyPresent() && !farmingModeActive)
 		{
 			readyCheck();
 		}
-	}
+    }
 }
 
+//  check if you are separated from the party, and attempt to regroup in town if you are.
+//  returns true if the character is alone, false if not
 function aloneCheck(msToWait = 15000)
 {
     if(is_moving(character) || smart.moving)
@@ -244,7 +279,7 @@ function letsGo()
 function toggleAutoPlay()
 {
     autoPlay = !autoPlay;
-    5
+
     if(character.name == partyLeader)
     {
         send_cm(mageName, {message:"autoToggle",auto:autoPlay});

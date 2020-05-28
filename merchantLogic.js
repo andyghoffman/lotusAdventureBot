@@ -79,7 +79,7 @@ function merchantLateUpdate()
 		returnToTown();
 	}
 
-	if(vendorMode && craftingEnabled && character.gold > minimumGold)
+	if(vendorMode && craftingOn && character.gold > minimumGold)
 	{
 		craftUpgradedWeapon(locate_item(itemToCraft), upgradeLevelToStop);
 	}
@@ -179,7 +179,7 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 			}
 		}
 
-		if(lastEmpty != -1)
+		if(lastEmpty != -1 && item)
 		{
 			log("Moving +"+upgradeLevel + " " + itemToCraft + " to last empty item slot");
 			swap(itemInvSlot, lastEmpty);
@@ -193,7 +193,7 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 		else
 		{
 			log("Inventory full, crafting mode disabling.");
-			craftingEnabled = false;
+			craftingOn = false;
 		}
 	}
 	else if(item.level < upgradeLevel)
