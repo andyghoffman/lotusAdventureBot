@@ -1,5 +1,7 @@
 var whosReady = {priest:false,mage:false,ranger:false,merchant:false};
 var traveling = false;
+var sentRequests = [];
+
 const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
 const lowPotions = 100;
@@ -316,7 +318,7 @@ function tetherToLeader()
 
 function isInTown()
 {
-	return (character.map === "main" && distance(character,{x:merchantStand_X,y:merchantStand_Y}) < 200);
+	return (character.map === merchantStandMap && distance(character,{x:merchantStand_X,y:merchantStand_Y}) < 200);
 }
 
 function partyPresent()
@@ -331,10 +333,18 @@ function partyPresent()
 
 function requestMluck()
 {
+	if(sentRequests.find(x=>x.message=="mluck"))
+	{
+		log(character.name + " waiting for Mluck...");
+		return;
+	}
+
 	log(character.name + " requesting Mluck");
 
 	let merchReq = {message:"mluck",name:character.name};
 	send_cm(merchantName, merchReq);
+
+	sentRequests.push({message:"mluck",name:merchantName});
 }
 
 function requestMagiPort()
@@ -343,6 +353,34 @@ function requestMagiPort()
 
 	let magiReq = {message:"magiPort",name:character.name};
 	send_cm(mageName, magiReq);
+}
+
+function checkSentRequests()
+{
+	if(sentRequests.length > 0)
+	{
+		for(let i = sentRequests.length-1; i >= 0; i--)
+		{
+			if(sentRequests[i].message == "mluck")
+			{
+				if(character.s.mluck)
+				{
+					log("Mluck recieved. Thank you!");
+					send_cm(sentRequests[i].name, {message:"thanks",request:"mluck"});
+					sentRequests.splice(i);
+				}
+			}
+			else if(sentRequests[i].message == "potions")
+			{
+				if(checkPotionInventory())
+				{
+					log("Potions recieved. Thank you!");
+					send_cm(sentRequests[i].name, {message:"thanks",request:"potions"});
+					sentRequests.splice(i);
+				}
+			}
+		}
+	}
 }
 
 function usePotions(healthPotThreshold = 0.9, manaPotThreshold = 0.9)
@@ -368,6 +406,12 @@ function checkBuffs()
 
 function checkPotionInventory()
 {
+	if(sentRequests.find(x=>x.message=="potions"))
+	{
+		log(character.name + " waiting for potions...");
+		return;
+	}
+
 	let	hPotions = quantity("hpot0");
 	let mPotions = quantity("mpot0");
 
@@ -379,6 +423,7 @@ function checkPotionInventory()
 		send_cm(merchantName, potsList);
 
 		log(character.name + " sending request for potions");
+		sentRequests.push({message:"potions",name:merchantName});
 
 		return false;
 	}

@@ -4,20 +4,30 @@ load_code("merchantLogic");
 load_code("mageLogic");
 load_code("rangerLogic");
 
-var autoPlay = false;
-var aloneChecking = false;
-var farmingModeActive = false;
+///     crafting settings       ///
+const craftingEnabled = true;
+const itemToCraft = "staff";
+const upgradeLevelToStop = 7;
+//////
 
+///     farming settings        ///
 const farmMonsterName = "arcticbee";
 const farmMap = "winterland";
 const farmMonsterNr = 6;
 const farmCoords = {x:1312.8,y:-853.8}
 const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
+//////
+
+///     character settings      ///
 const merchantName = "LotusMerch";
 const mageName = "LotusMage";
 const rangerName = "LotusRanger";
 const priestName = "LotusPriest";
 const partyLeader = priestName;
+const merchantStandMap = "main";
+const merchantStand_X = -123.05;
+const merchantStand_Y = 59.89;
+//////
 
 map_key("1", "snippet", "loadCharacters()")
 map_key("2", "snippet", "initParty()")
@@ -25,6 +35,10 @@ map_key("3", "snippet", "stopCharacters()")
 map_key("4", "snippet", "transferAllToMerchant()")
 map_key("5", "snippet", "toggleAutoPlay()")
 map_key("0", "snippet", "test()")
+
+var autoPlay = false;
+var aloneChecking = false;
+var farmingModeActive = false;
 
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
@@ -40,9 +54,7 @@ function test()
 function main()
 {
     if (character.rip)
-		setTimeout(respawn, 15000);
-
-    dontWalkWithShop();
+        setTimeout(respawn, 15000);
 
     if(is_moving(character) || smart.moving)
 		return;
@@ -122,6 +134,8 @@ function main()
 
 function lateUpdate()
 {
+    checkSentRequests();
+
 	if(!autoPlay && character.ctype != "merchant")
 		return;
 

@@ -1,17 +1,21 @@
-const merchantStand_X = -123.05;
-const merchantStand_Y = 59.89;
-
 var lowScrolls = 10;
 var scrollsToStock = 100;
 var vendorMode = false;	//	true when in town with shop, false when busy delivering items
 var returningToTown = false;	//	true when merchant is on it's way back to town
-var potionsHeldFor = [];
+var deliveryMode = false;
+var potionShipments = [];
+var deliveryRequests = [];
 
 function merchantAuto(target)
 {
-	if(isInTown() && !vendorMode && !returningToTown)
+	if(isInTown() && !vendorMode && !returningToTown && !deliveryMode)
 	{
 		enableVendorMode();
+	}
+
+	if(!vendorMode && parent.stand)
+	{
+		parent.close_merchant();
 	}
 
 	if(!character.s.mluck)
@@ -23,7 +27,7 @@ function merchantAuto(target)
 
 		if(partyMember)
 		{
-			if(!partyMember.s.mluck || checkPotionRequestsFor(partyMember.name))
+			if(!partyMember.s.mluck || checkPotionShipments(partyMember.name))
 			{
 				if(is_in_range(partyMember, "mluck"))
 				{
@@ -32,7 +36,7 @@ function merchantAuto(target)
 						log("Giving mluck to " + partyMember.name);
 						use_skill("mluck", partyMember);
 					}
-					else if(checkPotionRequestsFor(partyMember.name))
+					else if(checkPotionShipments(partyMember.name))
 					{
 						deliverPotions();
 					}
@@ -53,79 +57,137 @@ function merchantAuto(target)
 function merchantLateUpdate()
 {
 	stockScrolls();
+	checkRequests();
 
-	if(potionsHeldFor.length > 0 && vendorMode && !returningToTown)
+	if(deliveryMode && !returningToTown)
 	{
 		disableVendorMode();
 		requestMagiPort();
 	}
 
-	if(!vendorMode && !returningToTown)
+	if(!isInTown() && !returningToTown && !deliveryMode)
 	{
-		if(parent.party_list.every(function(p)
-		{
-			let partyMember = parent.entities[p];
-			return (partyMember && partyMember.s.mluck);
-		}) && potionsHeldFor.length == 0 && !isInTown() && !vendorMode)
-		{
-			returnToTown();
-		}
+		returnToTown();
 	}
 
-	if(vendorMode)
+	if(vendorMode && craftingEnabled)
 	{
-		if(locate_item("staff") != -1)
-		{
-			log("Upgrading staff...");
-			craftUpgradedWeapon(locate_item("staff"), 7);
-		}
+		craftUpgradedWeapon(locate_item(itemToCraft), upgradeLevelToStop);
 	}
 }
 
-function merchant_on_cm(name, data)
+function merchant_on_cm(sender, data)
 {
-	if(data.message == "buyPots" && vendorMode)
+	if(data.message == "buyPots")
 	{
-		if(potionsHeldFor && checkPotionRequestsFor(name))
+		if(potionShipments && checkPotionShipments(sender))
 		{
-			log("Already have potion request from " + name);
+			log("Already have potion request from " + sender);
 			return;
 		}
 
-		log("Recieved potion request from " + name);
-		buyPotionsFor(name, data.hPots, data.mPots);
+		log("Recieved potion request from " + sender);
+		deliveryRequests.push({request:"potions",sender:sender,fulfilled:false,shipment:null,hPots:data.hPots,mPots:data.mPots});
 	}
-	else if(data.message == "mluck" && vendorMode)
+	else if(data.message == "mluck")
 	{
-		log("Recieved mluck request from " + name);
+		if(deliveryRequests.find(x=>x.request=="mluck" && x.from==sender))
+		{
+			log("Already have mluck request from " + sender);
+			return;
+		}
 
-		disableVendorMode();
+		log("Recieved mluck request from " + sender);
+		deliveryRequests.push({request:"mluck",from:sender});
+	}
+	else if(data.message == "thanks")
+	{
+		log("Recieved delivery confirmation from " + sender);
+		deliveryRequests.splice(deliveryRequests.indexOf(x=>x.sender == sender && x.request == request));
 	}
 }
 
 function merchant_on_magiport(name)
 {
-	accept_magiport(name);
+	if(deliveryMode)
+	{
+		accept_magiport(name);
+	}
 }
 
-function checkPotionRequestsFor(name)
+function checkRequests()
 {
-	if(potionsHeldFor.length == 0)
+	if(deliveryRequests.length > 0)
+	{
+		deliveryMode = true;
+
+		for(let i = 0; i < deliveryRequests.length; i++)
+		{
+			if(deliveryRequests[i].shipment || deliveryRequests[i].request == "mluck")
+			{
+				requestMagiPort();
+			}
+			else if(deliveryRequests[i].request == "potions")
+			{
+				buyPotionsFor(deliveryRequests[i].sender, deliveryRequests[i].hPots, deliveryRequests[i].mPots);
+			}
+		}
+	}
+	else
+	{
+		deliveryMode = false;
+	}
+}
+
+function checkPotionShipments(name)
+{
+	if(potionShipments.length == 0)
 		return;
 
-	for(let i = 0; i < potionsHeldFor.length; i++)
+	for(let i = 0; i < potionShipments.length; i++)
 	{
-		if(potionsHeldFor[i].name == name)
+		if(potionShipments[i].name == name)
 			return true;
 	}
 
 	return false;
 }
 
-function craftUpgradedWeapon(weapon, upgradeLevel)
+function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 {
-	if(item_properties(character.items[weapon]).level < 7)
-		upgrade(weapon, locate_item("scroll0"));
+	let itemName = character.items[itemInvSlot].name;
+	let item = item_properties(character.items[itemInvSlot]);
+
+	if(item.level < upgradeLevel)
+	{
+		log("Upgrading " + itemName + "...");
+		upgrade(itemInvSlot, locate_item("scroll0"));
+	}
+	else
+	{
+		let lastEmpty = -1;
+		let emptySlots = 0;
+		for(let i=0; i<character.items.length; i++)
+		{
+			if(item_properties(character.items[i]) == null)
+			{
+				lastEmpty = i;
+				emptySlots++;
+			}
+		}
+
+		if(lastEmpty != -1)
+		{
+			log("Moving +"+upgradeLevel + " " + itemName + " to last empty item slot");
+			swap(itemInvSlot, lastEmpty);
+		}
+
+		if(emptySlots > 0)
+		{
+			log("Buying another " + itemName);
+			buy_with_gold(itemName);
+		}
+	}
 }
 
 function stockScrolls()
@@ -153,6 +215,8 @@ function returnToTown(delay)
 	if(returningToTown)
 		return;
 
+	log("Merchant returning to town.");
+
 	returningToTown = true;
 
 	if(character.map == "main")
@@ -160,7 +224,6 @@ function returnToTown(delay)
 		setTimeout(function()
 		{
 			use("use_town");
-			setTimeout(enableVendorMode, delay);
 		}, delay);
 	}
 	else
@@ -168,10 +231,11 @@ function returnToTown(delay)
 		setTimeout(function()
 		{
 			use("use_town");
+
             setTimeout(function()
             {
-                goTo("main",{x:merchantStand_X,y:merchantStand_Y},enableVendorMode);
-            }, 10000);
+                goTo("main",{x:merchantStand_X,y:merchantStand_Y});
+            }, 7500);
 
 		}, delay);
 	}
@@ -179,6 +243,24 @@ function returnToTown(delay)
 
 function buyPotionsFor(name, healthPots, manaPots)
 {
+	if(!isInTown())
+	{
+		returnToTown();
+		return;
+	}
+
+	let request = deliveryRequests.find(x=>x.sender == name && x.request == "potions");
+	if(!request)
+	{
+		log("Attempting to buy potions but don't have request");
+		return;
+	}
+	else if(request.shipment)
+	{
+		log("Already fulfilled potion request.");
+		return;
+	}
+
 	let hPotsAlreadyHave = quantity("hpot0");
 	let mPotsAlreadyHave = quantity("mpot0");
 
@@ -196,13 +278,15 @@ function buyPotionsFor(name, healthPots, manaPots)
 		log("Buying " + mpotAmount + " mana potions");
 	}
 
-	let order = {name:name, hPots:healthPots, mPots:manaPots};
-	potionsHeldFor.push(order);
+	let potionShipment = {name:name, hPots:healthPots, mPots:manaPots};
+	potionShipments.push(potionShipment);
+	request.shipment = potionShipment;
+	request.fulfilled = true;
 }
 
 function deliverPotions()
 {
-	if(potionsHeldFor == null || potionsHeldFor == [])
+	if(potionShipments == null || potionShipments == [])
 	{
 		log("deliverPotions called but shopping list is empty!");
 		return;
@@ -214,35 +298,42 @@ function deliverPotions()
 
 		if(partyMember)
 		{
-			for(let i = 0; i < potionsHeldFor.length; i++)
+			for(let i = 0; i < potionShipments.length; i++)
 			{
-				if(partyMember.name == potionsHeldFor[i].name)
+				if(partyMember.name == potionShipments[i].name)
 				{
-					send_item(partyMember,locate_item("hpot0"),
-					potionsHeldFor[i].hPots);
-					send_item(partyMember,locate_item("mpot0"),
-					potionsHeldFor[i].mPots);
+					send_item(partyMember,locate_item("hpot0"), potionShipments[i].hPots);
+					send_item(partyMember,locate_item("mpot0"), potionShipments[i].mPots);
+					potionShipments.splice(i);
 				}
 			}
 		}
 	});
-
-	potionsHeldFor = [];
-
-	returnToTown(2500);
 }
 
 function enableVendorMode()
 {
+	if(!isInTown() || returningToTown || deliveryMode)
+	{
+		return;
+	}
+
 	log("Merchant returning to vendor mode.");
 
-	smart_move({x: merchantStand_X, y: merchantStand_Y}, () =>
+	if(!isInTown())
 	{
-		log("Merchant entered vendor mode.");
-		parent.open_merchant(41);
-		vendorMode = true;
-		returningToTown = false;
-	});
+		returnToTown();
+	}
+	else
+	{
+		smart_move({x: merchantStand_X, y: merchantStand_Y}, function()
+		{
+			log("Merchant entered vendor mode.");
+			parent.open_merchant(locate_item("stand0"));
+			vendorMode = true;
+			returningToTown = false;
+		});
+	}
 }
 
 function disableVendorMode()
@@ -251,12 +342,4 @@ function disableVendorMode()
 
 	parent.close_merchant();
 	vendorMode = false;
-}
-
-function dontWalkWithShop()
-{
-	if(character.stand && !vendorMode)
-	{
-		parent.close_merchant();
-	}
 }
