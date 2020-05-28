@@ -86,7 +86,15 @@ function merchantLateUpdate()
 
 	if(vendorMode && craftingOn && character.gold > minimumGold)
 	{
-		craftUpgradedWeapon(locate_item(itemToUpgrade), upgradeLevelToStop);
+		for(let i = 0; i < compoundLevelToStop; i++)
+		{
+			craftCompounds(i);
+		}
+
+		for(let i = 0; i < itemsToUpgrade.length; i++)
+		{
+			craftUpgrade(itemsToUpgrade[i], upgradeLevelToStop, upgradingBuyableItem[i]);
+		}
 	}
 }
 
@@ -179,11 +187,11 @@ function checkPotionShipments(name)
 	return false;
 }
 
-function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
+function craftUpgrade(itemToUpgrade, upgradeLevel, buyable)
 {
-	let item = item_properties(character.items[itemInvSlot]);
+	let item = character.items[locate_item(itemToUpgrade)];
 
-	if(!item || item.level >= upgradeLevel)
+	if((!item && buyable) || (item && item.level >= upgradeLevel))
 	{
 		let lastEmpty = -1;
 		let emptySlots = 0;
@@ -198,11 +206,11 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 
 		if(lastEmpty != -1 && item)
 		{
-			log("Moving +"+upgradeLevel + " " + itemToUpgrade + " to last empty item slot");
+			log("Moving +"+item.level + " " + item.name + " to last empty item slot");
 			swap(itemInvSlot, lastEmpty);
 		}
 
-		if(emptySlots > 0)
+		if(emptySlots && buyable)
 		{
 			log("Buying another " + itemToUpgrade);
 			buy_with_gold(itemToUpgrade);
@@ -213,9 +221,9 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 			craftingOn = false;
 		}
 	}
-	else if(item.level < upgradeLevel)
+	else if(item && item.level < upgradeLevel)
 	{
-		log("Upgrading " + itemToUpgrade + "...");
+		log("Upgrading " + item.name + "...");
 
 		let scroll = "scroll0";
 		if(item.level >= 7)
@@ -223,8 +231,48 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 			scroll = "scroll1";
 		}
 
-		upgrade(itemInvSlot, locate_item(scroll));
+		upgrade(locate_item(itemToUpgrade), locate_item(scroll));
 	}
+}
+
+function craftCompounds(levelToUse)
+{
+	let triple = [-1,-1,-1];
+	let foundItem = "";
+
+	for(let i = 0; i < itemsToCompound.length; i++)
+	{
+		let count = 0;
+		triple = [-1,-1,-1];
+
+		for(let k = 0; k < character.items.length; k++)
+		{
+			let item = character.items[k];
+			if(item  && item.name == itemsToCompound[i] && item.level == levelToUse && count < 3)
+			{
+				triple[count] = k;
+				count++;
+			}
+		}
+
+		//	found a triple, stop looking
+		if(triple[0] != -1 && triple[1] != -1 && triple[2] != -1)
+		{
+			foundItem = itemsToCompound[i];
+			break;
+		}
+	}
+
+	//	no triple
+	if(foundItem == "")
+	{
+		return;
+	}
+
+	log("Compounding 3 +" + levelToUse + " " + foundItem + "...");
+
+	let scroll = "cscroll0";
+	compound(triple[0], triple[1], triple[2], locate_item(scroll));
 }
 
 function stockScrolls()
@@ -368,6 +416,7 @@ function enableVendorMode()
 		smart_move(merchantStandCoords, function()
 		{
 			log("Merchant entered vendor mode.");
+			log("Crafting Mode: " + craftingOn);
 			parent.open_merchant(locate_item("stand0"));
 			vendorMode = true;
 			returningToTown = false;

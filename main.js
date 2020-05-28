@@ -5,11 +5,12 @@ load_code("mageLogic");
 load_code("rangerLogic");
 
 ///     crafting settings       ///
-var itemToUpgrade = "wshield";
+var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap"];
+var upgradingBuyableItem = [false,false,false,false,false];
 var upgradeLevelToStop = 7;
 var itemsToCompound = ["intring","strring","dexring","vitring"];
 var compoundLevelToStop = 2;
-const craftingEnabled = false;
+const craftingEnabled = true;
 const minimumGold = 5000000;
 //////
 
