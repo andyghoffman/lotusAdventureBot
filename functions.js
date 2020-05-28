@@ -192,7 +192,13 @@ function on_cm(sender, data)
     }
     else if(data.message == "autoToggle")
     {
-        autoPlay = data.auto;
+		autoPlay = data.auto;
+
+		if(!autoPlay)
+		{
+			farmingModeActive = false;
+		}
+
         log("autoPlay: " + autoPlay);
         return;
     }
@@ -440,12 +446,12 @@ function usePotions(healthPotThreshold = 0.9, manaPotThreshold = 0.9)
 function checkBuffs()
 {
 	//	check that you have mLuck from merchant
-	if(!character.s.mluck || !character.s.mluck.f != merchantName)
+	if(!character.s.mluck || character.s.mluck.f != merchantName)
 	{
 		requestMluck();
 		return false;
 	}
-	else
+	else if(character.s.mluck && character.s.mluck.f == merchantName)
 	{
 		return true;
 	}
@@ -675,5 +681,22 @@ function goTo(mapName = "main", coords = {x:0,y:0} , oncomplete = null)
 		{
 			smart_move(coords, ()=>{traveling = false;});
 		}
+	}
+}
+
+function travelToFarmSpot()
+{
+	if(farmMode == "coords")
+	{
+		goTo(farmMap, farmCoords);
+	}
+	else if(farmMode == "name")
+	{
+		traveling = true;
+		smart_move(farmMonsterName, ()=>{traveling = false;});
+	}
+	else if(farmMode == "number")
+	{
+
 	}
 }

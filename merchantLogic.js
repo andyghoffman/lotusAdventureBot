@@ -86,6 +86,8 @@ function merchantLateUpdate()
 
 	if(vendorMode && craftingOn && character.gold > minimumGold)
 	{
+		sellVendorTrash();
+
 		for(let i = 0; i < compoundLevelToStop; i++)
 		{
 			craftCompounds(i);
@@ -134,6 +136,20 @@ function merchant_on_magiport(name)
 	if(deliveryMode)
 	{
 		accept_magiport(name);
+	}
+}
+
+function sellVendorTrash()
+{
+	for(let i = 0; i < character.items.length; i++)
+	{
+		let item = character.items[i];
+
+		if(item && vendorTrash.find(x=>x==item.name))
+		{
+			log("Selling " + item.name + " to vendor.");
+			sell(i, item.q);
+		}
 	}
 }
 
@@ -324,6 +340,7 @@ function buyPotionsFor(name, healthPots, manaPots)
 	else if(request.shipment)
 	{
 		log("Already fulfilled potion request.");
+		deliveryRequests.splice(deliveryRequests.indexOf(request));
 		return;
 	}
 

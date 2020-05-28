@@ -6,18 +6,24 @@ load_code("rangerLogic");
 
 ///     crafting settings       ///
 var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap"];
-var upgradingBuyableItem = [false,false,false,false,false];
+var upgradingBuyableItem = [false,false,false,false,false]; //  if true will attempt to buy base items to continue crafting
 var upgradeLevelToStop = 7;
-var itemsToCompound = ["intring","strring","dexring","vitring"];
+var itemsToCompound = ["intring","strring","dexring","vitring","ringsj"];
 var compoundLevelToStop = 2;
+var vendorTrash = ["cclaw","hpamulet","hpbelt"];
 const craftingEnabled = true;
 const minimumGold = 5000000;
 //////
 
 ///     farming settings        ///
-const farmMonsterName = "arcticbee";
+///     farmMode:
+///     name = travel to any spawn, will change if there is more than 1. ideal if only one spawn location
+///     coords = travel to farmMap and farmCoords
+///     number = travel to the spawn # of farmMonsterSpawnNumber
+const farmMode = "name";
+const farmMonsterName = "crabx";//"arcticbee";
 const farmMap = "winterland";
-const farmMonsterNr = 6;
+const farmMonsterSpawnNumber = 6;
 const farmCoords = {x:1312.8, y:-853.8}
 const specialMonsters = ["snowman"];
 const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
@@ -130,8 +136,8 @@ function main()
 		}
 		else if(!traveling)
 		{
-            log(character.name + " going to map... ");
-			goTo(farmMap, farmCoords);
+            log(character.name + " going to farm map... ");
+            travelToFarmSpot();
 		}
     }
     //  party follower routines
@@ -150,8 +156,8 @@ function main()
 		}
 		else if(!traveling)
 		{
-            log(character.name + " going to map... ");
-            goTo(farmMap, farmCoords);
+            log(character.name + " going to farm map... ");
+            travelToFarmSpot();
         }
 
         //  if leader is too far away approach him
@@ -289,6 +295,11 @@ function letsGo()
 function toggleAutoPlay()
 {
     autoPlay = !autoPlay;
+
+    if(!autoPlay)
+    {
+        farmingModeActive = false;
+    }
 
     if(character.name == partyLeader)
     {
