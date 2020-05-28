@@ -66,19 +66,7 @@ function main()
 
 	if(character.ctype != "merchant")
 	{
-        if(!autoPlay || !farmingModeActive)
-        {
-            if(character.name != partyLeader)
-            {
-                aloneCheck();
-            }
-            else if(character.name == partyLeader)
-            {
-                return;
-            }
-        }
-
-        if(aloneCheck() || !autoPlay || !readyToGo() || !farmingModeActive)
+        if(aloneCheck(15000) || !autoPlay || !readyToGo() || !farmingModeActive)
         {
             return;
         }
@@ -178,17 +166,19 @@ function lateUpdate()
 function aloneCheck(msToWait = 15000)
 {
     if(is_moving(character) || smart.moving)
+    {
         return false;
+    }
 
     if(!partyPresent() && !aloneChecking)
     {
         if(character.name == partyLeader)
         {
-			initParty();
+            initParty();
         }
         else if(character.name != partyLeader)
         {
-            if(get_player(partyLeader))
+            if(parent.entities[get_player(partyLeader)])
             {
                 followLeader();
                 return false;
@@ -196,6 +186,7 @@ function aloneCheck(msToWait = 15000)
         }
 
         aloneChecking = true;
+        log(character.name + " is checking if they are lost...");
 
         setTimeout(function()
         {

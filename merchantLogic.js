@@ -166,24 +166,7 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 {
 	let item = item_properties(character.items[itemInvSlot]);
 
-	if(!item)
-	{
-		log("Buying another " + itemToCraft);
-		buy_with_gold(itemToCraft);
-	}
-	else if(item.level < upgradeLevel)
-	{
-		log("Upgrading " + itemToCraft + "...");
-
-		let scroll = "scroll0";
-		if(item.level >= 7)
-		{
-			scroll = "scroll1";
-		}
-
-		upgrade(itemInvSlot, locate_item(scroll));
-	}
-	else
+	if(!item || item.level >= upgradeLevel)
 	{
 		let lastEmpty = -1;
 		let emptySlots = 0;
@@ -207,6 +190,23 @@ function craftUpgradedWeapon(itemInvSlot, upgradeLevel)
 			log("Buying another " + itemToCraft);
 			buy_with_gold(itemToCraft);
 		}
+		else
+		{
+			log("Inventory full, crafting mode disabling.");
+			craftingEnabled = false;
+		}
+	}
+	else if(item.level < upgradeLevel)
+	{
+		log("Upgrading " + itemToCraft + "...");
+
+		let scroll = "scroll0";
+		if(item.level >= 7)
+		{
+			scroll = "scroll1";
+		}
+
+		upgrade(itemInvSlot, locate_item(scroll));
 	}
 }
 

@@ -326,9 +326,9 @@ function partyPresent()
 	if(parent.party_list.length < 4)
 		return false;
 
-	return (get_player(priestName) || character.name === priestName) &&
-			(get_player(mageName) || character.name === mageName) &&
-			(get_player(rangerName) || character.name === rangerName);
+	return (parent.entities[priestName] || character.name === priestName) &&
+			(parent.entities[mageName] || character.name === mageName) &&
+			(parent.entities[rangerName] || character.name === rangerName);
 }
 
 function requestMluck()
