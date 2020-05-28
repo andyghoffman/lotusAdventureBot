@@ -31,19 +31,18 @@ setInterval(lateUpdate, 5000);
 
 function test()
 {
-	/*let item = locate_item("staff");
+	let item = locate_item("staff");
 
 	if(item_properties(character.items[item]).level < 7)
-		upgrade(item, locate_item("scroll0"));*/
-
-	let message = {message:"test",content:"oh"};
-	send_cm("LotusMage", message);
+		upgrade(item, locate_item("scroll0"));
 }
 
 function main()
 {
     if (character.rip)
 		setTimeout(respawn, 15000);
+
+    dontWalkWithShop();
 
     if(is_moving(character) || smart.moving)
 		return;
@@ -70,10 +69,15 @@ function main()
             return;
         }
     }
+    else if(character.ctype === "merchant")
+	{
+        merchantAuto();
+        return;
+	}
 
     let target = getMonsterFarmTarget(farmMonsterName);
 
-    if(target)
+    if(target && !is_moving(character) && !smart.moving)
     {
         personalSpace();
     }
@@ -84,15 +88,11 @@ function main()
 		{
 			priestAuto(target);
 		}
-		else
+		else if(!traveling)
 		{
-            log(character.name + "going to map... ");
+            log(character.name + " going to map... ");
 			goTo(farmMap, farmCoords);
 		}
-	}
-	else if(character.ctype === "merchant")
-	{
-		merchantAuto(target);
 	}
 	else
 	{
@@ -107,13 +107,16 @@ function main()
 				mageAuto(target);
             }
 		}
-		else
+		else if(!traveling)
 		{
-            log(character.name + "going to map... ");
+            log(character.name + " going to map... ");
             goTo(farmMap, farmCoords);
         }
 
-        tetherToLeader();
+        if(!is_moving(character) && !smart.moving)
+        {
+            tetherToLeader();
+        }
 	}
 }
 
@@ -175,14 +178,14 @@ function aloneCheck(msToWait = 15000)
 
         setTimeout(function()
         {
-            if(character.name != partyLeader && get_player(partyLeader))
+            if(character.name != partyLeader && parent.entities[partyLeader])
             {
                 aloneChecking = false;
                 followLeader();
                 return false;
             }
 
-            if(!isInTown() && !partyPresent())
+            if(!isInTown() && !partyPresent() && aloneChecking)
             {
                 log(character.name + " is lost & returning to town.");
 
@@ -193,9 +196,11 @@ function aloneCheck(msToWait = 15000)
                     goTo("main");
                 }
                 else
+                {
                     use("use_town");
                     setTimeout(goTo("main"), 7500);
                 }
+            }
 
             aloneChecking = false;
 

@@ -1,5 +1,5 @@
-var ready = false;
 var whosReady = {priest:false,mage:false,ranger:false,merchant:false};
+var traveling = false;
 const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
 const lowPotions = 100;
@@ -18,14 +18,17 @@ function initParty()
 {
 	partyMembers = parent.party_list;
 
+	if(!partyMembers.includes(priestName))
+		send_party_invite(priestName);
+
 	if(!partyMembers.includes(merchantName))
 		send_party_invite(merchantName);
 
-	if(!partyMembers.includes(mageName))	
+	if(!partyMembers.includes(mageName))
 		send_party_invite(mageName);
 
-	if(!partyMembers.includes(merchantName))
-		send_party_invite(merchantName);
+	if(!partyMembers.includes(rangerName))
+		send_party_invite(rangerName);
 
 	log("Party Invites sent!");
 }
@@ -36,7 +39,7 @@ function stopCharacters()
     stop_character(rangerName);
 
 	stopFarmMode();
-	
+
     autoPlay = false;
 
 	log("Characters stopped!");
@@ -51,7 +54,6 @@ function stopFarmMode()
 
     farmingModeActive = false;
     whosReady = {priest:false,mage:false,ranger:false,merchant:false};
-    ready = false;
 }
 
 function on_cm(sender, data)
@@ -85,7 +87,19 @@ function on_cm(sender, data)
 		log(character.name + " recieved readycheck from " + sender);
 
 		stopFarmMode();
-		ready =	checkBuffs() && checkPotionInventory();
+
+		let ready, buffs, pots = false;
+
+		if(character.name == merchantName)
+		{
+			ready = parent.party_list.includes(partyLeader);
+		}
+		else
+		{
+			buffs = checkBuffs();
+			pots = checkPotionInventory();
+			ready = buffs & pots;
+		}
 
 		if(sender == priestName)
 			whosReady.priest = data.isReady;
@@ -105,12 +119,22 @@ function on_cm(sender, data)
 		else if(character.name == merchantName)
 			whosReady.merchant = ready;
 
-		send_cm(sender, {message:"readyreply",isReady:ready});
+		send_cm(sender, {message:"readyreply",isReady:ready,hasBuffs:buffs,hasPots:pots});
 		return;
 	}
 	else if(data.message == "readyreply")
 	{
-		log(character.name + " recieved readyreply from " + sender + ". " + sender + " is " + (data.ready?"ready!":"not ready."));
+		let reason = character.name + " recieved readyreply from " + sender + ". " + sender + " is " + (data.isReady?"ready!":"not ready.")
+
+		if(sender != merchantName)
+		{
+			if(!data.hasBuffs)
+				reason += sender + " is missing buffs. ";
+			if(!data.hasPots)
+				reason += sender + " is missing pots. ";
+		}
+
+		log(reason);
 
 		if(sender == priestName)
 			whosReady.priest = data.isReady;
@@ -118,13 +142,15 @@ function on_cm(sender, data)
 			whosReady.mage = data.isReady;
 		else if(sender == rangerName)
 			whosReady.ranger = data.isReady;
+		else if(sender == merchantName)
+			whosReady.merchant = data.isReady;
 
 		return;
 	}
 	else if(data.message == "letsgo")
 	{
         log("Let's go!");
-        whosReady = {priest:true,mage:true,ranger:true};
+        whosReady = {priest:true,mage:true,ranger:true,merchant:true};
         farmingModeActive = true;
 		return;
     }
@@ -176,7 +202,9 @@ function readyCheck()
 {
 	stopFarmMode();
 
-	ready =	checkBuffs() && checkPotionInventory();
+	let buffs = checkBuffs();
+	let pots = checkPotionInventory();
+	let ready = buffs && pots;
 
 	if(character.ctype === "priest")
 		whosReady.priest = ready;
@@ -184,6 +212,8 @@ function readyCheck()
 		whosReady.mage = ready;
 	if(character.ctype === "ranger")
 		whosReady.ranger = ready;
+	if(character.ctype === "merchant")
+		whosReady.merchant = ready;
 
 	if(ready)
 	{
@@ -203,7 +233,13 @@ function readyCheck()
 	}
 	else if(!ready)
 	{
-		log(character.name + " is not ready!");
+		let reason = character.name + " is not ready! ";
+		if(!buffs)
+			reason += character.name + " is missing buffs. ";
+		if(!pots)
+			reason += character.name + " is missing pots. ";
+
+		log(reason);
 
 		if(!isInTown())
 		{
@@ -217,7 +253,7 @@ function readyCheck()
 
 function readyToGo()
 {
-	return (whosReady.priest && whosReady.mage && whosReady.ranger && whosReady.merchant);
+	return (whosReady.priest && whosReady.mage && whosReady.ranger);
 }
 
 function personalSpace()
@@ -240,9 +276,9 @@ function personalSpace()
                 up = spaceToKeep * 1.5;
             else
 				up = -spaceToKeep * 1.5;
-			
+
 			adjustment = {x:character.x+right, y:character.y+up};
-	
+
 			if(character.name != partyLeader)
 			{
 				let leader = parent.entities[get_player(partyLeader)];
@@ -363,7 +399,7 @@ function transferAllToMerchant()
     if(character.ctype !== "merchant" && merchant && merchant.owner === character.owner && distance(character, merchant) < 400)
 	{
 		send_gold(merchant, character.gold)
-		
+
         for(let i = 0; i < character.items.length; i++)
 		{
 			if(character.items[i] && !exclude.includes(character.items[i]))
@@ -517,26 +553,28 @@ function autoAttack(target)
 
 function goTo(mapName = "main", coords = {x:0,y:0} , oncomplete = null)
 {
+	traveling = true;
+
 	if(character.map != mapName)
 	{
 		if(oncomplete != null)
 		{
-			smart_move(mapName,function(){smart_move(coords, oncomplete);});
+			smart_move(mapName, ()=>{oncomplete(); traveling = false;});
 		}
 		else
 		{
-			smart_move(mapName,function(){smart_move(coords);});
+			smart_move(mapName, ()=>{traveling = false;});
 		}
 	}
 	else
 	{
-        if(oncomplete != null)
-        {
-			smart_move(coords, oncomplete);
-        }
-        else
-        {
-			smart_move(coords);
-        }
+		if(oncomplete != null)
+		{
+			smart_move(coords, ()=>{oncomplete(); traveling = false;});
+		}
+		else
+		{
+			smart_move(coords, ()=>{traveling = false;});
+		}
 	}
 }
