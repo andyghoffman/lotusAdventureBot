@@ -1,7 +1,6 @@
 var lowScrolls = 0;
 var scrollsToStock = 10;
 var vendorMode = false;			//	true when in town with shop, false when busy delivering items
-var returningToTown = false;	//	true when merchant is on it's way back to town
 var deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
 var potionShipments = [];
 var deliveryRequests = [];
@@ -303,23 +302,6 @@ function stockScrolls()
 			log("Buying " + scrollsToStock + " " + s);
 		}
 	}
-}
-
-function returnToTown(delay)
-{
-	if(returningToTown)
-		return;
-
-	log("Merchant returning to town.");
-
-	returningToTown = true;
-
-	use("use_town");
-
-	setTimeout(function()
-	{
-		goTo(merchantStandMap,merchantStandCoords,()=>{returningToTown=false});
-	}, 7500);
 }
 
 function buyPotionsFor(name, healthPots, manaPots)

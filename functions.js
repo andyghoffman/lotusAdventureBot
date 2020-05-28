@@ -1,16 +1,11 @@
-var whosReady = {priest:false,mage:false,ranger:false,merchant:false};
-var traveling = false;
-var sentRequests = [];
-
-const healthPotionsToHave = 1000;
-const manaPotionsToHave = 1000;
-const lowPotions = 100;
-const spaceToKeep = 10;
-const whiteList = ["LotusPriest", "LotusMage", "LotusRanger", "LotusMerch"];
-
 function initParty()
 {
 	partyMembers = parent.party_list;
+
+	if(partyMembers.length == 4)
+	{
+		return;
+	}
 
 	if(!partyMembers.includes(priestName))
 	{
@@ -49,6 +44,103 @@ function initParty()
 	}
 
 	log("Initializing Party...");
+}
+
+
+//  check if you are separated from the party, and attempt to regroup in town if you are.
+//  returns true if the character is alone, false if not
+function aloneCheck(msToWait = 15000)
+{
+    if(is_moving(character) || smart.moving)
+    {
+        return false;
+    }
+
+    if(!partyPresent() && !aloneChecking)
+    {
+        if(character.name != partyLeader)
+        {
+            if(parent.entities[partyLeader])
+            {
+                followLeader();
+                return false;
+            }
+        }
+
+        aloneChecking = true;
+        log(character.name + " is checking if they are lost...");
+
+        setTimeout(function()
+        {
+            if(character.name != partyLeader && parent.entities[partyLeader])
+            {
+                aloneChecking = false;
+                followLeader();
+                return false;
+            }
+
+            if(!isInTown() && !partyPresent() && aloneChecking)
+            {
+                log(character.name + " is lost & returning to town.");
+
+                stopFarmMode();
+                returnToTown();
+            }
+
+            aloneChecking = false;
+
+        }, msToWait);
+
+        return true;
+    }
+
+    if(!partyPresent() || aloneChecking)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+function letsGo()
+{
+	log("Let's go!");
+
+	send_cm(mageName, {message:"letsgo"});
+	send_cm(rangerName, {message:"letsgo"});
+
+	farmingModeActive = true;
+}
+
+function toggleAutoPlay()
+{
+    autoPlay = !autoPlay;
+
+    if(!autoPlay)
+    {
+        farmingModeActive = false;
+    }
+
+    if(character.name == partyLeader)
+    {
+        send_cm(mageName, {message:"autoToggle",auto:autoPlay});
+        send_cm(rangerName, {message:"autoToggle",auto:autoPlay});
+
+        log("sending autoPlayToggle to Mage & Ranger");
+    }
+
+    log("autoPlay: " + autoPlay);
+}
+
+function returnPartyToTown()
+{
+    log("Returning party to town.");
+
+    returnToTown();
+    send_cm(mageName, {message:"town"});
+    send_cm(rangerName, {message:"town"});
 }
 
 //	returns true if character is offline
@@ -201,7 +293,11 @@ function on_cm(sender, data)
 
         log("autoPlay: " + autoPlay);
         return;
-    }
+	}
+	else if(data.message == "town")
+	{
+		returnToTown();
+	}
 
 	if(character.ctype === "merchant")
 	{
@@ -699,4 +795,21 @@ function travelToFarmSpot()
 	{
 
 	}
+}
+
+function returnToTown(delay)
+{
+	if(returningToTown)
+		return;
+
+	log(character.name + " returning to town.");
+
+	returningToTown = true;
+
+	use("use_town");
+
+	setTimeout(function()
+	{
+		goTo(merchantStandMap,merchantStandCoords,()=>{returningToTown=false});
+	}, 5000);
 }

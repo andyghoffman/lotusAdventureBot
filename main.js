@@ -17,14 +17,16 @@ const minimumGold = 5000000;
 
 ///     farming settings        ///
 ///     farmMode:
-///     name = travel to any spawn, will change if there is more than 1. ideal if only one spawn location
+///     name = travel to any spawn of the farmMonster, will change if there is more than 1. ideal if only one spawn location
 ///     coords = travel to farmMap and farmCoords
 ///     number = travel to the spawn # of farmMonsterSpawnNumber
+///
+///     specialMonsters are prioritized if they are present
 const farmMode = "name";
-const farmMonsterName = "crabx";//"arcticbee";
-const farmMap = "winterland";
-const farmMonsterSpawnNumber = 6;
-const farmCoords = {x:1312.8, y:-853.8}
+const farmMonsterName = "crabx";
+const farmMap = "winterland";           //  only used if farmMode is 'coords' or 'number'
+const farmMonsterSpawnNumber = 6;       //  only used if farmMode is 'number'
+const farmCoords = {x:1312.8, y:-853.8} //  only used if farmMode is 'coords'
 const specialMonsters = ["snowman"];
 const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
 //////
@@ -37,10 +39,15 @@ const priestName = "LotusPriest";
 const partyLeader = priestName;
 const merchantStandMap = "main";
 const merchantStandCoords = {x:-118, y:11};
+const healthPotionsToHave = 1000;
+const manaPotionsToHave = 1000;
+const lowPotions = 100;
+const spaceToKeep = 10;
+const whiteList = ["LotusPriest", "LotusMage", "LotusRanger", "LotusMerch"];
 //////
 
 map_key("1", "snippet", "initParty()")
-map_key("2", "snippet", "initParty()")
+map_key("2", "snippet", "returnPartyToTown()")
 map_key("3", "snippet", "stopCharacters()")
 map_key("4", "snippet", "transferAllToMerchant()")
 map_key("5", "snippet", "toggleAutoPlay()")
@@ -51,6 +58,10 @@ var autoPlay = false;
 var aloneChecking = false;
 var farmingModeActive = false;
 var craftingOn = craftingEnabled;
+var whosReady = {priest:false,mage:false,ranger:false,merchant:false};
+var traveling = false;
+var returningToTown = false;
+var sentRequests = [];
 
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
@@ -71,7 +82,7 @@ function main()
         setTimeout(respawn, 15000);
     }
 
-    if(is_moving(character) || smart.moving)
+    if(is_moving(character) || smart.moving || returningToTown)
     {
 		return;
     }
@@ -214,100 +225,4 @@ function lateUpdate()
 			readyCheck();
 		}
     }
-}
-
-//  check if you are separated from the party, and attempt to regroup in town if you are.
-//  returns true if the character is alone, false if not
-function aloneCheck(msToWait = 15000)
-{
-    if(is_moving(character) || smart.moving)
-    {
-        return false;
-    }
-
-    if(!partyPresent() && !aloneChecking)
-    {
-        if(character.name != partyLeader)
-        {
-            if(parent.entities[partyLeader])
-            {
-                followLeader();
-                return false;
-            }
-        }
-
-        aloneChecking = true;
-        log(character.name + " is checking if they are lost...");
-
-        setTimeout(function()
-        {
-            if(character.name != partyLeader && parent.entities[partyLeader])
-            {
-                aloneChecking = false;
-                followLeader();
-                return false;
-            }
-
-            if(!isInTown() && !partyPresent() && aloneChecking)
-            {
-                log(character.name + " is lost & returning to town.");
-
-                stopFarmMode();
-
-                if(get_targeted_monster())
-                {
-                    goTo("main");
-                }
-                else
-                {
-                    use("use_town");
-                    setTimeout(goTo("main"), 7500);
-                }
-            }
-
-            aloneChecking = false;
-
-        }, msToWait);
-
-        return true;
-    }
-
-    if(!partyPresent() || aloneChecking)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-function letsGo()
-{
-	log("Let's go!");
-
-	send_cm(mageName, {message:"letsgo"});
-	send_cm(rangerName, {message:"letsgo"});
-
-	farmingModeActive = true;
-}
-
-function toggleAutoPlay()
-{
-    autoPlay = !autoPlay;
-
-    if(!autoPlay)
-    {
-        farmingModeActive = false;
-    }
-
-    if(character.name == partyLeader)
-    {
-        send_cm(mageName, {message:"autoToggle",auto:autoPlay});
-        send_cm(rangerName, {message:"autoToggle",auto:autoPlay});
-
-        log("sending autoPlayToggle to Mage & Ranger");
-    }
-
-    log("autoPlay: " + autoPlay);
 }
