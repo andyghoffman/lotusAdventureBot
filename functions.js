@@ -829,13 +829,13 @@ function stopFarmMode()
     whosReady = {priest:false,mage:false,ranger:false,merchant:false};
 }
 
-function validTargetForSkill(targetName, targetHP, targetMaxHP)
+function validTargetForSkill(target)
 {
-	if(specialMonsters.includes(targetName))
+	if(specialMonsters.includes(target.name))
 	{
 		return true;
 	}
-	else if(targetHP > targetMaxHP*0.5)
+	else if(target.hp > target.max_hp*0.5)
 	{
 		return true;
 	}

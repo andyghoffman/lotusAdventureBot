@@ -55,7 +55,7 @@ function priestAuto(target)
 		}
     });
 
-	if(character.mp >= G.skills.curse.mp && !is_on_cooldown("curse") && !target.s.curse && target.hp > target.max_hp*0.5)
+	if(character.mp >= G.skills.curse.mp && !is_on_cooldown("curse") && !target.s.curse && validTargetForSkill(target))
 	{
 		use_skill("curse", target);
 		reduce_cooldown("curse", character.ping);
