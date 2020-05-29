@@ -535,6 +535,12 @@ function checkBuffs()
 	//	check that you have mLuck from merchant
 	if(!character.s.mluck || character.s.mluck.f != merchantName)
 	{
+		//	if you have someone elses mluck and in town just accept it, merchant will fix it after it leaves
+		if(character.s.mluck && isInTown())
+		{
+			return true;
+		}
+
 		requestMluck();
 		return false;
 	}

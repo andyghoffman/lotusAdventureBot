@@ -466,7 +466,7 @@ function buyFromPonty(itemsToBuy)
 				{
 					buy = true;
 				}
-				else
+				else if(!itemsToUpgrade.includes(d.name) && !itemsToCompound.includes(d.name))
 				{
 					buy = true;
 				}
@@ -480,6 +480,5 @@ function buyFromPonty(itemsToBuy)
         }
     });
 
-    // Attempt to buy stuff
-    parent.socket.emit("secondhands");
+	parent.socket.emit("secondhands");
 }
