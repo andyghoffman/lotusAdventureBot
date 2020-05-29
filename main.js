@@ -139,12 +139,6 @@ function main()
         target = getMonsterFarmTarget(farmMonsterName);
     }
 
-    //  try to keep monsters away from your face
-    if(target && !is_moving(character) && !smart.moving)
-    {
-        personalSpace();
-    }
-
     //  party leader standard routine
 	if(character.name == partyLeader)
 	{
@@ -156,7 +150,9 @@ function main()
 		{
             log(character.name + " going to farm map... ");
             travelToFarmSpot();
-		}
+        }
+
+        personalSpace();
     }
     //  party follower routines
 	else
@@ -178,6 +174,8 @@ function main()
             travelToFarmSpot();
         }
 
+        personalSpace();
+
         //  if leader is too far away approach him
         if(!traveling)
         {
@@ -186,7 +184,7 @@ function main()
                 followLeader();
             }
         }
-	}
+    }
 }
 
 // called every 5000ms

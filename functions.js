@@ -214,6 +214,11 @@ function readyToGo()
 
 function personalSpace()
 {
+	if(is_moving(character) || smart.moving)
+	{
+		return;
+	}
+
 	let target = get_nearest_monster
 	({
 		target:character.name
@@ -224,44 +229,41 @@ function personalSpace()
 	    target = get_nearest_monster();
 	}
 
-    if(target)
+    if(target && (distance(character, target) < spaceToKeep*2))
     {
-        if(distance(character, target) < spaceToKeep*2)
-        {
-            let right = 0;
-            let up = 0
+		let right = 0;
+		let up = 0
 
-            if(target.x < character.x)
-                right = -spaceToKeep * 1.5;
-            else
-                right = spaceToKeep * 1.5;
+		if(target.x < character.x)
+			right = -spaceToKeep * 1.5;
+		else
+			right = spaceToKeep * 1.5;
 
-			if(target.y < character.y)
-                up = spaceToKeep * 1.5;
-            else
-				up = -spaceToKeep * 1.5;
+		if(target.y < character.y)
+			up = spaceToKeep * 1.5;
+		else
+			up = -spaceToKeep * 1.5;
 
-			adjustment = {x:character.x+right, y:character.y+up};
+		adjustment = {x:character.x+right, y:character.y+up};
 
-			if(character.name != partyLeader)
+		if(character.name != partyLeader)
+		{
+			let leader = parent.entities[get_player(partyLeader)];
+
+			//	make sure you dont run away from party
+			if(leader && distance(adjustment, leader) < spaceToKeep*2)
 			{
-				let leader = parent.entities[get_player(partyLeader)];
-
-				//	make sure you dont run away from party
-				if(leader && distance(adjustment, leader) < spaceToKeep*2)
-				{
-					smart_move(adjustment);
-					return;
-				}
-				else if(leader)
-				{
-					followLeader();
-					return;
-				}
+				smart_move(adjustment);
+				return;
 			}
+			else if(leader)
+			{
+				followLeader();
+				return;
+			}
+		}
 
-			smart_move(adjustment);
-        }
+		smart_move(adjustment);
     }
 }
 
