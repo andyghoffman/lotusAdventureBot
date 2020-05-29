@@ -804,3 +804,17 @@ function returnToTown(delay)
 		goTo(merchantStandMap,merchantStandCoords,()=>{returningToTown=false});
 	}, 5000);
 }
+
+//	sorts inventory to push all items toward the back
+function tidyInventory()
+{
+	for(let i = 0; i < character.items.length; i++)
+	{
+		let item = character.items[i];
+
+		if(item && i+1 < character.items.length && !character.items[i+1])
+		{
+			swap(i, i+1);
+		}
+	}
+}

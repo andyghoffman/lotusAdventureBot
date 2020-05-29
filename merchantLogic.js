@@ -442,7 +442,7 @@ function disableVendorMode()
 
 function dontWalkWithShop()
 {
-	if(parent.stand)
+	if(character.stand)
 	{
 		parent.close_merchant();
 	}
@@ -454,10 +454,28 @@ function buyFromPonty(itemsToBuy)
 	{
 		for(let d of data)
 		{
-			if (itemsToBuy.includes(d.name) && (!d.level || d.level <= 1))
+			if (itemsToBuy.includes(d.name))
 			{
-				log("Buying " + d.name + " from Ponty!");
-				parent.socket.emit("sbuy", { "rid": d.rid })
+				let buy = false;
+
+				if(itemsToUpgrade.includes(d.name) && (!d.level || d.level <= upgradeLevelToStop))
+				{
+					buy = true;
+				}
+				else if(itemsToCompound.includes(d.name) && (!d.level || d.level <= compoundLevelToStop))
+				{
+					buy = true;
+				}
+				else
+				{
+					buy = true;
+				}
+
+				if(buy)
+				{
+					log("Buying " + d.name + " from Ponty!");
+					parent.socket.emit("sbuy", { "rid": d.rid })
+				}
             }
         }
     });

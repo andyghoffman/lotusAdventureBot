@@ -82,6 +82,10 @@ function main()
     //  standard routine
     usePotions(healthPotThreshold, manaPotThreshold);
     loot();
+    if(autoPlay)
+    {
+        tidyInventory();
+    }
 
     if(is_moving(character) || smart.moving || returningToTown)
     {
@@ -118,7 +122,7 @@ function main()
 	{
         merchantAuto();
         return;
-	}
+    }
 
     let target = null;
 
