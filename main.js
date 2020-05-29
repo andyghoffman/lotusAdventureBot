@@ -7,13 +7,13 @@ load_code("rangerLogic");
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 5000000;
-var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap"];
+var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","hbow","mushroomstaff","t2bow","shield","wbook0","quiver",];
 var upgradingBuyableItem = [false,false,false,false,false]; //  if true will attempt to buy base items to continue crafting
 var upgradeLevelToStop = 7;
-var itemsToCompound = ["intring","strring","dexring","vitring","ringsj"];
+var itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt"];
 var compoundLevelToStop = 2;
-var vendorTrash = ["cclaw","hpamulet","hpbelt"];
-var buyFromPontyList = [];
+var vendorTrash = ["cclaw","hpamulet","hpbelt","vitring"];
+var buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck"];
 itemsToUpgrade.forEach(x=>{buyFromPontyList.push(x)});
 itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
 //////
