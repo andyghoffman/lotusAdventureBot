@@ -22,6 +22,7 @@ var vendorTrash = ["cclaw","hpamulet","hpbelt"];
 ///     number = travel to the spawn # of farmMonsterSpawnNumber
 ///
 ///     specialMonsters are prioritized if they are present
+const fullAuto = true; //  if true will automatically start farming on connect & startup. set false to have player control on startup
 const farmMode = "name";
 const farmMonsterName = "crabx";
 const farmMap = "winterland";           //  only used if farmMode is 'coords' or 'number'
@@ -43,7 +44,7 @@ const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
 const lowPotions = 100;
 const spaceToKeep = 10;
-const whiteList = ["LotusPriest", "LotusMage", "LotusRanger", "LotusMerch"];
+const whiteList = [merchantName, mageName, rangerName, priestName];
 //////
 
 map_key("1", "snippet", "initParty()")
@@ -54,7 +55,7 @@ map_key("5", "snippet", "toggleAutoPlay()")
 map_key("6", "snippet", "toggleCraftingMode()")
 map_key("0", "snippet", "test()")
 
-var autoPlay = false;
+var autoPlay = fullAuto;
 var aloneChecking = false;
 var farmingModeActive = false;
 var craftingOn = craftingEnabled;
@@ -99,7 +100,7 @@ function main()
         }
 
         //  make sure party is together
-        if(!autoPlay || !readyToGo() || !farmingModeActive)
+        if(!autoPlay || !readyToGo() || !farmingModeActive || !partyPresent())
         {
             if((character.name != partyLeader) || (character.name == partyLeader && autoPlay))
             {

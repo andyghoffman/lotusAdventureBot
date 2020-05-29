@@ -20,6 +20,9 @@ function merchantAuto(target)
 		let isPartyMember = parent.party_list.includes(other);
 		let target = parent.entities[other];
 
+		if(!target.player || target.npc)
+			continue;
+
 		if(isPartyMember)
 		{
 			if(is_in_range(target, "mluck"))
@@ -438,7 +441,7 @@ function disableVendorMode()
 
 function dontWalkWithShop()
 {
-	if(parent.stand && (is_moving(character) || smart.moving || returningToTown))
+	if(parent.stand)
 	{
 		parent.close_merchant();
 	}

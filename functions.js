@@ -186,8 +186,6 @@ function stopFarmMode()
 
 function on_cm(sender, data)
 {
-	//log(character.name + " recieved cm from " + name);
-
 	if(!whiteList.includes(sender))
 	{
 		log(character.name + " recieved unexpected cm from " + sender);
@@ -279,7 +277,12 @@ function on_cm(sender, data)
 	{
         log("Let's go!");
         whosReady = {priest:true,mage:true,ranger:true,merchant:true};
-        farmingModeActive = true;
+		farmingModeActive = true;
+		if(fullAuto)
+		{
+			autoPlay = true;
+		}
+
 		return;
     }
     else if(data.message == "autoToggle")
@@ -297,6 +300,7 @@ function on_cm(sender, data)
 	else if(data.message == "town")
 	{
 		returnToTown();
+		return;
 	}
 
 	if(character.ctype === "merchant")
