@@ -99,7 +99,7 @@ function merchant_on_cm(sender, data)
 {
 	if(data.message == "buyPots")
 	{
-		if(checkPotionShipments(sender))
+		if(deliveryRequests.find(x=>x.request=="potions" && x.from==sender))
 		{
 			log("Already have potion request from " + sender);
 			return;
