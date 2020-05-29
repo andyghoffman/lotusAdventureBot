@@ -27,7 +27,7 @@ const farmMonsterName = "crabx";
 const farmMap = "winterland";           //  only used if farmMode is 'coords' or 'number'
 const farmMonsterSpawnNumber = 6;       //  only used if farmMode is 'number'
 const farmCoords = {x:1312.8, y:-853.8} //  only used if farmMode is 'coords'
-const specialMonsters = ["snowman"];
+const specialMonsters = ["snowman","phoenix"];
 const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
 //////
 
@@ -66,14 +66,6 @@ var sentRequests = [];
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
 
-function test()
-{
-	let item = locate_item("staff");
-
-	if(item_properties(character.items[item]).level < 7)
-		upgrade(item, locate_item("scroll0"));
-}
-
 //  called every 250ms
 function main()
 {
@@ -83,16 +75,21 @@ function main()
         return;
     }
 
-    if(is_moving(character) || smart.moving || returningToTown)
-    {
-		return;
-    }
-
     //  standard routine
     usePotions(healthPotThreshold, manaPotThreshold);
     loot();
 
-	if(character.ctype != "merchant")
+    if(is_moving(character) || smart.moving || returningToTown)
+    {
+        if(character.name == merchantName)
+        {
+            dontWalkWithShop();
+        }
+
+        return;
+    }
+
+	if(character.name != merchantName)
 	{
         //  autofollow leader when not auto-farming
         if(character.name != partyLeader && !farmingModeActive && parent.entities[partyLeader])
@@ -113,7 +110,7 @@ function main()
         }
     }
     //  merchant standard routine
-    else if(character.ctype === "merchant")
+    else if(character.name == merchantName)
 	{
         merchantAuto();
         return;

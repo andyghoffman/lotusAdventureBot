@@ -9,11 +9,6 @@ const scrolls = ["scroll0","scroll1","cscroll0"];
 
 function merchantAuto(target)
 {
-	if(!vendorMode && parent.stand)
-	{
-		parent.close_merchant();
-	}
-
 	if(!checkMluck(character))
 	{
 		log("mlucking self");
@@ -439,4 +434,12 @@ function disableVendorMode()
 
 	parent.close_merchant();
 	vendorMode = false;
+}
+
+function dontWalkWithShop()
+{
+	if(parent.stand && (is_moving(character) || smart.moving || returningToTown))
+	{
+		parent.close_merchant();
+	}
 }
