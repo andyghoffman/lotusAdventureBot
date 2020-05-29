@@ -99,7 +99,7 @@ function merchant_on_cm(sender, data)
 {
 	if(data.message == "buyPots")
 	{
-		if(potionShipments && checkPotionShipments(sender))
+		if(checkPotionShipments(sender))
 		{
 			log("Already have potion request from " + sender);
 			return;
@@ -203,7 +203,9 @@ function checkRequests()
 function checkPotionShipments(name)
 {
 	if(potionShipments.length == 0)
-		return;
+	{
+		return false;
+	}
 
 	for(let i = 0; i < potionShipments.length; i++)
 	{
@@ -311,7 +313,7 @@ function stockScrolls()
 		if(amount <= lowScrolls)
 		{
 			buy_with_gold(s, scrollsToStock);
-			log("Buying " + scrollsToStock + " " + s);
+			log("Buying " + scrollsToStock + " " + G.items[s].name);
 		}
 	}
 }
@@ -334,7 +336,6 @@ function buyPotionsFor(name, healthPots, manaPots)
 	else if(request.shipment)
 	{
 		log("Already fulfilled potion request.");
-		deliveryRequests.splice(deliveryRequests.indexOf(request));
 		return;
 	}
 
