@@ -229,20 +229,20 @@ function personalSpace()
 	    target = get_nearest_monster();
 	}
 
-    if(target && (distance(character, target) < spaceToKeep*2))
+    if(target && (distance(character, target) < target.range))
     {
 		let right = 0;
 		let up = 0
 
 		if(target.x < character.x)
-			right = -spaceToKeep * 1.5;
+			right = -target.range * 1.5;
 		else
-			right = spaceToKeep * 1.5;
+			right = target.range * 1.5;
 
 		if(target.y < character.y)
-			up = spaceToKeep * 1.5;
+			up = target.range * 1.5;
 		else
-			up = -spaceToKeep * 1.5;
+			up = -target.range * 1.5;
 
 		adjustment = {x:character.x+right, y:character.y+up};
 
@@ -667,7 +667,7 @@ function initParty()
 	}
 	if(characterOffline(merchantName))
 	{
-		start_character(merchantName, 0);
+		//start_character(merchantName, 0);
 	}
 
 	if(!partyMembers.includes(mageName))
@@ -827,4 +827,18 @@ function stopFarmMode()
 
     farmingModeActive = false;
     whosReady = {priest:false,mage:false,ranger:false,merchant:false};
+}
+
+function validTargetForSkill(targetName, targetHP, targetMaxHP)
+{
+	if(specialMonsters.includes(targetName))
+	{
+		return true;
+	}
+	else if(targetHP > targetMaxHP*0.5)
+	{
+		return true;
+	}
+
+	return false;
 }

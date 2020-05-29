@@ -1,11 +1,11 @@
 var manaToReserve = 0.2;
-var energizeTarget = "LotusRanger"
+var energizeTarget = "LotusPriest"
 
 function mageAuto(target)
-{	
+{
 	//if(character.mp < character.maxmp * manaToReserve)
 	//	return;
-	
+
 	if(!is_on_cooldown("energize"))
 	{
 		parent.party_list.forEach(function(otherPlayerName)
@@ -14,20 +14,19 @@ function mageAuto(target)
 
 			if(partyMember && partyMember.id === energizeTarget)
 			{
-				if(!partyMember.s.energized && !is_on_cooldown("energize") &&
-				   is_in_range(partyMember, "energize"))
+				if(!partyMember.s.energized && !is_on_cooldown("energize") && is_in_range(partyMember, "energize"))
 				{
 					change_target(partyMember);
 					use_skill("energize", partyMember);
 					reduce_cooldown("energize", character.ping);
-					change_target(target);					
+					change_target(target);
 				}
 			}
 		});
 	}
-	
+
 	if(target)
-	{	
+	{
 		autoAttack(target);
 	}
 }
@@ -39,7 +38,7 @@ function mage_on_cm(name, data)
 		log(data.content);
 		return;
 	}
-	
+
 	if(data.message == "magiPort")
 	{
 		log("Recieved MagiPort request from " + name);

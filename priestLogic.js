@@ -26,7 +26,7 @@ function priestAuto(target)
 				}
 				else if(!is_on_cooldown("heal") && character.mp >= G.skills.heal.mp)
 				{
-					if(!is_in_range(partyMember, "heal"))
+					/*if(!is_in_range(partyMember, "heal"))
 					{
 						smart_move(
 							character.x + (partyMember.x - character.x) * 0.3,
@@ -37,19 +37,19 @@ function priestAuto(target)
 					}
 					else
 					{
-						log("Priest is healing " + partyMember.name);
 
-						reduce_cooldown("heal", character.ping);
-						heal(partyMember).then((message) =>
-						{
+					}*/
 
-						}).catch((message) =>
-						{
-							log(character.name + " Heal failed: " + message.reason);
-						});
+					log("Priest is healing " + partyMember.name);
 
-						return;
-					}
+					reduce_cooldown("heal", character.ping);
+					heal(partyMember).then((message) =>
+					{
+
+					}).catch((message) =>
+					{
+						log(character.name + " Heal failed: " + message.reason);
+					});
 				}
 			}
 		}
@@ -63,6 +63,7 @@ function priestAuto(target)
 
 	if(target && target.target && target.target != character.id && character.mp >= G.skills.absorb.mp && !is_on_cooldown("absorb"))
 	{
+		change_target(target.target);
 		use_skill("absorb", target.target);
 		reduce_cooldown("absorb", character.ping);
 	}

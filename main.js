@@ -13,7 +13,7 @@ itemsToUpgrade.forEach(x=>{upgradingBuyableItem.push(false)});
 var upgradeLevelToStop = 7;
 var itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt"];
 var compoundLevelToStop = 2;
-var vendorTrash = ["cclaw","hpamulet","hpbelt","vitring"];
+var vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring"];
 var buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow"];
 itemsToUpgrade.forEach(x=>{buyFromPontyList.push(x)});
 itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
@@ -219,7 +219,7 @@ function lateUpdate()
     checkBuffs();
 
     //  if the merchant is nearby, send him your items (token minimum amount so it doesn't get spammed)
-    if(parent.entities[merchantName] && character.gold < 10000)
+    if(parent.entities[merchantName] && character.gold > 10000)
     {
         transferAllToMerchant();
     }

@@ -15,8 +15,6 @@ function merchantAuto(target)
 		use_skill("mluck", character);
 	}
 
-	let goToTown = false;
-
 	for(other in parent.entities)
 	{
 		let isPartyMember = parent.party_list.includes(other);
@@ -29,14 +27,14 @@ function merchantAuto(target)
 		{
 			if(is_in_range(target, "mluck"))
 			{
-				if(!checkMluck(target))
+				if(checkPotionShipments(target.name))
+				{
+					deliverPotions(target.name);
+				}
+				else if(!checkMluck(target))
 				{
 					log("Giving mluck to " + target.name);
 					use_skill("mluck", target);
-				}
-				else if(checkPotionShipments(target.name))
-				{
-					goToTown = deliverPotions();
 				}
 			}
 			else if(deliveryMode && !returningToTown)
@@ -58,21 +56,12 @@ function merchantAuto(target)
 			}
 		}
 	}
-
-	if(goToTown)
-	{
-		returnToTown();
-	}
 }
 
 function merchantLateUpdate()
 {
 	stockScrolls();
 	checkRequests();
-	if(isInTown())
-	{
-		sellVendorTrash();
-	}
 
 	if(!vendorMode && !returningToTown && !deliveryMode)
 	{
@@ -86,18 +75,31 @@ function merchantLateUpdate()
 		}
 	}
 
-	if(vendorMode && craftingOn && character.gold > minimumGold)
+	if(vendorMode && !deliveryMode && craftingOn && character.gold > minimumGold && isInTown())
 	{
+		sellVendorTrash();
 		buyFromPonty(buyFromPontyList)
+
+		let busy = false;
 
 		for(let i = 0; i < compoundLevelToStop; i++)
 		{
-			craftCompounds(i);
+			busy = craftCompounds(i);
+
+			if(busy)
+			{
+				break;
+			}
 		}
 
 		for(let i = 0; i < itemsToUpgrade.length; i++)
 		{
-			craftUpgrade(itemsToUpgrade[i], upgradeLevelToStop, upgradingBuyableItem[i]);
+			busy = craftUpgrade(itemsToUpgrade[i], upgradeLevelToStop, upgradingBuyableItem[i]);
+
+			if(busy)
+			{
+				break;
+			}
 		}
 	}
 }
@@ -177,8 +179,13 @@ function checkRequests()
 
 		for(let i = 0; i < deliveryRequests.length; i++)
 		{
+			//	go buy potions
+			if(deliveryRequests[i].request == "potions" && !deliveryRequests[i].shipment)
+			{
+				buyPotionsFor(deliveryRequests[i].sender, deliveryRequests[i].hPots, deliveryRequests[i].mPots);
+			}
 			//	deliver potions or mluck
-			if(deliveryRequests[i].shipment || deliveryRequests[i].request == "mluck")
+			else if(deliveryRequests[i].shipment || deliveryRequests[i].request == "mluck")
 			{
 				let recipient = parent.entities[deliveryRequests[i].sender];
 				if(recipient)
@@ -192,11 +199,6 @@ function checkRequests()
 				{
 					requestMagiPort();
 				}
-			}
-			//	go buy potions
-			else if(deliveryRequests[i].request == "potions")
-			{
-				buyPotionsFor(deliveryRequests[i].sender, deliveryRequests[i].hPots, deliveryRequests[i].mPots);
 			}
 		}
 	}
@@ -217,7 +219,9 @@ function checkPotionShipments(name)
 	for(let i = 0; i < potionShipments.length; i++)
 	{
 		if(potionShipments[i].name == name)
+		{
 			return true;
+		}
 	}
 
 	return false;
@@ -229,24 +233,36 @@ function craftUpgrade(itemToUpgrade, upgradeLevel, buyable)
 
 	if((!item && buyable) || (item && item.level >= upgradeLevel))
 	{
-		let lastEmpty = -1;
-		let emptySlots = 0;
-		for(let i=0; i<character.items.length; i++)
+		//let lastEmpty = -1;
+		//let emptySlots = ;
+		/*for(let i=0; i<character.items.length; i++)
 		{
 			if(item_properties(character.items[i]) == null)
 			{
 				lastEmpty = i;
 				emptySlots++;
 			}
+		}*/
+
+		for(let i=character.items.length-1; i>0; i--)
+		{
+			if(locate_item(character.items[i]) == null || character.items[i] != itemToUpgrade)
+			{
+				swap(locate_item(itemToUpgrade), i);
+				break;
+				//lastEmpty = i;
+				//emptySlots++;
+			}
 		}
 
+		/*
 		if(lastEmpty != -1 && item)
 		{
 			log("Moving +"+item.level + " " + G.items[item.name].name + " to last empty item slot");
-			swap(itemInvSlot, lastEmpty);
+			swap(locate_item(itemToUpgrade), lastEmpty);
 		}
 
-		if(emptySlots && buyable)
+		if(buyable)
 		{
 			log("Buying another " + G.items[itemToUpgrade].name);
 			buy_with_gold(itemToUpgrade);
@@ -255,7 +271,9 @@ function craftUpgrade(itemToUpgrade, upgradeLevel, buyable)
 		{
 			log("Inventory full, crafting mode disabling.");
 			craftingOn = false;
-		}
+		}*/
+
+		return false;
 	}
 	else if(item && item.level < upgradeLevel)
 	{
@@ -268,7 +286,11 @@ function craftUpgrade(itemToUpgrade, upgradeLevel, buyable)
 		}
 
 		upgrade(locate_item(itemToUpgrade), locate_item(scroll));
+
+		return true;
 	}
+
+	return false;
 }
 
 function craftCompounds(levelToUse)
@@ -302,13 +324,15 @@ function craftCompounds(levelToUse)
 	//	no triple
 	if(foundItem == "")
 	{
-		return;
+		return false;
 	}
 
 	log("Compounding three +" + levelToUse + " " + G.items[foundItem].name + "...");
 
 	let scroll = "cscroll0";
 	compound(triple[0], triple[1], triple[2], locate_item(scroll));
+
+	return true;
 }
 
 function stockScrolls()
@@ -338,11 +362,6 @@ function buyPotionsFor(name, healthPots, manaPots)
 	if(!request)
 	{
 		log("Attempting to buy potions but don't have request");
-		return;
-	}
-	else if(request.shipment)
-	{
-		log("Already fulfilled potion request.");
 		return;
 	}
 
@@ -376,55 +395,31 @@ function buyPotionsFor(name, healthPots, manaPots)
 	request.fulfilled = true;
 }
 
-function deliverPotions()
+function deliverPotions(nameToDeliverTo)
 {
 	log("Delivering potions");
 
 	if(potionShipments == null || potionShipments == [])
 	{
-		log("deliverPotions called but shopping list is empty!");
+		log("deliverPotions called but shipments is empty!");
 		return;
 	}
 
-	let delivered = false;
-
-	parent.party_list.forEach(function(otherPlayerName)
+	if(parent.entities[nameToDeliverTo])
 	{
-		let partyMember = parent.entities[otherPlayerName];
+		let shipment = potionShipments.find(x=>x.name==nameToDeliverTo);
 
-		if(partyMember)
-		{
-			for(let i = 0; i < potionShipments.length; i++)
-			{
-				if(partyMember.name == potionShipments[i].name)
-				{
-					let has_hPots = character.items[locate_item("hpot0")].q >= potionShipments[i].hPots;
-					let has_mPots = character.items[locate_item("mpot0")].q >= potionShipments[i].mPots;
+		log("Giving potions to " + nameToDeliverTo);
 
-					if(!(has_hPots && has_mPots))
-					{
-						log("Tried to deliver potions but don't have shipment, returning to town.");
-						delivered = false;
-						continue;
-					}
-
-					log("Giving potions to " + otherPlayerName);
-
-					send_item(partyMember,locate_item("hpot0"), potionShipments[i].hPots);
-					send_item(partyMember,locate_item("mpot0"), potionShipments[i].mPots);
-					potionShipments.splice(i);
-					delivered = true;
-				}
-			}
-		}
-	});
-
-	return delivered;
+		send_item(nameToDeliverTo,locate_item("hpot0"), shipment.hPots);
+		send_item(nameToDeliverTo,locate_item("mpot0"), shipment.mPots);
+		potionShipments.splice(potionShipments.indexOf(shipment));
+	}
 }
 
 function enableVendorMode()
 {
-	if(!isInTown() || returningToTown || deliveryMode)
+	if(returningToTown || deliveryMode)
 	{
 		return;
 	}
