@@ -15,6 +15,8 @@ function merchantAuto(target)
 		use_skill("mluck", character);
 	}
 
+	let goToTown = false;
+
 	for(other in parent.entities)
 	{
 		let isPartyMember = parent.party_list.includes(other);
@@ -34,7 +36,7 @@ function merchantAuto(target)
 				}
 				else if(checkPotionShipments(target.name))
 				{
-					deliverPotions();
+					goToTown = deliverPotions();
 				}
 			}
 			else if(deliveryMode && !returningToTown)
@@ -55,6 +57,11 @@ function merchantAuto(target)
 				use_skill("mluck", target);
 			}
 		}
+	}
+
+	if(goToTown)
+	{
+		returnToTown();
 	}
 }
 
@@ -379,7 +386,7 @@ function deliverPotions()
 		return;
 	}
 
-	let returnToTown = false;
+	let delivered = false;
 
 	parent.party_list.forEach(function(otherPlayerName)
 	{
@@ -397,7 +404,7 @@ function deliverPotions()
 					if(!(has_hPots && has_mPots))
 					{
 						log("Tried to deliver potions but don't have shipment, returning to town.");
-						returnToTown = true;
+						delivered = false;
 						continue;
 					}
 
@@ -406,15 +413,13 @@ function deliverPotions()
 					send_item(partyMember,locate_item("hpot0"), potionShipments[i].hPots);
 					send_item(partyMember,locate_item("mpot0"), potionShipments[i].mPots);
 					potionShipments.splice(i);
+					delivered = true;
 				}
 			}
 		}
 	});
 
-	if(returnToTown)
-	{
-		returnToTown();
-	}
+	return delivered;
 }
 
 function enableVendorMode()
