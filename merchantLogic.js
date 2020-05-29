@@ -78,6 +78,7 @@ function merchantLateUpdate()
 	if(vendorMode && craftingOn && character.gold > minimumGold)
 	{
 		sellVendorTrash();
+		buyFromPonty(buyFromPontyList)
 
 		for(let i = 0; i < compoundLevelToStop; i++)
 		{
@@ -445,4 +446,22 @@ function dontWalkWithShop()
 	{
 		parent.close_merchant();
 	}
+}
+
+function buyFromPonty(itemsToBuy)
+{
+	parent.socket.once("secondhands", function(data)
+	{
+		for(let d of data)
+		{
+			if (itemsToBuy.includes(d.name) && (!d.level || d.level <= 1))
+			{
+				log("Buying " + d.name + " from Ponty!");
+				parent.socket.emit("sbuy", { "rid": d.rid })
+            }
+        }
+    });
+
+    // Attempt to buy stuff
+    parent.socket.emit("secondhands");
 }

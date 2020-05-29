@@ -13,6 +13,9 @@ var upgradeLevelToStop = 7;
 var itemsToCompound = ["intring","strring","dexring","vitring","ringsj"];
 var compoundLevelToStop = 2;
 var vendorTrash = ["cclaw","hpamulet","hpbelt"];
+var buyFromPontyList = [];
+itemsToUpgrade.forEach(x=>{buyFromPontyList.push(x)});
+itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
 //////
 
 ///     farming settings        ///
