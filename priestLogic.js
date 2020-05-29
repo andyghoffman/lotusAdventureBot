@@ -57,8 +57,14 @@ function priestAuto(target)
 
 	if(character.mp >= G.skills.curse.mp && !is_on_cooldown("curse") && !target.s.curse && target.hp > target.max_hp*0.5)
 	{
-		use_skill("curse");
+		use_skill("curse", target);
 		reduce_cooldown("curse", character.ping);
+	}
+
+	if(target && target.target && target.target != character.id && character.mp >= G.skills.absorb.mp && !is_on_cooldown("absorb"))
+	{
+		use_skill("absorb", target.target);
+		reduce_cooldown("absorb", character.ping);
 	}
 
 	if(character.mp > (character.max_mp * manaReserve))
