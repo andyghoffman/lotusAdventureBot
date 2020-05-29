@@ -379,6 +379,8 @@ function deliverPotions()
 		return;
 	}
 
+	let returnToTown = false;
+
 	parent.party_list.forEach(function(otherPlayerName)
 	{
 		let partyMember = parent.entities[otherPlayerName];
@@ -395,8 +397,8 @@ function deliverPotions()
 					if(!(has_hPots && has_mPots))
 					{
 						log("Tried to deliver potions but don't have shipment, returning to town.");
-						returnToTown();
-						return;
+						returnToTown = true;
+						continue;
 					}
 
 					log("Giving potions to " + otherPlayerName);
@@ -408,6 +410,11 @@ function deliverPotions()
 			}
 		}
 	});
+
+	if(returnToTown)
+	{
+		returnToTown();
+	}
 }
 
 function enableVendorMode()
