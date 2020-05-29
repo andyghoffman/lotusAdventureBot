@@ -6,9 +6,10 @@ load_code("rangerLogic");
 
 ///     crafting settings       ///
 const craftingEnabled = true;
-const minimumGold = 5000000;
+const minimumGold = 5000000;    //  merchant won't go below this amount of gold in wallet
 var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","hbow","mushroomstaff","t2bow","shield","wbook0","quiver",];
-var upgradingBuyableItem = [false,false,false,false,false]; //  if true will attempt to buy base items to continue crafting
+var upgradingBuyableItem = [];  //  if true will attempt to buy base items to continue crafting. need to manually set which, if any, are true. assumes false
+itemsToUpgrade.forEach(x=>{upgradingBuyableItem.push(false)});
 var upgradeLevelToStop = 7;
 var itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt"];
 var compoundLevelToStop = 2;
@@ -232,8 +233,8 @@ function lateUpdate()
             letsGo();
         }
         else if(partyPresent() && !farmingModeActive)
-		{
-			readyCheck();
-		}
+        {
+            readyCheck();
+        }
     }
 }

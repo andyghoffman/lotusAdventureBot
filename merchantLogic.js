@@ -62,6 +62,10 @@ function merchantLateUpdate()
 {
 	stockScrolls();
 	checkRequests();
+	if(isInTown())
+	{
+		sellVendorTrash();
+	}
 
 	if(!vendorMode && !returningToTown && !deliveryMode)
 	{
@@ -77,7 +81,6 @@ function merchantLateUpdate()
 
 	if(vendorMode && craftingOn && character.gold > minimumGold)
 	{
-		sellVendorTrash();
 		buyFromPonty(buyFromPontyList)
 
 		for(let i = 0; i < compoundLevelToStop; i++)
@@ -230,13 +233,13 @@ function craftUpgrade(itemToUpgrade, upgradeLevel, buyable)
 
 		if(lastEmpty != -1 && item)
 		{
-			log("Moving +"+item.level + " " + item.name + " to last empty item slot");
+			log("Moving +"+item.level + " " + G.items[item.name].name + " to last empty item slot");
 			swap(itemInvSlot, lastEmpty);
 		}
 
 		if(emptySlots && buyable)
 		{
-			log("Buying another " + itemToUpgrade);
+			log("Buying another " + G.items[itemToUpgrade].name);
 			buy_with_gold(itemToUpgrade);
 		}
 		else
@@ -247,7 +250,7 @@ function craftUpgrade(itemToUpgrade, upgradeLevel, buyable)
 	}
 	else if(item && item.level < upgradeLevel)
 	{
-		log("Upgrading " + item.name + "...");
+		log("Upgrading " + G.items[item.name].name + "...");
 
 		let scroll = "scroll0";
 		if(item.level >= 7)
@@ -293,7 +296,7 @@ function craftCompounds(levelToUse)
 		return;
 	}
 
-	log("Compounding 3 +" + levelToUse + " " + foundItem + "...");
+	log("Compounding three +" + levelToUse + " " + G.items[foundItem].name + "...");
 
 	let scroll = "cscroll0";
 	compound(triple[0], triple[1], triple[2], locate_item(scroll));
