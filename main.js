@@ -152,6 +152,7 @@ function main()
             travelToFarmSpot();
         }
 
+        //  keep personal space
         personalSpace();
     }
     //  party follower routines
@@ -174,15 +175,13 @@ function main()
             travelToFarmSpot();
         }
 
+        //  keep personal space
         personalSpace();
 
         //  if leader is too far away approach him
-        if(!traveling)
+        if(parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) > spaceToKeep*2)
         {
-            if(parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) > spaceToKeep*2)
-            {
-                followLeader();
-            }
+            followLeader();
         }
     }
 }
@@ -210,15 +209,17 @@ function lateUpdate()
 	}
 
     //  don't do anything past here if autoPlay is off, or if you are moving
-	if(!autoPlay || is_moving(character) || smart.moving)
+    if(!autoPlay || is_moving(character) || smart.moving)
+    {
         return;
+    }
 
     //  check if you need anything
     checkPotionInventory();
     checkBuffs();
 
-    //  if the merchant is nearby, send him your items
-    if(parent.entities[merchantName])
+    //  if the merchant is nearby, send him your items (token minimum amount so it doesn't get spammed)
+    if(parent.entities[merchantName] && character.gold < 10000)
     {
         transferAllToMerchant();
     }

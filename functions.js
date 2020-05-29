@@ -275,7 +275,9 @@ function isInTown()
 function partyPresent()
 {
 	if(parent.party_list.length < 4)
+	{
 		return false;
+	}
 
 	return (parent.entities[priestName] || character.name === priestName) &&
 			(parent.entities[mageName] || character.name === mageName) &&
