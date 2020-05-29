@@ -26,12 +26,12 @@ itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
 ///     number = travel to the spawn # of farmMonsterSpawnNumber
 ///
 ///     specialMonsters are prioritized if they are present
-const fullAuto = true; //  if true will automatically start farming on connect & startup. set false to have player control on startup
+const fullAuto = true;  //  if true will automatically start farming on connect & startup. set false to have player control on startup
 const farmMode = "name";
 const farmMonsterName = "crabx";
-const farmMap = "winterland";           //  only used if farmMode is 'coords' or 'number'
-const farmMonsterSpawnNumber = 6;       //  only used if farmMode is 'number'
-const farmCoords = {x:1312.8, y:-853.8} //  only used if farmMode is 'coords'
+const farmMap = "winterland";   //  only used if farmMode is 'coords' or 'number'
+const farmMonsterSpawnNumber = 6;   //  only used if farmMode is 'number'
+const farmCoords = {x:1312.8, y:-853.8};    //  only used if farmMode is 'coords'
 const specialMonsters = ["snowman","phoenix"];
 const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
 //////

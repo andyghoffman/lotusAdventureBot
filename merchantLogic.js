@@ -99,7 +99,7 @@ function merchant_on_cm(sender, data)
 {
 	if(data.message == "buyPots")
 	{
-		if(deliveryRequests.find(x=>x.request=="potions" && x.from==sender))
+		if(deliveryRequests.find(x=>x.request=="potions" && x.sender==sender))
 		{
 			log("Already have potion request from " + sender);
 			return;
@@ -110,7 +110,7 @@ function merchant_on_cm(sender, data)
 	}
 	else if(data.message == "mluck")
 	{
-		if(deliveryRequests.find(x=>x.request=="mluck" && x.from==sender))
+		if(deliveryRequests.find(x=>x.request=="mluck" && x.sender==sender))
 		{
 			log("Already have mluck request from " + sender);
 			return;
