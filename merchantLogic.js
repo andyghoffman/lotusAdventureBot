@@ -1,5 +1,8 @@
-var lowScrolls = 1;
-var scrollsToStock = 20;
+///		Merchant Settings		///
+const lowScrolls = 1;
+const scrollsToStock = 20;
+//////
+
 var vendorMode = false;			//	true when in town with shop, false when busy delivering items
 var deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
 var potionShipments = [];
@@ -21,7 +24,9 @@ function merchantAuto(target)
 		let target = parent.entities[other];
 
 		if(!target.player || target.npc)
+		{
 			continue;
+		}
 
 		if(isPartyMember)
 		{
@@ -46,7 +51,8 @@ function merchantAuto(target)
 		}
 		else if(target)
 		{
-			if(!checkMluck(target) && is_in_range(target, "mluck") && !is_on_cooldown("mluck"))
+			//	mluck others but some safety checks to make sure you don't spam it
+			if(!checkMluck(target) && is_in_range(target, "mluck") && !is_on_cooldown("mluck") && !target.afk && !target.stand && character.mp > character.max_mp*0.5)
 			{
 				log("Giving mluck to " + target.name);
 				use_skill("mluck", target);
@@ -454,33 +460,44 @@ function buyFromPonty(itemsToBuy)
 {
 	parent.socket.once("secondhands", function(data)
 	{
-		for(let d of data)
+		for(let pontyItem of data)
 		{
-			if (itemsToBuy.includes(d.name))
+			if (itemsToBuy.includes(pontyItem.name))
 			{
 				let buy = false;
 
-				if(itemsToUpgrade.includes(d.name) && (!d.level || d.level <= upgradeLevelToStop))
+				if(itemsToUpgrade.includes(pontyItem.name) || itemsToCompound.includes(pontyItem.name))
 				{
-					buy = true;
+					if(itemsToUpgrade.includes(pontyItem.name) && (pontyItem.level <= upgradeLevelToStop))
+					{
+						buy = true;
+					}
+					else if(itemsToCompound.includes(pontyItem.name) && (pontyItem.level <= compoundLevelToStop))
+					{
+						buy = true;
+					}
 				}
-				else if(itemsToCompound.includes(d.name) && (!d.level || d.level <= compoundLevelToStop))
-				{
-					buy = true;
-				}
-				else if(!itemsToUpgrade.includes(d.name) && !itemsToCompound.includes(d.name))
+				else
 				{
 					buy = true;
 				}
 
 				if(buy)
 				{
-					log("Buying " + d.name + " from Ponty!");
-					parent.socket.emit("sbuy", { "rid": d.rid })
+					log("Buying " + pontyItem.name + " from Ponty!");
+					parent.socket.emit("sbuy", { "rid": pontyItem.rid })
 				}
             }
         }
     });
 
 	parent.socket.emit("secondhands");
+}
+
+function exchangeItems(npcName, item, numberOfExchanges)
+{
+	smart_move(npcName, ()=>
+	{
+
+	});
 }

@@ -110,16 +110,13 @@ function main()
         autoAttack(get_targeted_monster());
     }
 
-    if(is_moving(character) || smart.moving || returningToTown)
+    //  finish what you are doing before checking past here
+    if(is_moving(character) || smart.moving || returningToTown || character.q.upgrade || character.q.compound)
     {
         return;
     }
 
-    if(character.q.upgrade || character.q.compound)
-    {
-        return;
-    }
-
+    //  standard routines
 	if(character.name != merchantName)
 	{
         //  autofollow leader when not auto-farming
@@ -132,6 +129,7 @@ function main()
         //  make sure party is together
         if(!autoPlay || !readyToGo() || !farmingModeActive || !partyPresent())
         {
+            //  party leader will only aloneCheck if autoplay is active, other characters will tether to leader regardless of autoplay
             if((character.name != partyLeader) || (character.name == partyLeader && autoPlay))
             {
                 aloneCheck();

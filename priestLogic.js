@@ -1,9 +1,18 @@
-var healThreshold = 0.8;
-var manaReserve = 0.5;
+///		Priest Settings		///
+const healThreshold = 0.8;
+const manaReserve = 0.25;
+//////
 
 function priestAuto(target)
 {
+	//	heal
 	autoHeal();
+
+	//	save mana for healing if low
+	if(character.mp < (character.max_mp * manaReserve))
+	{
+		return;
+	}
 
 	//	cast curse
 	if(character.mp >= G.skills.curse.mp && !is_on_cooldown("curse") && !target.s.curse && validTargetForSkill(target))
@@ -30,13 +39,9 @@ function priestAuto(target)
 		}
 	}
 
-	//	auto attack, but hold back mana for healing
-	if(character.mp > (character.max_mp * manaReserve))
+	if(target)
 	{
-		if(target)
-		{
-			autoAttack(target);
-		}
+		autoAttack(target);
 	}
 }
 

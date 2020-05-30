@@ -13,7 +13,6 @@ function on_cm(sender, data)
 
 	if(data.message == "target")
 	{
-		log(character.name + " recieved target from " + sender);
         target = get_entity(data.targetId);
 
         if(target)
@@ -22,7 +21,7 @@ function on_cm(sender, data)
 		}
 		else
 		{
-			log("Couldn't find target.");
+			log(character.name + " recieved target " + target.name + " from " + sender + " but could not find it.");
 		}
 
         return;
@@ -711,7 +710,7 @@ function tidyInventory()
 
 		if(item && slotToMove == -1)
 		{
-			slotToMove = i;;
+			slotToMove = i;
 		}
 		else if(slotToMove != -1 && !item)
 		{

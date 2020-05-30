@@ -1,10 +1,9 @@
-var manaToReserve = 0.25;
+///		Ranger Settings		///
+
+//////
 
 function rangerAuto(target)
 {
-	if(character.mp < character.maxmp * manaToReserve)
-		return;
-
 	if(target)
 	{
 		//	cast hunters mark

@@ -1,4 +1,6 @@
-var defaultEnergizeTarget = "LotusRanger"
+///		Mage Settings		///
+const defaultEnergizeTarget = "LotusRanger"
+//////
 
 function mageAuto(target)
 {
