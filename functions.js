@@ -479,11 +479,12 @@ function followLeader()
 	{
 		if (distance(character, leader) > minimumMonsterDistance*2)
 		{
-        	move
+        	/*move
 			(
             	character.real_x+(leader.x-character.real_x) / 2,
             	character.real_y+(leader.y-character.real_y) / 2
-        	);
+			);*/
+			approachTarget(leader);
 		}
 
 		return true;
@@ -586,14 +587,34 @@ function getMonsterFarmTarget(farmTarget)
 	}
 }
 
+function approachTarget(target, onComplete)
+{
+	if(!target)
+	{
+		target = get_current_target();
+	}
+
+	if(!onComplete)
+	{
+		move(
+			character.x + (target.x - character.x) * 0.3,
+			character.y + (target.y - character.y) * 0.3
+		);
+	}
+	else
+	{
+		smart_move(
+			character.x + (target.x - character.x) * 0.3,
+			character.y + (target.y - character.y) * 0.3
+		, ()=>{onComplete();});
+	}
+}
+
 function autoAttack(target)
 {
     if(!is_in_range(target, "attack"))
 	{
-        smart_move(
-            character.x + (target.x - character.x) * 0.3,
-            character.y + (target.y - character.y) * 0.3
-        );
+		approachTarget(target);
     }
     else if (!is_on_cooldown("attack"))
 	{

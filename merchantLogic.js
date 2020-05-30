@@ -41,11 +41,7 @@ function merchantAuto(target)
 			else if(deliveryMode && !returningToTown)
 			{
 				log("Moving closer");
-
-				smart_move(
-					character.x + (target.x - character.x) * 0.3,
-					character.y + (target.y - character.y) * 0.3
-				);
+				approachTarget(target);
 			}
 		}
 		else if(target)
@@ -209,10 +205,7 @@ function checkRequests()
 				let recipient = parent.entities[deliveryRequests[i].sender];
 				if(recipient)
 				{
-					smart_move(
-						character.x + (recipient.x - character.x) * 0.3,
-						character.y + (recipient.y - character.y) * 0.3
-					);
+					approachTarget(recipient);
 				}
 				else
 				{
@@ -252,12 +245,12 @@ function craftUpgrades(finalTargetUpgradeLevel)
 	{
 		let item = character.items[i];
 
-		if(item && itemsToUpgrade.includes(item.name) && (item.level < finalTargetUpgradeLevel && G.items[item.name].grades[0] > finalTargetUpgradeLevel))
+		if(item && itemsToUpgrade.includes(item.name) /*&& (item.level < finalTargetUpgradeLevel && G.items[item.name].grades[0] > finalTargetUpgradeLevel)*/)
 		{
 			log("Upgrading " + G.items[item.name].name + "...");
 
 			let scroll = "scroll0";
-			if(item.level >= upgradeLevelToUseTierTwoScroll)
+			if(item.level >= upgradeLevelToUseTierTwoScroll || item.level >= G.items[item.name].grades[0])
 			{
 				scroll = "scroll1";
 			}
