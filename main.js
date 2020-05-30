@@ -6,8 +6,8 @@ load_code("rangerLogic");
 
 ///     crafting settings       ///
 const craftingEnabled = true;
-const minimumGold = 5000000;    //  merchant won't go below this amount of gold in wallet
-var basicItemsToCraft = ["pants","gloves","shoes","coat","helmet"];   //  keep buying and upgrading these
+const minimumGold = 1000000;    //  merchant won't go below this amount of gold in wallet
+var basicItemsToCraft = ["bow"];   //  keep buying and upgrading these
 var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","wbook0","quiver"];
 var upgradeLevelToStop = 7;
 var upgradeLevelToUseTierTwoScroll = 6;
@@ -34,7 +34,6 @@ const farmMap = "winterland";   //  only used if farmMode is 'coords' or 'number
 const farmMonsterSpawnNumber = 6;   //  only used if farmMode is 'number'
 const farmCoords = {x:1312.8, y:-853.8};    //  only used if farmMode is 'coords'
 const specialMonsters = ["snowman","phoenix"];
-const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
 //////
 
 ///     character settings      ///
@@ -48,8 +47,13 @@ const merchantStandCoords = {x:-118, y:11};
 const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
 const lowPotions = 100;
-const spaceToKeep = 15;
+const minimumMonsterDistance = 15;
+const lowInventoryThreshold = 14;
+const monsterHpThresholdForSkills = 0.5;
+const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
 const whiteList = [merchantName, mageName, rangerName, priestName];
+const itemsToHoldOnTo = ["hpot0","mpot0","stand0","scroll0","scroll1","cscroll0","cscroll1"];
+const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
 //////
 
 map_key("1", "snippet", "initParty()")
@@ -67,6 +71,7 @@ var craftingOn = craftingEnabled;
 var whosReady = {priest:false,mage:false,ranger:false,merchant:false};
 var traveling = false;
 var returningToTown = false;
+var banking = false;
 var sentRequests = [];
 
 setInterval(main, 250);
@@ -89,13 +94,24 @@ function main()
         tidyInventory();
     }
 
+    //  don't walk with merchant stand, don't idle without it
+    if(character.name == merchantName)
+    {
+        standCheck();
+    }
+    //  make sure you heal even if you are moving
+    else if(character.name == priestName)
+    {
+        autoHeal();
+    }
+    //  make sure you attack even if you are moving
+    if(get_targeted_monster())
+    {
+        autoAttack(get_targeted_monster());
+    }
+
     if(is_moving(character) || smart.moving || returningToTown)
     {
-        if(character.name == merchantName)
-        {
-            standCheck();
-        }
-
         return;
     }
 
@@ -131,24 +147,28 @@ function main()
         return;
     }
 
-    let target = null;
+    let target = get_targeted_monster();
 
-    //  look for any special targets
-    for(let i = 0; i < specialMonsters.length; i++)
-    {
-        target = getMonsterFarmTarget(specialMonsters[i]);
-        if(target)
-        {
-            broadCastTarget(target);
-            break;
-        }
-    }
 
     //  look for the monster you are farming
     if(!target)
     {
-        target = getMonsterFarmTarget(farmMonsterName);
-    }
+        //  look for any special targets
+        for(let i = 0; i < specialMonsters.length; i++)
+        {
+            target = getMonsterFarmTarget(specialMonsters[i]);
+            if(target && specialMonsters.includes(target.name))
+            {
+                broadCastTarget(target);
+                break;
+            }
+        }
+
+        if(!target)
+        {
+            target = getMonsterFarmTarget(farmMonsterName);
+        }
+    }5
 
     //  party leader standard routine
 	if(character.name == partyLeader)
@@ -190,7 +210,7 @@ function main()
         personalSpace();
 
         //  if leader is too far away approach him
-        if(parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) > spaceToKeep*2)
+        if(parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) > minimumMonsterDistance*2)
         {
             followLeader();
         }

@@ -234,26 +234,30 @@ function personalSpace()
 	if(!target)
 	{
 		target = get_nearest_monster();
-		if(distance(character, target) > spaceToKeep)
-		{
-			return;
-		}
 	}
 
+	if(distance(character, target) > minimumMonsterDistance)
+	{
+		return;
+	}
+
+	//	try to move out of the monster's range
     if(target && (distance(character, target) < target.range))
     {
+		let currentPos = {x:character.real_x,y:character.real_y};
 		let right = 0;
-		let up = 0
+		let up = 0;
+		let reverse = isStuck ? -5 : 1;
 
 		if(target.x < character.x)
-			right = -target.range * 1.5;
+			right = -target.range * 1.5 * reverse;
 		else
-			right = target.range * 1.5;
+			right = target.range * 1.5 * reverse;
 
 		if(target.y < character.y)
-			up = target.range * 1.5;
+			up = target.range * 1.5 * reverse;
 		else
-			up = -target.range * 1.5;
+			up = -target.range * 1.5 * reverse;
 
 		adjustment = {x:character.x+right, y:character.y+up};
 
@@ -262,9 +266,9 @@ function personalSpace()
 			let leader = parent.entities[get_player(partyLeader)];
 
 			//	make sure you dont run away from party
-			if(leader && distance(adjustment, leader) < spaceToKeep*2)
+			if(leader && distance(adjustment, leader) < minimumMonsterDistance*2)
 			{
-				smart_move(adjustment);
+				smart_move(adjustment, ()=>{stuckCheck(currentPos);});
 				return;
 			}
 			else if(leader)
@@ -274,8 +278,33 @@ function personalSpace()
 			}
 		}
 
-		smart_move(adjustment);
+		smart_move(adjustment, ()=>{stuckCheck(currentPos);});
     }
+}
+
+//	used with personalSpace to get out of corners and walls
+var isStuck = false;
+function stuckCheck(originalPosition)
+{
+	isStuck = distance(originalPosition, {x:character.real_x,y:character.real_y}) < 2;
+
+	if(isStuck)
+	{
+		log(character.name + " is stuck!");
+		setTimeout(()=>
+		{
+			if(!isStuck)
+			{
+				return;
+			}
+
+			log(character.name + " is still stuck and returning to town.");
+			isStuck = false;
+			stopFarmMode();
+            returnToTown();
+
+		}, 15000);
+	}
 }
 
 function isInTown()
@@ -415,7 +444,6 @@ function transferAllToMerchant()
 		return;
 
 	let merchant = get_player(merchantName);
-	let exclude = ["hpot0","mpot0"];
 
     if(character.ctype !== "merchant" && merchant && merchant.owner === character.owner && distance(character, merchant) < 400)
 	{
@@ -423,7 +451,7 @@ function transferAllToMerchant()
 
         for(let i = 0; i < character.items.length; i++)
 		{
-			if(item_properties(character.items[i]) && !exclude.includes(character.items[i].name))
+			if(item_properties(character.items[i]) && !itemsToHoldOnTo.includes(character.items[i].name))
 			{
 				send_item(merchant, i, character.items[i].q);
 			}
@@ -448,7 +476,7 @@ function followLeader()
 
 	if(leader)
 	{
-		if (distance(character, leader) > spaceToKeep*2)
+		if (distance(character, leader) > minimumMonsterDistance*2)
 		{
         	move
 			(
@@ -867,10 +895,76 @@ function validTargetForSkill(target)
 	{
 		return true;
 	}
-	else if(target.hp > target.max_hp*0.5)
+	else if(target.hp > target.max_hp*monsterHpThresholdForSkills)
 	{
 		return true;
 	}
 
 	return false;
+}
+
+function checkForLowInventorySpace()
+{
+	let emptyInvSlots = 0;
+	for(let i of character.items)
+	{
+		if(!i)
+		{
+			emptyInvSlots++;
+		}
+	}
+
+	return emptyInvSlots <= lowInventoryThreshold;
+}
+
+function depositInventoryAtBank()
+{
+	banking = true;
+	traveling = true;
+
+	smart_move("bank", ()=>
+	{
+		//	store in first bank
+		for(let i in character.items)
+		{
+			if(i && !itemsToHoldOnTo.includes(i.name))
+			{
+				if((itemsToCompound.includes(i) && i.level < compoundLevelToStop) || (itemsToUpgrade.includes(i) && i.level < upgradeLevelToStop))
+				{
+					continue;
+				}
+
+				bank_store(i, 0);
+			}
+		}
+
+		//	store in second bank
+		if(checkForLowInventorySpace())
+		{
+			setTimeout(()=>
+			{
+				for(let i in character.items)
+				{
+					if(i && !itemsToHoldOnTo.includes(i.name))
+					{
+						if((itemsToCompound.includes(i) && i.level < compoundLevelToStop) || (itemsToUpgrade.includes(i) && i.level < upgradeLevelToStop))
+						{
+							continue;
+						}
+
+						bank_store(i, 1);
+					}
+				}
+
+				banking = false;
+				traveling = false;
+
+			}, 1000);
+		}
+		else
+		{
+			banking = false;
+			traveling = false;
+		}
+	});
 }

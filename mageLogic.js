@@ -2,6 +2,7 @@ var defaultEnergizeTarget = "LotusRanger"
 
 function mageAuto(target)
 {
+	//	cast energize on party members
 	if(!is_on_cooldown("energize"))
 	{
 		let energizeTarget = parent.entities[defaultEnergizeTarget];
@@ -13,17 +14,17 @@ function mageAuto(target)
 			if(partyMember && partyMember.name != character.name && partyMember.mp < partyMember.max_mp*0.5)
 			{
 				energizeTarget = partyMember;
-				break;
 			}
 		});
 
-		if(!energizeTarget.s.energized && is_in_range(energizeTarget, "energize"))
+		if(energizeTarget && !energizeTarget.s.energized && is_in_range(energizeTarget, "energize"))
 		{
 			use_skill("energize", energizeTarget);
 			reduce_cooldown("energize", character.ping);
 		}
 	}
 
+	//	auto attack
 	if(target)
 	{
 		autoAttack(target);

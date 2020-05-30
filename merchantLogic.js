@@ -5,14 +5,14 @@ var deliveryMode = false;		//	true when the merchant has requests it needs to fu
 var potionShipments = [];
 var deliveryRequests = [];
 
-const scrolls = ["scroll0","scroll1","cscroll0"];
-
 function merchantAuto(target)
 {
+	//	keep magic luck on yourself
 	if(!checkMluck(character))
 	{
 		log("mlucking self");
 		use_skill("mluck", character);
+		reduce_cooldown("mluck", character.ping);
 	}
 
 	for(other in parent.entities)
@@ -65,7 +65,7 @@ function merchantLateUpdate()
 	stockScrolls();
 	checkRequests();
 
-	if(!vendorMode && !returningToTown && !deliveryMode && autoPlay)
+	if(!vendorMode && !returningToTown && !deliveryMode && autoPlay && !banking)
 	{
 		if(isInTown())
 		{
@@ -75,6 +75,13 @@ function merchantLateUpdate()
 		{
 			returnToTown();
 		}
+	}
+
+	if(checkForLowInventorySpace() && !banking && autoPlay && !returningToTown && !deliveryMode && autoPlay)
+	{
+		disableVendorMode();
+		depositInventoryAtBank();
+		return;
 	}
 
 	if(vendorMode && !deliveryMode && craftingOn && character.gold > minimumGold && isInTown())
@@ -109,9 +116,9 @@ function merchant_on_cm(sender, data)
 	}
 	else if(data.message == "mluck")
 	{
-		if(deliveryRequests.find(x=>x.request=="mluck" && x.sender==sender))
+		if(deliveryRequests.find(x=>x.request=="mluck"))
 		{
-			log("Already have mluck request from " + sender);
+			log("Already have mluck request.");
 			return;
 		}
 
@@ -121,7 +128,24 @@ function merchant_on_cm(sender, data)
 	else if(data.message == "thanks")
 	{
 		log("Recieved delivery confirmation from " + sender);
-		deliveryRequests.splice(deliveryRequests.indexOf(x=>x.sender == sender && x.request == request));
+
+		if(data.request == "mluck")
+		{
+			let mluks = []
+			for(let i = deliveryRequests.length-1; i >= 0; i--)
+			{
+				if(deliveryRequests[i].request=="mluck")
+				{
+					mluks.push(i);
+				}
+			}
+
+			deliveryRequests.splice(mluks);
+		}
+		else
+		{
+			deliveryRequests.splice(deliveryRequests.indexOf(x=>x.sender == sender && x.request == request));
+		}
 	}
 }
 
@@ -162,6 +186,11 @@ function sellVendorTrash()
 
 function checkRequests()
 {
+	if(banking)
+	{
+		return;
+	}
+
 	if(deliveryRequests.length > 0)
 	{
 		deliveryMode = true;
@@ -380,7 +409,7 @@ function deliverPotions(nameToDeliverTo)
 
 function enableVendorMode()
 {
-	if(returningToTown || deliveryMode)
+	if(returningToTown || deliveryMode || banking)
 	{
 		return;
 	}
