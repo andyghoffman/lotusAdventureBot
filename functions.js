@@ -13,12 +13,17 @@ function on_cm(sender, data)
 
 	if(data.message == "target")
 	{
+		log(character.name + " recieved target from " + sender);
         target = get_entity(data.targetId);
 
         if(target)
         {
             change_target(target, true);
-        }
+		}
+		else
+		{
+			log("Couldn't find target.");
+		}
 
         return;
 	}
@@ -137,7 +142,9 @@ function on_cm(sender, data)
 
 function on_party_invite(name)
 {
-    if (whiteList.includes(name) && parent.party_list.length == 0)
+	log(character.name + " recieved party invite from " + name);
+
+    if (whiteList.includes(name) && !parent.party_list.includes(name))
 	{
 		accept_party_invite(name);
 	}
@@ -226,7 +233,11 @@ function personalSpace()
 
 	if(!target)
 	{
-	    target = get_nearest_monster();
+		target = get_nearest_monster();
+		if(distance(character, target) > spaceToKeep)
+		{
+			return;
+		}
 	}
 
     if(target && (distance(character, target) < target.range))
@@ -321,7 +332,7 @@ function checkSentRequests()
 	{
 		if(sentRequests[i].message == "mluck")
 		{
-			if(character.s.mluck)
+			if(checkMluck(character))
 			{
 				log("Mluck recieved. Thank you!");
 				send_cm(sentRequests[i].name, {message:"thanks",request:"mluck"});
@@ -456,15 +467,15 @@ function followLeader()
 
 function broadCastTarget(broadCastTarget)
 {
-    broadCastTarget = get_targeted_monster();
-    parent.party_list.forEach(function(otherPlayerName)
+    parent.party_list.forEach(function(partyPlayer)
     {
-        if(otherPlayerName != character.name)
+        if(partyPlayer != character.name)
         {
-            let partyMember = parent.entities[otherPlayerName];
+            let partyMember = parent.entities[partyPlayer];
 
             if(partyMember && partyMember.name != merchantName && partyMember.name != broadCastTarget.name)
             {
+				log(character.name + " broadcasting target " + broadCastTarget.name + " to " + partyMember.name);
                 send_cm(partyMember.name, {message:"target",targetId:broadCastTarget.id});
             }
         }
@@ -632,14 +643,35 @@ function returnToTown(delay)
 //	sorts inventory to push all items toward the back
 function tidyInventory()
 {
+	if(character.q.upgrade || character.q.compound)
+	{
+		return;
+	}
+
+	let slotToMove = -1;
+	let lastEmptySlot = -1;
 	for(let i = 0; i < character.items.length; i++)
 	{
 		let item = character.items[i];
 
-		if(item && i+1 < character.items.length && !character.items[i+1])
+		if(item && item.name == "placeholder")
 		{
-			swap(i, i+1);
+			continue;
 		}
+
+		if(item && slotToMove == -1)
+		{
+			slotToMove = i;;
+		}
+		else if(slotToMove != -1 && !item)
+		{
+			lastEmptySlot = i;
+		}
+	}
+
+	if(lastEmptySlot > 0)
+	{
+		swap(slotToMove, lastEmptySlot);
 	}
 }
 
@@ -658,7 +690,7 @@ function initParty()
 	}
 	if(characterOffline(priestName))
 	{
-		start_character(priestName, 0);
+		start_character(priestName, 1);
 	}
 
 	if(!partyMembers.includes(merchantName))
@@ -676,7 +708,7 @@ function initParty()
 	}
 	if(characterOffline(mageName))
 	{
-		start_character(mageName, 0);
+		start_character(mageName, 1);
 	}
 
 	if(!partyMembers.includes(rangerName))
@@ -685,7 +717,7 @@ function initParty()
 	}
 	if(characterOffline(rangerName))
 	{
-		start_character(rangerName, 0);
+		start_character(rangerName, 1);
 	}
 
 	log("Initializing Party...");
@@ -694,7 +726,7 @@ function initParty()
 
 //  check if you are separated from the party, and attempt to regroup in town if you are.
 //  returns true if the character is alone, false if not
-function aloneCheck(msToWait = 15000)
+function aloneCheck(msToWait = 30000)
 {
     if(is_moving(character) || smart.moving)
     {

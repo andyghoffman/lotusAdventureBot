@@ -1,5 +1,5 @@
-var lowScrolls = 0;
-var scrollsToStock = 10;
+var lowScrolls = 1;
+var scrollsToStock = 20;
 var vendorMode = false;			//	true when in town with shop, false when busy delivering items
 var deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
 var potionShipments = [];
@@ -31,10 +31,11 @@ function merchantAuto(target)
 				{
 					deliverPotions(target.name);
 				}
-				else if(!checkMluck(target))
+				else if(!checkMluck(target) && !is_on_cooldown("mluck"))
 				{
 					log("Giving mluck to " + target.name);
 					use_skill("mluck", target);
+					reduce_cooldown("mluck", character.ping);
 				}
 			}
 			else if(deliveryMode && !returningToTown)
@@ -49,10 +50,11 @@ function merchantAuto(target)
 		}
 		else if(target)
 		{
-			if(!checkMluck(target) && is_in_range(target, "mluck"))
+			if(!checkMluck(target) && is_in_range(target, "mluck") && !is_on_cooldown("mluck"))
 			{
 				log("Giving mluck to " + target.name);
 				use_skill("mluck", target);
+				reduce_cooldown("mluck", character.ping);
 			}
 		}
 	}
@@ -63,7 +65,7 @@ function merchantLateUpdate()
 	stockScrolls();
 	checkRequests();
 
-	if(!vendorMode && !returningToTown && !deliveryMode)
+	if(!vendorMode && !returningToTown && !deliveryMode && autoPlay)
 	{
 		if(isInTown())
 		{
@@ -78,25 +80,13 @@ function merchantLateUpdate()
 	if(vendorMode && !deliveryMode && craftingOn && character.gold > minimumGold && isInTown())
 	{
 		sellVendorTrash();
+		buyBasicItems();
 		buyFromPonty(buyFromPontyList)
-
-		let busy = false;
+		craftUpgrades(upgradeLevelToStop);
 
 		for(let i = 0; i < compoundLevelToStop; i++)
 		{
-			busy = craftCompounds(i);
-
-			if(busy)
-			{
-				break;
-			}
-		}
-
-		for(let i = 0; i < itemsToUpgrade.length; i++)
-		{
-			busy = craftUpgrade(itemsToUpgrade[i], upgradeLevelToStop, upgradingBuyableItem[i]);
-
-			if(busy)
+			if(craftCompounds(i))
 			{
 				break;
 			}
@@ -115,7 +105,7 @@ function merchant_on_cm(sender, data)
 		}
 
 		log("Recieved potion request from " + sender);
-		deliveryRequests.push({request:"potions",sender:sender,fulfilled:false,shipment:null,hPots:data.hPots,mPots:data.mPots});
+		deliveryRequests.push({request:"potions",sender:sender,shipment:null,hPots:data.hPots,mPots:data.mPots});
 	}
 	else if(data.message == "mluck")
 	{
@@ -227,67 +217,26 @@ function checkPotionShipments(name)
 	return false;
 }
 
-function craftUpgrade(itemToUpgrade, upgradeLevel, buyable)
+function craftUpgrades(upgradeLevel)
 {
-	let item = character.items[locate_item(itemToUpgrade)];
-
-	if((!item && buyable) || (item && item.level >= upgradeLevel))
+	for(let i = 0; i < character.items.length; i++)
 	{
-		//let lastEmpty = -1;
-		//let emptySlots = ;
-		/*for(let i=0; i<character.items.length; i++)
+		let item = character.items[i];
+
+		if(item && itemsToUpgrade.includes(item.name) && item.level < upgradeLevel && !(item.level < upgradeLevel && item.grade == "high"))
 		{
-			if(item_properties(character.items[i]) == null)
+			log("Upgrading " + G.items[item.name].name + "...");
+
+			let scroll = "scroll0";
+			if(item.level >= upgradeLevelToUseTierTwoScroll)
 			{
-				lastEmpty = i;
-				emptySlots++;
+				scroll = "scroll1";
 			}
-		}*/
 
-		for(let i=character.items.length-1; i>0; i--)
-		{
-			if(locate_item(character.items[i]) == null || character.items[i] != itemToUpgrade)
-			{
-				swap(locate_item(itemToUpgrade), i);
-				break;
-				//lastEmpty = i;
-				//emptySlots++;
-			}
+			upgrade(i, locate_item(scroll));
+
+			return true;
 		}
-
-		/*
-		if(lastEmpty != -1 && item)
-		{
-			log("Moving +"+item.level + " " + G.items[item.name].name + " to last empty item slot");
-			swap(locate_item(itemToUpgrade), lastEmpty);
-		}
-
-		if(buyable)
-		{
-			log("Buying another " + G.items[itemToUpgrade].name);
-			buy_with_gold(itemToUpgrade);
-		}
-		else
-		{
-			log("Inventory full, crafting mode disabling.");
-			craftingOn = false;
-		}*/
-
-		return false;
-	}
-	else if(item && item.level < upgradeLevel)
-	{
-		log("Upgrading " + G.items[item.name].name + "...");
-
-		let scroll = "scroll0";
-		if(item.level >= 7)
-		{
-			scroll = "scroll1";
-		}
-
-		upgrade(locate_item(itemToUpgrade), locate_item(scroll));
-
-		return true;
 	}
 
 	return false;
@@ -335,6 +284,31 @@ function craftCompounds(levelToUse)
 	return true;
 }
 
+function buyBasicItems()
+{
+	let count = 0;
+
+	for(let i = 0; i < basicItemsToCraft.length; i++)
+	{
+		for(let k = 0; k < character.items.length; k++)
+		{
+			if(character.items[k] && (character.items[k].name == basicItemsToCraft[i] && character.items[k].level < upgradeLevelToStop))
+			{
+				count++;
+			}
+		}
+	}
+
+	if(count == 0)
+	{
+		for(let i = 0; i < basicItemsToCraft.length; i++)
+		{
+			log("Buying a " + G.items[basicItemsToCraft[i]].name);
+			buy_with_gold(basicItemsToCraft[i]);
+		}
+	}
+}
+
 function stockScrolls()
 {
 	for(let i = 0; i < scrolls.length; i++)
@@ -372,27 +346,14 @@ function buyPotionsFor(name, healthPots, manaPots)
 		return;
 	}
 
-	let hPotsAlreadyHave = quantity("hpot0");
-	let mPotsAlreadyHave = quantity("mpot0");
-
-	if(healthPots > hPotsAlreadyHave)
-	{
-		let hpotAmount = healthPots-hPotsAlreadyHave;
-		buy_with_gold("hpot0", hpotAmount);
-		log("Buying " + hpotAmount + " health potions");
-	}
-
-	if(manaPots > mPotsAlreadyHave)
-	{
-		let mpotAmount = manaPots-mPotsAlreadyHave;
-		buy_with_gold("mpot0", manaPots-mPotsAlreadyHave);
-		log("Buying " + mpotAmount + " mana potions");
-	}
+	buy_with_gold("hpot0", healthPots);
+	log("Buying " + healthPots + " health potions");
+	buy_with_gold("mpot0", manaPots);
+	log("Buying " + manaPots + " mana potions");
 
 	let potionShipment = {name:name, hPots:healthPots, mPots:manaPots};
 	potionShipments.push(potionShipment);
 	request.shipment = potionShipment;
-	request.fulfilled = true;
 }
 
 function deliverPotions(nameToDeliverTo)
@@ -451,11 +412,18 @@ function disableVendorMode()
 	vendorMode = false;
 }
 
-function dontWalkWithShop()
+function standCheck()
 {
-	if(character.stand)
+    if(is_moving(character) || smart.moving || returningToTown)
+    {
+		if(character.stand)
+		{
+			parent.close_merchant();
+		}
+	}
+	else if(vendorMode)
 	{
-		parent.close_merchant();
+		parent.open_merchant(locate_item("stand0"));
 	}
 }
 

@@ -7,14 +7,15 @@ load_code("rangerLogic");
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 5000000;    //  merchant won't go below this amount of gold in wallet
-var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","wbook0","quiver",];
-var upgradingBuyableItem = [];  //  if true will attempt to buy base items to continue crafting. need to manually set which, if any, are true. assumes false
-itemsToUpgrade.forEach(x=>{upgradingBuyableItem.push(false)});
+var basicItemsToCraft = ["pants","gloves","shoes","coat","helmet"];   //  keep buying and upgrading these
+var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","wbook0","quiver"];
 var upgradeLevelToStop = 7;
+var upgradeLevelToUseTierTwoScroll = 6;
 var itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt"];
 var compoundLevelToStop = 2;
-var vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring"];
+var vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll"];
 var buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow"];
+basicItemsToCraft.forEach(x=>{itemsToUpgrade.push(x)});
 itemsToUpgrade.forEach(x=>{buyFromPontyList.push(x)});
 itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
 //////
@@ -47,7 +48,7 @@ const merchantStandCoords = {x:-118, y:11};
 const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
 const lowPotions = 100;
-const spaceToKeep = 10;
+const spaceToKeep = 15;
 const whiteList = [merchantName, mageName, rangerName, priestName];
 //////
 
@@ -92,9 +93,14 @@ function main()
     {
         if(character.name == merchantName)
         {
-            dontWalkWithShop();
+            standCheck();
         }
 
+        return;
+    }
+
+    if(character.q.upgrade || character.q.compound)
+    {
         return;
     }
 
@@ -131,6 +137,11 @@ function main()
     for(let i = 0; i < specialMonsters.length; i++)
     {
         target = getMonsterFarmTarget(specialMonsters[i]);
+        if(target)
+        {
+            broadCastTarget(target);
+            break;
+        }
     }
 
     //  look for the monster you are farming
@@ -189,7 +200,7 @@ function main()
 // called every 5000ms
 function lateUpdate()
 {
-    if(character.rip)
+    if(character.rip || character.q.upgrade || character.q.compound)
     {
         return;
     }

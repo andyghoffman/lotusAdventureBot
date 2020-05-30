@@ -1,28 +1,27 @@
-var manaToReserve = 0.2;
-var energizeTarget = "LotusPriest"
+var defaultEnergizeTarget = "LotusRanger"
 
 function mageAuto(target)
 {
-	//if(character.mp < character.maxmp * manaToReserve)
-	//	return;
-
 	if(!is_on_cooldown("energize"))
 	{
-		parent.party_list.forEach(function(otherPlayerName)
-		{
-			let partyMember = parent.entities[otherPlayerName];
+		let energizeTarget = parent.entities[defaultEnergizeTarget];
 
-			if(partyMember && partyMember.id === energizeTarget)
+		parent.party_list.forEach(function(partyPlayer)
+		{
+			let partyMember = parent.entities[partyPlayer];
+
+			if(partyMember && partyMember.name != character.name && partyMember.mp < partyMember.max_mp*0.5)
 			{
-				if(!partyMember.s.energized && !is_on_cooldown("energize") && is_in_range(partyMember, "energize"))
-				{
-					change_target(partyMember);
-					use_skill("energize", partyMember);
-					reduce_cooldown("energize", character.ping);
-					change_target(target);
-				}
+				energizeTarget = partyMember;
+				break;
 			}
 		});
+
+		if(!energizeTarget.s.energized && is_in_range(energizeTarget, "energize"))
+		{
+			use_skill("energize", energizeTarget);
+			reduce_cooldown("energize", character.ping);
+		}
 	}
 
 	if(target)
