@@ -7,8 +7,8 @@ load_code("rangerLogic");
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 1000000;    //  merchant won't go below this amount of gold in wallet
-var basicItemsToCraft = ["bow"];   //  keep buying and upgrading these
-var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","wbook0","quiver"];
+var basicItemsToCraft = [];   //  keep buying and upgrading these
+var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","quiver"];
 var upgradeLevelToStop = 7;
 var upgradeLevelToUseTierTwoScroll = 6;
 var itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt"];

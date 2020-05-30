@@ -223,6 +223,7 @@ function personalSpace()
 {
 	if(is_moving(character) || smart.moving)
 	{
+		isStuck = false;
 		return;
 	}
 
@@ -247,7 +248,7 @@ function personalSpace()
 		let currentPos = {x:character.real_x,y:character.real_y};
 		let right = 0;
 		let up = 0;
-		let reverse = isStuck ? -5 : 1;
+		let reverse = isStuck ? -2 : 1;
 
 		if(target.x < character.x)
 			right = -target.range * 1.5 * reverse;
@@ -925,11 +926,13 @@ function depositInventoryAtBank()
 	smart_move("bank", ()=>
 	{
 		//	store in first bank
-		for(let i in character.items)
+		for(let i = 0; i < character.items.length; i++)
 		{
-			if(i && !itemsToHoldOnTo.includes(i.name))
+			let item = character.items[i];
+
+			if(item && !itemsToHoldOnTo.includes(item.name))
 			{
-				if((itemsToCompound.includes(i) && i.level < compoundLevelToStop) || (itemsToUpgrade.includes(i) && i.level < upgradeLevelToStop))
+				if(vendorTrash.includes(item.name) || (itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
 				{
 					continue;
 				}
@@ -943,11 +946,13 @@ function depositInventoryAtBank()
 		{
 			setTimeout(()=>
 			{
-				for(let i in character.items)
+				for(let i = 0; i < character.items.length; i++)
 				{
-					if(i && !itemsToHoldOnTo.includes(i.name))
+					let item = character.items[i];
+
+					if(item && !itemsToHoldOnTo.includes(item.name))
 					{
-						if((itemsToCompound.includes(i) && i.level < compoundLevelToStop) || (itemsToUpgrade.includes(i) && i.level < upgradeLevelToStop))
+						if(vendorTrash.includes(item.name) || (itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
 						{
 							continue;
 						}
