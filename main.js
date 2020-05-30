@@ -7,17 +7,19 @@ load_code("rangerLogic");
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 1000000;    //  merchant won't go below this amount of gold in wallet
-var basicItemsToCraft = [];   //  keep buying and upgrading these
-var itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","quiver"];
-var upgradeLevelToStop = 7;
-var upgradeLevelToUseTierTwoScroll = 6;
-var itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt"];
-var compoundLevelToStop = 2;
-var vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll"];
-var buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow"];
+const basicItemsToCraft = [];   //  keep buying and upgrading these
+const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","quiver"];
+const upgradeLevelToStop = 7;
+const upgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
+const itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt"];
+const compoundLevelToStop = 2;
+const vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll"];
+const buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow","seashell"];
+const elixirs = ["elixirint0", "elixitint1", "elixirdex0", "elixirdex1"];
 basicItemsToCraft.forEach(x=>{itemsToUpgrade.push(x)});
 itemsToUpgrade.forEach(x=>{buyFromPontyList.push(x)});
 itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
+buyFromPontyList.forEach(x=>{elixirs.push(x)});
 //////
 
 ///     farming settings        ///
@@ -52,7 +54,7 @@ const lowInventoryThreshold = 14;
 const monsterHpThresholdForSkills = 0.5;
 const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
 const whiteList = [merchantName, mageName, rangerName, priestName];
-const itemsToHoldOnTo = ["hpot0","mpot0","stand0","scroll0","scroll1","cscroll0","cscroll1"];
+const itemsToHoldOnTo = ["hpot0","mpot0"];
 const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
 //////
 
@@ -76,6 +78,16 @@ var sentRequests = [];
 
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
+
+onStart();
+
+function onStart()
+{
+    if(character.name == merchantName)
+    {
+        merchantOnStart();
+    }
+}
 
 //  called every 250ms
 function main()

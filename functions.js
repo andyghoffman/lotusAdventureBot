@@ -309,7 +309,7 @@ function stuckCheck(originalPosition)
 
 function isInTown()
 {
-	return (character.map === merchantStandMap && distance(character,merchantStandCoords) < 200);
+	return (character.map == merchantStandMap && distance(character,merchantStandCoords) < 200);
 }
 
 function partyPresent()
@@ -941,55 +941,43 @@ function checkForLowInventorySpace()
 function depositInventoryAtBank()
 {
 	banking = true;
-	traveling = true;
 
 	smart_move("bank", ()=>
 	{
 		//	store in first bank
-		for(let i = 0; i < character.items.length; i++)
-		{
-			let item = character.items[i];
-
-			if(item && !itemsToHoldOnTo.includes(item.name))
-			{
-				if(vendorTrash.includes(item.name) || (itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
-				{
-					continue;
-				}
-
-				bank_store(i, 0);
-			}
-		}
+		storeInventoryInBankVault(0);
 
 		//	store in second bank
 		if(checkForLowInventorySpace())
 		{
 			setTimeout(()=>
 			{
-				for(let i = 0; i < character.items.length; i++)
-				{
-					let item = character.items[i];
-
-					if(item && !itemsToHoldOnTo.includes(item.name))
-					{
-						if(vendorTrash.includes(item.name) || (itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
-						{
-							continue;
-						}
-
-						bank_store(i, 1);
-					}
-				}
-
+				storeInventoryInBankVault(1);
 				banking = false;
-				traveling = false;
 
 			}, 1000);
 		}
 		else
 		{
 			banking = false;
-			traveling = false;
 		}
 	});
+}
+
+function storeInventoryInBankVault(bankVaultId)
+{
+	for(let i = 0; i < character.items.length; i++)
+	{
+		let item = character.items[i];
+
+		if(item && !itemsToHoldOnTo.includes(item.name) && !(character.name == merchantName && merchantItems.includes(item.name)))
+		{
+			if(vendorTrash.includes(item.name) || (itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
+			{
+				continue;
+			}
+
+			bank_store(i, bankVaultId);
+		}
+	}
 }

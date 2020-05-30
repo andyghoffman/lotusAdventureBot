@@ -1,12 +1,19 @@
 ///		Merchant Settings		///
 const lowScrolls = 1;
 const scrollsToStock = 20;
+const merchantItems = ["stand0","scroll0","scroll1","cscroll0","cscroll1","seashell"];
 //////
 
 var vendorMode = false;			//	true when in town with shop, false when busy delivering items
 var deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
+var exchangeMode = false;		//	true when the merchant is busy exchanging items with an npc
 var potionShipments = [];
 var deliveryRequests = [];
+
+function merchantOnStart()
+{
+	enableVendorMode();
+}
 
 function merchantAuto(target)
 {
@@ -64,19 +71,11 @@ function merchantAuto(target)
 
 function merchantLateUpdate()
 {
-	stockScrolls();
 	checkRequests();
 
-	if(!vendorMode && !returningToTown && !deliveryMode && autoPlay && !banking)
+	if(!autoPlay || returningToTown || deliveryMode || banking || exchangeMode)
 	{
-		if(isInTown())
-		{
-			enableVendorMode();
-		}
-		else
-		{
-			returnToTown();
-		}
+		return;
 	}
 
 	if(checkForLowInventorySpace() && !banking && autoPlay && !returningToTown && !deliveryMode && autoPlay)
@@ -88,17 +87,24 @@ function merchantLateUpdate()
 
 	if(vendorMode && !deliveryMode && craftingOn && character.gold > minimumGold && isInTown())
 	{
+		stockScrolls();
 		sellVendorTrash();
 		buyBasicItems();
-		buyFromPonty(buyFromPontyList)
-		craftUpgrades(upgradeLevelToStop);
+		buyFromPonty();
+		craftUpgrades();
+		craftCompounds();
+		exchangeSeashells();
+	}
 
-		for(let i = 0; i < compoundLevelToStop; i++)
+	if(autoPlay && !vendorMode && !returningToTown && !deliveryMode && !banking && !exchangeMode)
+	{
+		if(isInTown())
 		{
-			if(craftCompounds(i))
-			{
-				break;
-			}
+			enableVendorMode();
+		}
+		else
+		{
+			returnToTown();
 		}
 	}
 }
@@ -245,13 +251,13 @@ function checkPotionShipments(name)
 	return false;
 }
 
-function craftUpgrades(finalTargetUpgradeLevel)
+function craftUpgrades()
 {
 	for(let i = 0; i < character.items.length; i++)
 	{
 		let item = character.items[i];
 
-		if(item && itemsToUpgrade.includes(item.name) /*&& (item.level < finalTargetUpgradeLevel && G.items[item.name].grades[0] > finalTargetUpgradeLevel)*/)
+		if(item && itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop)
 		{
 			log("Upgrading " + G.items[item.name].name + "...");
 
@@ -270,7 +276,18 @@ function craftUpgrades(finalTargetUpgradeLevel)
 	return false;
 }
 
-function craftCompounds(levelToUse)
+function craftCompounds()
+{
+	for(let i = 0; i < compoundLevelToStop; i++)
+	{
+		if(craftCompound(i))
+		{
+			break;
+		}
+	}
+}
+
+function craftCompound(levelToUse)
 {
 	let triple = [-1,-1,-1];
 	let foundItem = "";
@@ -456,8 +473,10 @@ function standCheck()
 	}
 }
 
-function buyFromPonty(itemsToBuy)
+function buyFromPonty()
 {
+	let itemsToBuy = buyFromPontyList;
+
 	parent.socket.once("secondhands", function(data)
 	{
 		for(let pontyItem of data)
@@ -494,10 +513,42 @@ function buyFromPonty(itemsToBuy)
 	parent.socket.emit("secondhands");
 }
 
-function exchangeItems(npcName, item, numberOfExchanges)
+function exchangeItems(npcName, itemName, numberOfExchanges)
 {
+	disableVendorMode();
+	exchangeMode = true;
+
 	smart_move(npcName, ()=>
 	{
+		for(let i = 0; i < numberOfExchanges; i++)
+		{
+			let count = i;
 
+			setTimeout((x=count)=>
+			{
+				exchange(locate_item(itemName));
+
+				if(x == numberOfExchanges-1)
+				{
+					exchangeMode = false;
+				}
+
+			}, 5000*(i));
+		}
 	});
+}
+
+function exchangeSeashells()
+{
+	let seashells = character.items[locate_item("seashell")];
+
+	if(!seashells || seashells.q < 20)
+	{
+		return;
+	}
+
+	log("Exchanging seashells...");
+
+	let exchanges = Math.floor(seashells.q/20);
+	exchangeItems("fisherman", "seashell", exchanges);
 }
