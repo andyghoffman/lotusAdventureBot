@@ -246,13 +246,13 @@ function checkPotionShipments(name)
 	return false;
 }
 
-function craftUpgrades(upgradeLevel)
+function craftUpgrades(finalTargetUpgradeLevel)
 {
 	for(let i = 0; i < character.items.length; i++)
 	{
 		let item = character.items[i];
 
-		if(item && itemsToUpgrade.includes(item.name) && item.level < upgradeLevel && !(item.level < upgradeLevel && item.grade == "high"))
+		if(item && itemsToUpgrade.includes(item.name) && (item.level < finalTargetUpgradeLevel && G.items[item.name].grades[0] > finalTargetUpgradeLevel))
 		{
 			log("Upgrading " + G.items[item.name].name + "...");
 
@@ -317,6 +317,7 @@ function buyBasicItems()
 {
 	let count = 0;
 
+	//	only buy if we are out of basic items in inventory to upgrade
 	for(let i = 0; i < basicItemsToCraft.length; i++)
 	{
 		for(let k = 0; k < character.items.length; k++)
