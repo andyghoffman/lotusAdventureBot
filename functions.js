@@ -167,6 +167,26 @@ function on_magiport(name)
 	}
 }
 
+function classRoutine(target)
+{
+    if(character.ctype == "merchant")
+    {
+        merchantAuto(target);
+    }
+    else if(character.ctype == "priest")
+    {
+        priestAuto(target);
+    }
+    else if(character.ctype == "mage")
+    {
+        mageAuto(target);
+    }
+    else if(character.ctype == "ranger")
+    {
+        rangerAuto(target);
+    }
+}
+
 function readyCheck()
 {
 	if(readyChecking)
@@ -296,7 +316,7 @@ function personalSpace()
 			let leader = parent.entities[get_player(partyLeader)];
 
 			//	make sure you dont run away from party
-			if(leader && distance(adjustment, leader) < minimumMonsterDistance*2)
+			if(leader && distance(adjustment, leader) < maxLeaderDistance)
 			{
 				smart_move(adjustment, ()=>{stuckCheck(currentPos);});
 				return;
@@ -513,13 +533,8 @@ function followLeader()
 
 	if(leader)
 	{
-		if (distance(character, leader) > minimumMonsterDistance*2)
+		if (distance(character, leader) > maxLeaderDistance)
 		{
-        	/*move
-			(
-            	character.real_x+(leader.x-character.real_x) / 2,
-            	character.real_y+(leader.y-character.real_y) / 2
-			);*/
 			approachTarget(leader);
 		}
 
@@ -902,10 +917,14 @@ function toggleAutoPlay()
 
     if(character.name == partyLeader)
     {
-        send_cm(mageName, {message:"autoToggle",auto:autoPlay});
-        send_cm(rangerName, {message:"autoToggle",auto:autoPlay});
-
-        log("sending autoPlayToggle to Mage & Ranger");
+		for(let p in partyList)
+		{
+			if(p != character.name)
+			{
+				send_cm(character.name, {message:"autoToggle",auto:autoPlay});
+				log("sending autoPlayToggle to " + character.name);
+			}
+		}
     }
 
     log("autoPlay: " + autoPlay);
@@ -915,6 +934,7 @@ function returnPartyToTown()
 {
     log("Returning party to town.");
 
+	toggleAutoPlay();
     returnToTown();
     send_cm(mageName, {message:"town"});
     send_cm(rangerName, {message:"town"});
@@ -978,9 +998,14 @@ function validTargetForSkill(target)
 function checkForLowInventorySpace()
 {
 	let emptyInvSlots = 0;
-	for(let i of character.items)
+	for(let item of character.items)
 	{
-		if(!i)
+		if(!item)
+		{
+			emptyInvSlots++;
+		}
+		//	don't count things you are upgrading toward low inventory. compound items do count since these can take up a lot of space
+		else if(character.name == merchantName && isItemOnCraftList(item.name) && !itemsToCompound.includes(item.name))
 		{
 			emptyInvSlots++;
 		}
@@ -991,6 +1016,13 @@ function checkForLowInventorySpace()
 
 function depositInventoryAtBank()
 {
+	if(!isInTown())
+	{
+		returnToTown();
+		return;
+	}
+
+	log("Depositing inventory at bank...");
 	banking = true;
 
 	smart_move("bank", ()=>
@@ -1021,9 +1053,13 @@ function storeInventoryInBankVault(bankVaultId)
 	{
 		let item = character.items[i];
 
-		if(item && !itemsToHoldOnTo.includes(item.name) && !(character.name == merchantName && merchantItems.includes(item.name)))
+		if(item)
 		{
-			if(vendorTrash.includes(item.name) || (itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
+			if(itemsToHoldOnTo.includes(item.name) || vendorTrash.includes(item.name))
+			{
+				continue;
+			}
+			if(character.name == merchantName && (itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
 			{
 				continue;
 			}
@@ -1031,6 +1067,12 @@ function storeInventoryInBankVault(bankVaultId)
 			bank_store(i, bankVaultId);
 		}
 	}
+}
+
+function isItemOnCraftList(itemName)
+{
+	let r = (!itemsToHoldOnTo.includes(itemName) && (itemsToUpgrade.includes(itemName) || itemsToCompound.includes(itemName)));
+	return r;
 }
 
 function lookForSpecialTargets()

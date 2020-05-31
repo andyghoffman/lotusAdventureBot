@@ -7,7 +7,7 @@ load_code("rangerLogic");
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 1000000;    //  merchant won't go below this amount of gold in wallet
-const basicItemsToCraft = [];   //  keep buying and upgrading these
+const basicItemsToCraft = ["coat","pants","gloves","helmet","shoes"];   //  keep buying and upgrading these
 const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","quiver"];
 const upgradeLevelToStop = 7;
 const upgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
@@ -16,6 +16,7 @@ const compoundLevelToStop = 2;
 const vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll"];
 const buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow","seashell"];
 const elixirs = ["elixirint0", "elixitint1", "elixirdex0", "elixirdex1"];
+elixirs.forEach(x=>{merchantItems.push(x)});
 basicItemsToCraft.forEach(x=>{itemsToUpgrade.push(x)});
 itemsToUpgrade.forEach(x=>{buyFromPontyList.push(x)});
 itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
@@ -52,6 +53,7 @@ const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
 const lowPotions = 100;
 const minimumMonsterDistance = 45;
+const maxLeaderDistance = 60;
 const lowInventoryThreshold = 14;
 const monsterHpThresholdForSkills = 0.5;
 const healthPotThreshold = 0.98, manaPotThreshold = 0.95;
@@ -130,8 +132,14 @@ function main()
         return;
     }
 
-    //  standard routines
-	if(character.name != merchantName)
+    //  merchant standard routine
+    if(character.name == merchantName)
+	{
+        merchantAuto();
+        return;
+    }
+    //  standard routine for party group
+    else
 	{
         //  autofollow leader when not auto-farming
         if(character.name != partyLeader && !farmingModeActive && parent.entities[partyLeader])
@@ -152,17 +160,9 @@ function main()
             return;
         }
     }
-    //  merchant standard routine
-    else if(character.name == merchantName)
-	{
-        merchantAuto();
-        return;
-    }
-
-    let target = get_targeted_monster();
-
 
     //  look for the monster you are farming
+    let target = get_targeted_monster();
     if(!target)
     {
         //  look for any special targets
@@ -172,14 +172,20 @@ function main()
         {
             target = getMonsterFarmTarget(farmMonsterName);
         }
-    }5
+    }
+
+    //  if the monster is targeting another player, drop the target unless it's a special monster
+    if(target && target.target && target.target.player && !partyList.includes(target.target.name) && !specialMonsters.includes(target.name))
+    {
+        target = null;
+    }
 
     //  party leader standard routine
 	if(character.name == partyLeader)
 	{
 		if(target)
 		{
-			priestAuto(target);
+            classRoutine(target);
 		}
 		else if(!traveling)
 		{
@@ -190,19 +196,12 @@ function main()
         //  keep personal space
         personalSpace();
     }
-    //  party follower routines
+    //  codeBot party follower routines
 	else
 	{
 		if(target)
 		{
-			if(character.ctype === "ranger")
-			{
-				rangerAuto(target);
-			}
-			else if(character.ctype === "mage")
-			{
-				mageAuto(target);
-            }
+            classRoutine(target);
 		}
 		else if(!traveling)
 		{
@@ -214,7 +213,7 @@ function main()
         personalSpace();
 
         //  if leader is too far away approach him
-        if(parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) > minimumMonsterDistance*2)
+        if(parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) > maxLeaderDistance)
         {
             followLeader();
         }

@@ -12,6 +12,7 @@ var deliveryRequests = [];
 
 function merchantOnStart()
 {
+	merchantItems.forEach(x=>{itemsToHoldOnTo.push(x)});
 	enableVendorMode();
 }
 
@@ -185,7 +186,7 @@ function sellVendorTrash()
 	{
 		let item = character.items[i];
 
-		if(item && vendorTrash.find(x=>x==item.name))
+		if(item && vendorTrash.includes(item.name))
 		{
 			log("Selling " + item.name + " to vendor.");
 			sell(i, item.q);
@@ -334,15 +335,13 @@ function buyBasicItems()
 {
 	let count = 0;
 
-	//	only buy if we are out of basic items in inventory to upgrade
-	for(let i = 0; i < basicItemsToCraft.length; i++)
+	//	only buy if we are out of items in inventory to upgrade
+	for(let k = 0; k < character.items.length; k++)
 	{
-		for(let k = 0; k < character.items.length; k++)
+		let item = character.items[k];
+		if(item && (isItemOnCraftList(item.name) && !itemsToCompound.includes(item.name) && item.level < upgradeLevelToStop))
 		{
-			if(character.items[k] && (character.items[k].name == basicItemsToCraft[i] && character.items[k].level < upgradeLevelToStop))
-			{
-				count++;
-			}
+			count++;
 		}
 	}
 
@@ -350,6 +349,12 @@ function buyBasicItems()
 	{
 		for(let i = 0; i < basicItemsToCraft.length; i++)
 		{
+			if(!G.items[basicItemsToCraft[i]])
+			{
+				log(basicItemsToCraft[i] + " is not a valid item name!");
+				return;
+			}
+
 			log("Buying a " + G.items[basicItemsToCraft[i]].name);
 			buy_with_gold(basicItemsToCraft[i]);
 		}
@@ -440,13 +445,12 @@ function enableVendorMode()
 	}
 	else
 	{
-		smart_move(merchantStandCoords, function()
+		smart_move(merchantStandCoords, ()=>
 		{
 			log("Merchant entered vendor mode.");
 			log("Crafting Mode: " + craftingOn);
 			parent.open_merchant(locate_item("stand0"));
 			vendorMode = true;
-			returningToTown = false;
 		});
 	}
 }
