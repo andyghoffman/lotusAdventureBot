@@ -53,7 +53,7 @@ function merchantAuto(target)
 					reduce_cooldown("mluck", character.ping);
 				}
 			}
-			else if(deliveryMode && !returningToTown)
+			else if(deliveryMode && !returningToTown && deliveryRequests.length > 0)
 			{
 				log("Moving closer");
 				approachTarget(target);
@@ -76,7 +76,7 @@ function merchantLateUpdate()
 {
 	checkRequests();
 
-	if(!autoPlay || returningToTown || deliveryMode || banking || exchangeMode)
+	if(!autoPlay || isBusy())
 	{
 		return;
 	}
@@ -101,14 +101,25 @@ function merchantLateUpdate()
 		}
 	}
 
-	if(checkForLowInventorySpace())
+	if(checkForLowInventorySpace() && (autoPlay && !isBusy()))
 	{
-		disableVendorMode();
-		depositInventoryAtBank();
-		return;
+		if(!isInTown())
+		{
+			returnToTown();
+			return;
+		}
+
+		sellVendorTrash();
+
+		if(checkForLowInventorySpace())
+		{
+			disableVendorMode();
+			depositInventoryAtBank();
+			return;
+		}
 	}
 
-	if(autoPlay && !vendorMode && !returningToTown && !deliveryMode && !banking && !exchangeMode)
+	if(autoPlay && !vendorMode && !isBusy())
 	{
 		if(isInTown())
 		{
@@ -175,6 +186,13 @@ function merchant_on_magiport(name)
 	{
 		accept_magiport(name);
 	}
+}
+
+//	returns true if the merchant is occupied with a task
+function isBusy()
+{
+	let r = returningToTown || deliveryMode || banking || exchangeMode;
+	return r;
 }
 
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
@@ -401,6 +419,19 @@ function buyPotionsFor(name, healthPots, manaPots)
 		return;
 	}
 
+	if(checkForLowInventorySpace())
+	{
+		sellVendorTrash();
+
+		if(checkForLowInventorySpace())
+		{
+			log("Need inventory space to buy potions, going to bank.");
+			disableVendorMode();
+			depositInventoryAtBank();
+			return;
+		}
+	}
+
 	if(!isInTown())
 	{
 		log("Returning to buy potions...");
@@ -518,7 +549,7 @@ function buyFromPonty()
 
 				if(buy)
 				{
-					log("Buying " + pontyItem.name + " from Ponty!");
+					log("Buying " + G.items[pontyItem.name].name + " from Ponty!");
 					parent.socket.emit("sbuy", { "rid": pontyItem.rid })
 				}
             }

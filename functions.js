@@ -294,7 +294,7 @@ function personalSpace()
 		let currentPos = {x:character.real_x,y:character.real_y};
 		let right = 0;
 		let up = 0;
-		let reverse = isStuck ? -2 : 1;
+		let reverse = isStuck ? -1 : 1;
 
 		if(target.x < character.x)
 		{
@@ -479,6 +479,16 @@ function checkPotionInventory()
 	{
 		let healthPotsNeeded = healthPotionsToHave - hPotions;
 		let manaPotsNeeded = manaPotionsToHave - mPotions;
+
+		if(healthPotsNeeded < 0)
+		{
+			healthPotsNeeded = 0;
+		}
+		if(manaPotsNeeded < 0)
+		{
+			manaPotsNeeded = 0;
+		}
+
 		let potsList = {message:"buyPots", hPots:healthPotsNeeded, mPots:manaPotsNeeded};
 		send_cm(merchantName, potsList);
 

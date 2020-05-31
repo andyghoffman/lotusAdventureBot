@@ -6,7 +6,7 @@ load_code("rangerLogic");
 
 ///     crafting settings       ///
 const craftingEnabled = true;
-const minimumGold = 1000000;    //  merchant won't go below this amount of gold in wallet
+const minimumGold = 5000000;    //  merchant won't go below this amount of gold in wallet
 const basicItemsToCraft = ["coat","pants","gloves","helmet","shoes"];   //  keep buying and upgrading these
 const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","quiver"];
 const upgradeLevelToStop = 7;
