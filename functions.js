@@ -453,7 +453,7 @@ function usePotions(healthPotThreshold = 0.9, manaPotThreshold = 0.9)
 function checkBuffs()
 {
 	//	check that you have mLuck from merchant
-	if(!character.s.mluck || character.s.mluck.f != merchantName)
+	if(!checkMluck(character))
 	{
 		//	if you have someone elses mluck and in town just accept it, merchant will fix it after it leaves
 		if(character.s.mluck && isInTown())
@@ -464,7 +464,7 @@ function checkBuffs()
 		requestMluck();
 		return false;
 	}
-	else if(character.s.mluck && character.s.mluck.f == merchantName)
+	else
 	{
 		return true;
 	}

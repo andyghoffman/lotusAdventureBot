@@ -198,7 +198,7 @@ function isBusy()
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
 function checkMluck(target)
 {
-	if(!target.s.mluck || target.s.mluck.f != merchantName)
+	if(!target.s.mluck || target.s.mluck.f != merchantName || target.s.mluck.ms < 1800000)
 	{
 		return false;
 	}
