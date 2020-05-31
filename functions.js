@@ -358,7 +358,7 @@ function stuckCheck(originalPosition)
 			stopFarmMode();
             returnToTown();
 
-		}, 15000);
+		}, 30000);
 	}
 }
 
@@ -369,13 +369,13 @@ function isInTown()
 
 function partyPresent()
 {
-	if(parent.party_list.length < 4)
+	if(parent.party_list.length < partyList.length)
 	{
 		return false;
 	}
 
 	if((character.name === partyLeader || parent.entities[partyLeader]) &&
-	(character.name === partyList[1] || parent.entities[partyList[1]] ) &&
+	(character.name === partyList[1] || parent.entities[partyList[1]]) &&
 	(character.name === partyList[2] || parent.entities[partyList[2]]))
 	{
 		return true;
@@ -470,6 +470,7 @@ function checkBuffs()
 	}
 }
 
+//	returns true if potion inventory is OK, false if you need potions
 function checkPotionInventory()
 {
 	let	hPotions = quantity("hpot0");
@@ -495,6 +496,20 @@ function checkPotionInventory()
 		if(sentRequests.find(x=>x.message=="potions"))
 		{
 			log(character.name + " waiting for potions, resending request... ");
+
+			//	try to fix the problem yourself if the merchant isn't responding
+			if(hPotions == 0 || mPotions == 0)
+			{
+				log(character.name + " has no potions, is returning to town.");
+				farmingModeActive = false;
+				returnToTown();
+				setTimeout(()=>
+				{
+					log(character.name + " attempting to buy potions.");
+					buy_with_gold(healthPotsNeeded);
+					buy_with_gold(manaPotsNeeded);
+				}, 10000);
+			}
 		}
 		else
 		{
@@ -519,7 +534,11 @@ function transferAllToMerchant()
 
     if(character.ctype !== "merchant" && merchant && merchant.owner === character.owner && distance(character, merchant) < 400)
 	{
-		send_gold(merchant, character.gold)
+		//	hold onto gold if you don't have potions, probably means merchant is stuck and you need to buy them yourself
+		if(!checkPotionInventory())
+		{
+			send_gold(merchant, character.gold)
+		}
 
         for(let i = 0; i < character.items.length; i++)
 		{
@@ -788,7 +807,7 @@ function tidyInventory()
 
 function initParty()
 {
-	if(parent.party_list.length == 4)
+	if(parent.party_list.length >= partyList.length)
 	{
 		return;
 	}

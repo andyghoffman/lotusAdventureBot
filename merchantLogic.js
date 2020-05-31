@@ -13,7 +13,7 @@ var deliveryRequests = [];
 function merchantOnStart()
 {
 	merchantItems.forEach(x=>{itemsToHoldOnTo.push(x)});
-	pontyExclude.forEach(x=>{buyFromPontyList.pop(x)});
+	pontyExclude.forEach(x=>{buyFromPontyList.splice(x)});
 
 	enableVendorMode();
 }
@@ -297,9 +297,17 @@ function craftUpgrades()
 				scroll = "scroll1";
 			}
 
-			upgrade(i, locate_item(scroll));
+			let scrollToUse = locate_item(scroll);
 
-			return true;
+			if(scrollToUse > -1)
+			{
+				upgrade(i, scrollToUse);
+				return true;
+			}
+			else
+			{
+				log("Missing " + G.items[scroll].name);
+			}
 		}
 	}
 
@@ -351,10 +359,19 @@ function craftCompound(levelToUse)
 		return false;
 	}
 
-	log("Compounding three +" + levelToUse + " " + G.items[foundItem].name + "...");
-
 	let scroll = "cscroll0";
-	compound(triple[0], triple[1], triple[2], locate_item(scroll));
+	let scrollToUse = locate_item(scroll);
+
+	if(scrollToUse > -1)
+	{
+		log("Compounding three +" + levelToUse + " " + G.items[foundItem].name + "...");
+		compound(triple[0], triple[1], triple[2], scrollToUse);
+		return true;
+	}
+	else
+	{
+		log("Missing " + G.items[scroll].name);
+	}
 
 	return true;
 }
@@ -522,6 +539,7 @@ function standCheck()
 function buyFromPonty()
 {
 	let itemsToBuy = buyFromPontyList;
+	pontyExclude.forEach(x=>{itemsToBuy.splice(x)});
 
 	parent.socket.once("secondhands", function(data)
 	{
