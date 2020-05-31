@@ -38,22 +38,23 @@ const farmCoords = {x:1312.8, y:-853.8};    //  only used if farmMode is 'coords
 const specialMonsters = ["snowman","phoenix"];
 //////
 
-///     character settings      ///
+///     party/character settings      ///
 const merchantName = "LotusMerch";
 const mageName = "LotusMage";
 const rangerName = "LotusRanger";
 const priestName = "LotusPriest";
 const partyLeader = priestName;
+const partyList = [merchantName, mageName, rangerName, priestName]
+const whiteList = partyList;
 const merchantStandMap = "main";
 const merchantStandCoords = {x:-118, y:11};
 const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
 const lowPotions = 100;
-const minimumMonsterDistance = 15;
+const minimumMonsterDistance = 45;
 const lowInventoryThreshold = 14;
 const monsterHpThresholdForSkills = 0.5;
-const healthPotThreshold = 0.8, manaPotThreshold = 0.8;
-const whiteList = [merchantName, mageName, rangerName, priestName];
+const healthPotThreshold = 0.98, manaPotThreshold = 0.95;
 const itemsToHoldOnTo = ["hpot0","mpot0"];
 const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
 //////
@@ -70,7 +71,8 @@ var autoPlay = fullAuto;
 var aloneChecking = false;
 var farmingModeActive = false;
 var craftingOn = craftingEnabled;
-var whosReady = {priest:false,mage:false,ranger:false,merchant:false};
+var whosReady = {leader:false,merchant:false,codeBotOne:false,codeBotTwo:false};
+var readyChecking = false;
 var traveling = false;
 var returningToTown = false;
 var banking = false;
@@ -79,8 +81,8 @@ var sentRequests = [];
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
 
+//  called on initialization
 onStart();
-
 function onStart()
 {
     if(character.name == merchantName)
@@ -164,15 +166,7 @@ function main()
     if(!target)
     {
         //  look for any special targets
-        for(let i = 0; i < specialMonsters.length; i++)
-        {
-            target = getMonsterFarmTarget(specialMonsters[i]);
-            if(target && specialMonsters.includes(target.name))
-            {
-                broadCastTarget(target);
-                break;
-            }
-        }
+        target = lookForSpecialTargets();
 
         if(!target)
         {
@@ -268,7 +262,7 @@ function lateUpdate()
     //  party leader keeps things in check
 	if(character.name == partyLeader)
 	{
-        if(readyToGo() && partyPresent() && !farmingModeActive && !aloneChecking)
+        if(readyToGo() && partyPresent() && !farmingModeActive)
         {
             letsGo();
         }

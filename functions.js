@@ -8,6 +8,7 @@ function on_cm(sender, data)
 	else if(!data.message)
 	{
 		log(character.name + " recieved unexpected cm format from " + sender);
+		show_json(data);
 		return;
 	}
 
@@ -26,10 +27,9 @@ function on_cm(sender, data)
 
         return;
 	}
-	else if(data.message == "readycheck")
+	else if(data.message == "readyCheck")
 	{
-		log(character.name + " recieved readycheck from " + sender);
-
+		log(character.name + " recieved readyCheck from " + sender);
 		stopFarmMode();
 
 		let ready, buffs, pots = false;
@@ -45,30 +45,12 @@ function on_cm(sender, data)
 			ready = buffs & pots;
 		}
 
-		if(sender == priestName)
-			whosReady.priest = data.isReady;
-		else if(sender == mageName)
-			whosReady.mage = data.isReady;
-		else if(sender == rangerName)
-			whosReady.ranger = data.isReady;
-		else if(sender == merchantName)
-			whosReady.merchant = data.isReady;
-
-		if(character.name == priestName)
-			whosReady.priest = ready;
-		else if(character.name == mageName)
-			whosReady.mage = ready;
-		else if(character.name == rangerName)
-			whosReady.ranger = ready;
-		else if(character.name == merchantName)
-			whosReady.merchant = ready;
-
-		send_cm(sender, {message:"readyreply",isReady:ready,hasBuffs:buffs,hasPots:pots});
+		send_cm(sender, {message:"readyReply",isReady:ready,hasBuffs:buffs,hasPots:pots});
 		return;
 	}
-	else if(data.message == "readyreply")
+	else if(data.message == "readyReply")
 	{
-		let reason = character.name + " recieved readyreply from " + sender + ". " + sender + " is " + (data.isReady?"ready!":"not ready. ")
+		let reason = character.name + " recieved readyReply from " + sender + ". " + sender + " is " + (data.isReady?"ready!":"not ready. ")
 
 		if(sender != merchantName)
 		{
@@ -80,26 +62,51 @@ function on_cm(sender, data)
 
 		log(reason);
 
-		if(sender == priestName)
-			whosReady.priest = data.isReady;
-		else if(sender == mageName)
-			whosReady.mage = data.isReady;
-		else if(sender == rangerName)
-			whosReady.ranger = data.isReady;
+		if(sender == partyLeader)
+		{
+			whosReady.leader = data.isReady;
+		}
 		else if(sender == merchantName)
+		{
 			whosReady.merchant = data.isReady;
+		}
+		else if(partyList.includes(sender))
+		{
+			if(!whosReady.codeBotOne && !whosReady.codeBotTwo)
+			{
+				whosReady.codeBotOne = data.isReady;
+			}
+			else if(whosReady.codeBotOne && !whosReady.codeBotTwo)
+			{
+				whosReady.codeBotTwo = data.isReady;
+			}
+		}
+
+		if(readyToGo())
+		{
+			for(let p of partyList)
+			{
+				if(p != character.name)
+				{
+					send_cm(sender, {message:"partyReady"});
+				}
+			}
+		}
 
 		return;
 	}
-	else if(data.message == "letsgo")
+	else if(data.message == "partyReady")
+	{
+        log("Ready!");
+        whosReady = {leader:true,merchant:true,codeBotOne:true,codeBotTwo:true};
+		return;
+    }
+	else if(data.message == "letsGo")
 	{
         log("Let's go!");
-        whosReady = {priest:true,mage:true,ranger:true,merchant:true};
+        whosReady = {leader:true,merchant:true,codeBotOne:true,codeBotTwo:true};
 		farmingModeActive = true;
-		if(fullAuto)
-		{
-			autoPlay = true;
-		}
+		autoPlay = fullAuto;
 
 		return;
     }
@@ -162,20 +169,35 @@ function on_magiport(name)
 
 function readyCheck()
 {
+	if(readyChecking)
+	{
+		return;
+	}
+
 	stopFarmMode();
+	readyChecking = true;
 
 	let buffs = checkBuffs();
 	let pots = checkPotionInventory();
 	let ready = buffs && pots;
 
-	if(character.ctype === "priest")
-		whosReady.priest = ready;
-	if(character.ctype === "mage")
-		whosReady.mage = ready;
-	if(character.ctype === "ranger")
-		whosReady.ranger = ready;
-	if(character.ctype === "merchant")
+	if(character.name == partyLeader)
+	{
+		whosReady.leader = ready;
+	}
+	else if(character.name == merchantName)
+	{
 		whosReady.merchant = ready;
+	}
+	else if(partyList.includes(character.name))
+	{
+		whosReady.codeBotOne = ready;
+	}
+	else
+	{
+		log("Ready check attempt from character not in party list");
+		return;
+	}
 
 	if(ready)
 	{
@@ -183,14 +205,13 @@ function readyCheck()
 
 		if(!readyToGo())
 		{
-			parent.party_list.forEach(function(otherPlayerName)
+			for(let p of partyList)
 			{
-				let partyMember = parent.entities[otherPlayerName];
-				if(partyMember)
+				if(p != character.name)
 				{
-					send_cm(partyMember.name, {message:"readycheck",isready:ready});
+					send_cm(p, {message:"readyCheck",isReady:ready});
 				}
-			});
+			}
 		}
 	}
 	else if(!ready)
@@ -211,13 +232,19 @@ function readyCheck()
                 goTo("main");
 		}
 	}
+
+	setTimeout(()=>
+	{
+		readyChecking = false;
+	}, 30000);
 }
 
 function readyToGo()
 {
-	return (whosReady.priest && whosReady.mage && whosReady.ranger);
+	return (whosReady.leader && whosReady.merchant && whosReady.codeBotOne && whosReady.codeBotTwo);
 }
 
+//	social distancing
 function personalSpace()
 {
 	if(is_moving(character) || smart.moving)
@@ -236,13 +263,8 @@ function personalSpace()
 		target = get_nearest_monster();
 	}
 
-	if(distance(character, target) > minimumMonsterDistance)
-	{
-		return;
-	}
-
 	//	try to move out of the monster's range
-    if(target && (distance(character, target) < target.range))
+    if(target && (distance(character, target) < target.range || distance(character, target) < minimumMonsterDistance))
     {
 		let currentPos = {x:character.real_x,y:character.real_y};
 		let right = 0;
@@ -250,14 +272,22 @@ function personalSpace()
 		let reverse = isStuck ? -2 : 1;
 
 		if(target.x < character.x)
-			right = -target.range * 1.5 * reverse;
+		{
+			right = -(target.range+minimumMonsterDistance) * reverse;
+		}
 		else
-			right = target.range * 1.5 * reverse;
+		{
+			right = (target.range+minimumMonsterDistance) * reverse;
+		}
 
 		if(target.y < character.y)
-			up = target.range * 1.5 * reverse;
+		{
+			up = (target.range+minimumMonsterDistance) * reverse;
+		}
 		else
-			up = -target.range * 1.5 * reverse;
+		{
+			up = -(target.range+minimumMonsterDistance) * reverse;
+		}
 
 		adjustment = {x:character.x+right, y:character.y+up};
 
@@ -319,9 +349,16 @@ function partyPresent()
 		return false;
 	}
 
-	return (parent.entities[priestName] || character.name === priestName) &&
-			(parent.entities[mageName] || character.name === mageName) &&
-			(parent.entities[rangerName] || character.name === rangerName);
+	if((character.name === partyLeader || parent.entities[partyLeader]) &&
+	(character.name === partyList[1] || parent.entities[partyList[1]] ) &&
+	(character.name === partyList[2] || parent.entities[partyList[2]]))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 function requestMluck()
@@ -832,12 +869,26 @@ function aloneCheck(msToWait = 30000)
 
 function letsGo()
 {
-	log("Let's go!");
+	if(checkBuffs() && checkPotionInventory())
+	{
+		log("Let's go!");
 
-	send_cm(mageName, {message:"letsgo"});
-	send_cm(rangerName, {message:"letsgo"});
+		for(let p of partyList)
+		{
+			if(p != character.name)
+			{
+				send_cm(p, {message:"letsGo"});
+			}
+		}
 
-	farmingModeActive = true;
+		whosReady = {leader:true,merchant:true,codeBotOne:true,codeBotTwo:true};
+		farmingModeActive = true;
+		aloneChecking = false;
+	}
+	else
+	{
+		readyCheck();
+	}
 }
 
 function toggleAutoPlay()
@@ -907,7 +958,7 @@ function stopFarmMode()
 	}
 
     farmingModeActive = false;
-    whosReady = {priest:false,mage:false,ranger:false,merchant:false};
+    whosReady = {leader:false,merchant:false,codeBotOne:false,codeBotTwo:false};
 }
 
 function validTargetForSkill(target)
@@ -980,4 +1031,19 @@ function storeInventoryInBankVault(bankVaultId)
 			bank_store(i, bankVaultId);
 		}
 	}
+}
+
+function lookForSpecialTargets()
+{
+	for(let i = 0; i < specialMonsters.length; i++)
+	{
+		target = getMonsterFarmTarget(specialMonsters[i]);
+		if(target && specialMonsters.includes(target.name))
+		{
+			broadCastTarget(target);
+			return target;
+		}
+	}
+
+	return null;
 }

@@ -93,6 +93,7 @@ function merchantLateUpdate()
 		buyFromPonty();
 		craftUpgrades();
 		craftCompounds();
+		exchangeWithXyn();
 		exchangeSeashells();
 	}
 
@@ -513,7 +514,7 @@ function buyFromPonty()
 	parent.socket.emit("secondhands");
 }
 
-function exchangeItems(npcName, itemName, numberOfExchanges)
+function exchangeItems(npcName, itemName, numberOfExchanges, onComplete)
 {
 	disableVendorMode();
 	exchangeMode = true;
@@ -531,6 +532,11 @@ function exchangeItems(npcName, itemName, numberOfExchanges)
 				if(x == numberOfExchanges-1)
 				{
 					exchangeMode = false;
+
+					if(onComplete)
+					{
+						onComplete();
+					}
 				}
 
 			}, 5000*(i));
@@ -551,4 +557,24 @@ function exchangeSeashells()
 
 	let exchanges = Math.floor(seashells.q/20);
 	exchangeItems("fisherman", "seashell", exchanges);
+}
+
+function exchangeWithXyn()
+{
+	let xynTypes = ["gem","box"];
+
+	for(let itemType of xynTypes)
+	{
+		for(let i = 0; i < character.items.length; i++)
+		{
+			let item = character.items[i];
+
+			if(item && G.items[item.name].type == itemType)
+			{
+				log("Exchanging " + item.name + " with Xyn.. ");
+				exchangeItems("exchange", item.name, 1, ()=>{exchangeWithXyn();});
+				return;
+			}
+		}
+	}
 }
