@@ -13,6 +13,8 @@ var deliveryRequests = [];
 function merchantOnStart()
 {
 	merchantItems.forEach(x=>{itemsToHoldOnTo.push(x)});
+	pontyExclude.forEach(x=>{buyFromPontyList.pop(x)});
+
 	enableVendorMode();
 }
 
@@ -79,23 +81,29 @@ function merchantLateUpdate()
 		return;
 	}
 
-	if(checkForLowInventorySpace() && !banking && autoPlay && !returningToTown && !deliveryMode && autoPlay)
+	if(vendorMode && craftingOn && isInTown())
+	{
+		sellVendorTrash();
+		exchangeWithXyn();
+		exchangeSeashells();
+		craftUpgrades();
+		craftCompounds();
+
+		if(character.gold > minimumGold)
+		{
+			stockScrolls();
+			buyBasicItems();
+			buyFromPonty();
+		}
+
+		return;
+	}
+
+	if(checkForLowInventorySpace() && autoPlay)
 	{
 		disableVendorMode();
 		depositInventoryAtBank();
 		return;
-	}
-
-	if(vendorMode && !deliveryMode && craftingOn && character.gold > minimumGold && isInTown())
-	{
-		stockScrolls();
-		sellVendorTrash();
-		buyBasicItems();
-		buyFromPonty();
-		craftUpgrades();
-		craftCompounds();
-		exchangeWithXyn();
-		exchangeSeashells();
 	}
 
 	if(autoPlay && !vendorMode && !returningToTown && !deliveryMode && !banking && !exchangeMode)
@@ -543,7 +551,7 @@ function exchangeItems(npcName, itemName, numberOfExchanges, onComplete)
 					}
 				}
 
-			}, 5000*(i));
+			}, 10000*(i));
 		}
 	});
 }

@@ -508,7 +508,7 @@ function transferAllToMerchant()
 
         for(let i = 0; i < character.items.length; i++)
 		{
-			if(item_properties(character.items[i]) && !itemsToHoldOnTo.includes(character.items[i].name))
+			if(character.items[i] && !itemsToHoldOnTo.includes(character.items[i].name))
 			{
 				send_item(merchant, i, character.items[i].q);
 			}
@@ -778,47 +778,26 @@ function tidyInventory()
 
 function initParty()
 {
-	partyMembers = parent.party_list;
-
-	if(partyMembers.length == 4)
+	if(parent.party_list.length == 4)
 	{
 		return;
 	}
 
-	if(!partyMembers.includes(priestName))
+	for(let p of partyList)
 	{
-		send_party_invite(priestName);
-	}
-	if(characterOffline(priestName))
-	{
-		start_character(priestName, 1);
-	}
+		if(character.name == p)
+		{
+			continue;
+		}
 
-	if(!partyMembers.includes(merchantName))
-	{
-		send_party_invite(merchantName);
-	}
-	if(characterOffline(merchantName))
-	{
-		//start_character(merchantName, 0);
-	}
-
-	if(!partyMembers.includes(mageName))
-	{
-		send_party_invite(mageName);
-	}
-	if(characterOffline(mageName))
-	{
-		start_character(mageName, 1);
-	}
-
-	if(!partyMembers.includes(rangerName))
-	{
-		send_party_invite(rangerName);
-	}
-	if(characterOffline(rangerName))
-	{
-		start_character(rangerName, 1);
+		if(!parent.party_list.includes(p) && !characterOffline(p))
+		{
+			send_party_invite(p);
+		}
+		else if(characterOffline(p))
+		{
+			start_character(p, 1);
+		}
 	}
 
 	log("Initializing Party...");
@@ -906,9 +885,16 @@ function letsGo()
 	}
 }
 
-function toggleAutoPlay()
+function toggleAutoPlay(forceState=null)
 {
-    autoPlay = !autoPlay;
+	if(forceState != null)
+	{
+		autoPlay = forceState;
+	}
+	else
+	{
+		autoPlay = !autoPlay;
+	}
 
     if(!autoPlay)
     {
@@ -934,16 +920,22 @@ function returnPartyToTown()
 {
     log("Returning party to town.");
 
-	toggleAutoPlay();
-    returnToTown();
-    send_cm(mageName, {message:"town"});
-    send_cm(rangerName, {message:"town"});
+	toggleAutoPlay(false);
+	returnToTown();
+
+	for(let p of partyList)
+	{
+		if(character.name != p)
+		{
+			send_cm(p, {message:"town"});
+		}
+	}
 }
 
 //	returns true if character is offline
 function characterOffline(name)
 {
-	if(parent.X.characters.filter((x)=>{return x.name==name && x.online == 0}).length == 0)
+	if(parent.X.characters.filter((x)=>{return (x.name==name && x.online == 0)}).length == 0)
 	{
 		return false;
 	}
