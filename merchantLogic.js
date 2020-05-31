@@ -1,20 +1,18 @@
 ///		Merchant Settings		///
 const lowScrolls = 1;
-const scrollsToStock = 20;
+const scrollsToStock = [100, 20, 0];
 const merchantItems = ["stand0","scroll0","scroll1","cscroll0","cscroll1","seashell"];
 //////
 
 var vendorMode = false;			//	true when in town with shop, false when busy delivering items
 var deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
 var exchangeMode = false;		//	true when the merchant is busy exchanging items with an npc
-var potionShipments = [];
+var deliveryShipments = [];
 var deliveryRequests = [];
 
 function merchantOnStart()
 {
 	merchantItems.forEach(x=>{itemsToHoldOnTo.push(x)});
-	pontyExclude.forEach(x=>{buyFromPontyList.splice(x)});
-
 	enableVendorMode();
 }
 
@@ -31,41 +29,43 @@ function merchantAuto(target)
 	for(other in parent.entities)
 	{
 		let isPartyMember = parent.party_list.includes(other);
-		let target = parent.entities[other];
+		let friendlyTarget = parent.entities[other];
 
-		if(!target.player || target.npc)
+		if(!friendlyTarget.player || friendlyTarget.npc)
 		{
 			continue;
 		}
 
 		if(isPartyMember)
 		{
-			if(is_in_range(target, "mluck"))
+			if(distance(friendlyTarget, character) < 200)
 			{
-				if(checkPotionShipments(target.name))
+				let shipment = getShipmentFor(friendlyTarget.name);
+
+				if(shipment)
 				{
-					deliverPotions(target.name);
+					deliverItems(shipment);
 				}
-				else if(!checkMluck(target) && !is_on_cooldown("mluck"))
+				else if(!checkMluck(friendlyTarget) && !is_on_cooldown("mluck"))
 				{
-					log("Giving mluck to " + target.name);
-					use_skill("mluck", target);
+					log("Giving mluck to " + friendlyTarget.name);
+					use_skill("mluck", friendlyTarget);
 					reduce_cooldown("mluck", character.ping);
 				}
 			}
 			else if(deliveryMode && !returningToTown && deliveryRequests.length > 0)
 			{
-				log("Moving closer");
-				approachTarget(target);
+				log("Moving closer to recipient.");
+				approachTarget(friendlyTarget);
 			}
 		}
-		else if(target)
+		else if(friendlyTarget)
 		{
 			//	mluck others but some safety checks to make sure you don't spam it
-			if(!checkMluck(target) && is_in_range(target, "mluck") && !is_on_cooldown("mluck") && !target.afk && !target.stand && character.mp > character.max_mp*0.5)
+			if(!checkMluck(friendlyTarget) && is_in_range(friendlyTarget, "mluck") && !is_on_cooldown("mluck") && !friendlyTarget.afk && !friendlyTarget.stand && character.mp > character.max_mp*0.5)
 			{
-				log("Giving mluck to " + target.name);
-				use_skill("mluck", target);
+				log("Giving mluck to " + friendlyTarget.name);
+				use_skill("mluck", friendlyTarget);
 				reduce_cooldown("mluck", character.ping);
 			}
 		}
@@ -145,6 +145,30 @@ function merchant_on_cm(sender, data)
 		log("Recieved potion request from " + sender);
 		deliveryRequests.push({request:"potions",sender:sender,shipment:null,hPots:data.hPots,mPots:data.mPots});
 	}
+	else if(data.message == "elixir")
+	{
+		if(deliveryRequests.find(x=>x.request=="elixir" && x.sender==sender))
+		{
+			log("Already have elixir request from " + sender);
+			return;
+		}
+
+		log("Recieved elixir request from " + sender);
+
+		let elixir = getElixirInventorySlot(data.type);
+
+		if(elixir)
+		{
+			let shipmentItem = character.items[elixir];
+			deliveryRequests.push({request:"elixir",sender:sender,shipment:shipmentItem.name,type:data.type});
+			deliveryShipments.push({name:sender, elixir:shipmentItem.name, type:data.type});
+		}
+		else
+		{
+			log("Don't have any " + data.type + " elixirs.");
+			send_cm(sender, {message:"noelixirs"});
+		}
+	}
 	else if(data.message == "mluck")
 	{
 		if(deliveryRequests.find(x=>x.request=="mluck"))
@@ -162,30 +186,30 @@ function merchant_on_cm(sender, data)
 
 		if(data.request == "mluck")
 		{
-			let mluks = []
 			for(let i = deliveryRequests.length-1; i >= 0; i--)
 			{
 				if(deliveryRequests[i].request=="mluck")
 				{
-					mluks.push(i);
+					deliveryRequests.splice(i, 1);
 				}
 			}
-
-			deliveryRequests.splice(mluks);
 		}
 		else
 		{
-			deliveryRequests.splice(deliveryRequests.indexOf(x=>x.sender == sender && x.request == request));
+			deliveryRequests.splice(deliveryRequests.indexOf(x=>x.sender == sender && x.request == request), 1);
 		}
 	}
 }
 
 function merchant_on_magiport(name)
 {
-	if(deliveryMode)
+	if(!deliveryMode || (returningToTown || banking || exchangeMode))
 	{
-		accept_magiport(name);
+		return;
 	}
+
+	stop();
+	accept_magiport(name);
 }
 
 //	returns true if the merchant is occupied with a task
@@ -224,8 +248,9 @@ function sellVendorTrash()
 
 function checkRequests()
 {
-	if(banking)
+	if(deliveryRequests.length == 0)
 	{
+		deliveryMode = false;
 		return;
 	}
 
@@ -241,7 +266,7 @@ function checkRequests()
 			{
 				buyPotionsFor(deliveryRequests[i].sender, deliveryRequests[i].hPots, deliveryRequests[i].mPots);
 			}
-			//	deliver potions or mluck
+			//	deliver to recipient
 			else if(deliveryRequests[i].shipment || deliveryRequests[i].request == "mluck")
 			{
 				let recipient = parent.entities[deliveryRequests[i].sender];
@@ -256,29 +281,25 @@ function checkRequests()
 			}
 		}
 	}
-	else
-	{
-		deliveryMode = false;
-	}
 }
 
-//	returns true if holding a shipment for delivery to the given name
-function checkPotionShipments(name)
+//	returns null if no shipment
+function getShipmentFor(name)
 {
-	if(potionShipments.length == 0)
+	if(deliveryShipments.length == 0)
 	{
-		return false;
+		return null;
 	}
 
-	for(let i = 0; i < potionShipments.length; i++)
+	for(let i = 0; i < deliveryShipments.length; i++)
 	{
-		if(potionShipments[i].name == name)
+		if(deliveryShipments[i].name == name)
 		{
-			return true;
+			return deliveryShipments[i];
 		}
 	}
 
-	return false;
+	return null;
 }
 
 function craftUpgrades()
@@ -414,8 +435,22 @@ function stockScrolls()
 		let amount = quantity(s);
 		if(amount <= lowScrolls)
 		{
-			buy_with_gold(s, scrollsToStock);
-			log("Buying " + scrollsToStock + " " + G.items[s].name);
+			let q = 0;
+			if(s.includes(0))
+			{
+				q = scrollsToStock[0];
+			}
+			else if(s.includes(1))
+			{
+				q = scrollsToStock[1];
+			}
+			else if(s.includes(2))
+			{
+				q = scrollsToStock[2];
+			}
+
+			buy_with_gold(s, q);
+			log("Buying " + q + " grade " + (G.items[s].grade) + " " + G.items[s].name);
 		}
 	}
 }
@@ -462,29 +497,53 @@ function buyPotionsFor(name, healthPots, manaPots)
 	log("Buying " + manaPots + " mana potions");
 
 	let potionShipment = {name:name, hPots:healthPots, mPots:manaPots};
-	potionShipments.push(potionShipment);
+	deliveryShipments.push(potionShipment);
 	request.shipment = potionShipment;
 }
 
-function deliverPotions(nameToDeliverTo)
+function deliverItems(shipmentToDeliver)
 {
-	log("Delivering potions");
-
-	if(potionShipments == null || potionShipments == [])
+	if(shipmentToDeliver.hPots != null || shipmentToDeliver.mPots != null)
 	{
-		log("deliverPotions called but shipments is empty!");
-		return;
+		deliverPotions(shipmentToDeliver);
 	}
-
-	if(parent.entities[nameToDeliverTo])
+	else if(shipmentToDeliver.elixir != null)
 	{
-		let shipment = potionShipments.find(x=>x.name==nameToDeliverTo);
+		deliverElixir(shipmentToDeliver);
+	}
+}
 
-		log("Giving potions to " + nameToDeliverTo);
+function deliverElixir(shipment)
+{
+	let recipient = parent.entities[shipment.name];
+	if(distance(recipient, character) < 200)
+	{
+		log("Delivering elixir to " + shipment.name);
+		let elixir = getElixirInventorySlot(shipment.type);
+		let index = deliveryShipments.indexOf(shipment);
+		deliveryShipments.splice(index, 1);
+		send_item(shipment.name, elixir, 1);
+	}
+	else
+	{
+		approachTarget(recipient);
+	}
+}
 
-		send_item(nameToDeliverTo,locate_item("hpot0"), shipment.hPots);
-		send_item(nameToDeliverTo,locate_item("mpot0"), shipment.mPots);
-		potionShipments.splice(potionShipments.indexOf(shipment));
+function deliverPotions(shipment)
+{
+	let recipient = parent.entities[shipment.name];
+	if(distance(recipient, character) < 200)
+	{
+		log("Delivering potions to " + shipment.name);
+		let index = deliveryShipments.indexOf(shipment);
+		deliveryShipments.splice(index, 1);
+		send_item(shipment.name,locate_item("hpot0"), shipment.hPots);
+		send_item(shipment.name,locate_item("mpot0"), shipment.mPots);
+	}
+	else
+	{
+		approachTarget(recipient);
 	}
 }
 
@@ -539,7 +598,6 @@ function standCheck()
 function buyFromPonty()
 {
 	let itemsToBuy = buyFromPontyList;
-	pontyExclude.forEach(x=>{itemsToBuy.splice(x)});
 
 	parent.socket.once("secondhands", function(data)
 	{
@@ -624,7 +682,10 @@ function exchangeSeashells()
 
 function exchangeWithXyn()
 {
-	let xynTypes = ["gem","box"];
+	if(isBusy())
+	{
+		return;
+	}
 
 	for(let itemType of xynTypes)
 	{

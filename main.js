@@ -17,11 +17,14 @@ const vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscro
 const buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow","seashell"];
 const pontyExclude = ["ringsj"];    //  any craft-items you don't want to buy from ponty
 const elixirs = ["elixirint0", "elixitint1", "elixirdex0", "elixirdex1"];
+const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
+const xynTypes = ["gem","box"]; //  item types to be exchanged with Xyn
 elixirs.forEach(x=>{merchantItems.push(x)});
 basicItemsToCraft.forEach(x=>{itemsToUpgrade.push(x)});
 itemsToUpgrade.forEach(x=>{buyFromPontyList.push(x)});
 itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
 buyFromPontyList.forEach(x=>{elixirs.push(x)});
+pontyExclude.forEach(x=>{buyFromPontyList.splice(buyFromPontyList.indexOf(x), 1)});
 //////
 
 ///     farming settings        ///
@@ -48,19 +51,19 @@ const rangerName = "LotusRanger";
 const priestName = "LotusPriest";
 const partyLeader = priestName;
 const partyList = [merchantName, mageName, rangerName, priestName];
-const whiteList = partyList;
+const whiteList = [];
 const merchantStandMap = "main";
 const merchantStandCoords = {x:-118, y:11};
 const healthPotionsToHave = 1000;
 const manaPotionsToHave = 1000;
-const lowPotions = 100;
+const lowPotionsThreshold = 100;
 const minimumMonsterDistance = 45;
 const maxLeaderDistance = 60;
 const lowInventoryThreshold = 14;
 const monsterHpThresholdForSkills = 0.5;
 const healthPotThreshold = 0.98, manaPotThreshold = 0.95;
 const itemsToHoldOnTo = ["hpot0","mpot0"];
-const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
+partyList.forEach(x=>{whiteList.push(x)});
 //////
 
 map_key("1", "snippet", "initParty()")
@@ -72,15 +75,16 @@ map_key("6", "snippet", "toggleCraftingMode()")
 map_key("7", "snippet", "depositInventoryAtBank()")
 
 var autoPlay = fullAuto;
-var aloneChecking = false;
-var farmingModeActive = false;
 var craftingOn = craftingEnabled;
 var whosReady = {leader:false,merchant:false,codeBotOne:false,codeBotTwo:false};
+var sentRequests = [];
+var aloneChecking = false;
+var farmingModeActive = false;
 var readyChecking = false;
 var traveling = false;
 var returningToTown = false;
 var banking = false;
-var sentRequests = [];
+var noElixirs = false;
 
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
@@ -165,11 +169,10 @@ function main()
 
 
     //  look for a target
-    let target = lookForSpecialTargets();
-
+    let target = get_targeted_monster();
     if(!target)
     {
-        target = get_targeted_monster();
+        target = lookForSpecialTargets();
 
         if(!target)
         {
@@ -178,7 +181,7 @@ function main()
     }
 
     //  if the monster is targeting another player, drop the target unless it's a special monster
-    if(target && target.target && target.target.player && !partyList.includes(target.target.name) && !specialMonsters.includes(target.name))
+    if(target && target.target && target.target.player && !partyList.includes(target.target.name) && !specialMonsters.includes(target.mtype))
     {
         target = null;
     }
@@ -260,8 +263,7 @@ function lateUpdate()
     }
 
     //  check if you need anything
-    checkPotionInventory();
-    checkBuffs();
+    checkIfReady();
 
     //  party leader keeps things in check
 	if(character.name == partyLeader)
@@ -272,7 +274,7 @@ function lateUpdate()
         }
         else if(partyPresent() && !farmingModeActive)
         {
-            readyCheck();
+            sendReadyCheck();
         }
     }
 }

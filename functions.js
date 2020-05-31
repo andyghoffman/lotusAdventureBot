@@ -22,7 +22,12 @@ function on_cm(sender, data)
 		}
 		else
 		{
-			log(character.name + " recieved target " + target.name + " from " + sender + " but could not find it.");
+			log(character.name + " recieved a target from " + sender + " but could not find it.");
+			let senderPlayer = parent.entities[sender];
+			if(senderPlayer)
+			{
+				smart_move({x:senderPlayer.x, y:senderPlayer.y});
+			}
 		}
 
         return;
@@ -32,7 +37,7 @@ function on_cm(sender, data)
 		log(character.name + " recieved readyCheck from " + sender);
 		stopFarmMode();
 
-		let ready, buffs, pots = false;
+		let ready = false;
 
 		if(character.name == merchantName)
 		{
@@ -40,27 +45,17 @@ function on_cm(sender, data)
 		}
 		else
 		{
-			buffs = checkBuffs();
-			pots = checkPotionInventory();
-			ready = buffs & pots;
+			ready = checkIfReady();
 		}
 
-		send_cm(sender, {message:"readyReply",isReady:ready,hasBuffs:buffs,hasPots:pots});
+		send_cm(sender, {message:"readyReply",isReady:ready});
+
 		return;
 	}
 	else if(data.message == "readyReply")
 	{
-		let reason = character.name + " recieved readyReply from " + sender + ". " + sender + " is " + (data.isReady?"ready!":"not ready. ")
-
-		if(sender != merchantName)
-		{
-			if(!data.hasBuffs)
-				reason += sender + " is missing buffs. ";
-			if(!data.hasPots)
-				reason += sender + " is missing pots. ";
-		}
-
-		log(reason);
+		let response = character.name + " recieved readyReply from " + sender + ". " + sender + " is " + (data.isReady?"ready!":"not ready. ")
+		log(response);
 
 		if(sender == partyLeader)
 		{
@@ -88,7 +83,7 @@ function on_cm(sender, data)
 			{
 				if(p != character.name)
 				{
-					send_cm(sender, {message:"partyReady"});
+					send_cm(p, {message:"partyReady"});
 				}
 			}
 		}
@@ -97,14 +92,13 @@ function on_cm(sender, data)
 	}
 	else if(data.message == "partyReady")
 	{
-        log("Ready!");
+        log(character.name + " readyCheck approved!");
         whosReady = {leader:true,merchant:true,codeBotOne:true,codeBotTwo:true};
 		return;
     }
 	else if(data.message == "letsGo")
 	{
-        log("Let's go!");
-        whosReady = {leader:true,merchant:true,codeBotOne:true,codeBotTwo:true};
+        log(character.name + " recieved Let's Go from " + sender);
 		farmingModeActive = true;
 		autoPlay = fullAuto;
 
@@ -127,6 +121,13 @@ function on_cm(sender, data)
 		autoPlay = false;
 		farmingModeActive = false;
 		returnToTown();
+		return;
+	}
+	else if(data.message == "noelixirs")
+	{
+		noElixirs = true;
+		sentRequests.splice(sentRequests.indexOf(sentRequests.find(x=>x.request=="elixir"), 1));
+		log("Continuing without elixir.");
 		return;
 	}
 
@@ -189,7 +190,16 @@ function classRoutine(target)
     }
 }
 
-function readyCheck()
+function checkIfReady()
+{
+	let buffs = checkBuffs();
+	let pots = checkPotionInventory();
+	let r = buffs && pots;
+
+	return r;
+}
+
+function sendReadyCheck()
 {
 	if(readyChecking)
 	{
@@ -199,9 +209,7 @@ function readyCheck()
 	stopFarmMode();
 	readyChecking = true;
 
-	let buffs = checkBuffs();
-	let pots = checkPotionInventory();
-	let ready = buffs && pots;
+	let ready = checkIfReady();
 
 	if(character.name == partyLeader)
 	{
@@ -221,7 +229,7 @@ function readyCheck()
 		return;
 	}
 
-	if(ready)
+	if(checkIfReady())
 	{
 		log(character.name + " is ready!");
 
@@ -238,20 +246,17 @@ function readyCheck()
 	}
 	else if(!ready)
 	{
-		let reason = character.name + " is not ready! ";
-		if(!buffs)
-			reason += character.name + " is missing buffs. ";
-		if(!pots)
-			reason += character.name + " is missing pots. ";
-
-		log(reason);
+		log(character.name + " is not ready! ");
 
 		if(!isInTown())
 		{
-            if(!get_targeted_monster())
+			if(!get_targeted_monster())
+			{
                 use("use_town");
-            else
+			}
+			{
                 goTo("main");
+			}
 		}
 	}
 
@@ -285,7 +290,7 @@ function personalSpace()
 		target = get_nearest_monster();
 	}
 
-	if(dontKite.includes(target.name))
+	if(dontKite.includes(target.mtype))
 	{
 		return;
 	}
@@ -423,13 +428,14 @@ function checkSentRequests()
 
 	for(let i = sentRequests.length-1; i >= 0; i--)
 	{
+		let recieved = false;
+
 		if(sentRequests[i].message == "mluck")
 		{
 			if(checkMluck(character))
 			{
 				log("Mluck recieved. Thank you!");
-				send_cm(sentRequests[i].name, {message:"thanks",request:"mluck"});
-				sentRequests.splice(i);
+				recieved = true;
 			}
 		}
 		else if(sentRequests[i].message == "potions")
@@ -437,9 +443,22 @@ function checkSentRequests()
 			if(checkPotionInventory())
 			{
 				log("Potions recieved. Thank you!");
-				send_cm(sentRequests[i].name, {message:"thanks",request:"potions"});
-				sentRequests.splice(i);
+				recieved = true;
 			}
+		}
+		else if(sentRequests[i].message == "elixir")
+		{
+			if(checkElixirBuff())
+			{
+				log("Elixir recieved. Thank you!");
+				recieved = true;
+			}
+		}
+
+		if(recieved)
+		{
+			send_cm(sentRequests[i].name, {message:"thanks",request:sentRequests[i].message});
+			sentRequests.splice(i, 1);
 		}
 	}
 }
@@ -466,6 +485,10 @@ function checkBuffs()
 		requestMluck();
 		return false;
 	}
+	else if(!checkElixirBuff())
+	{
+		return false;
+	}
 	else
 	{
 		return true;
@@ -478,7 +501,7 @@ function checkPotionInventory()
 	let	hPotions = quantity("hpot0");
 	let mPotions = quantity("mpot0");
 
-	if(mPotions < lowPotions || hPotions < lowPotions)
+	if(mPotions < lowPotionsThreshold || hPotions < lowPotionsThreshold)
 	{
 		let healthPotsNeeded = healthPotionsToHave - hPotions;
 		let manaPotsNeeded = manaPotionsToHave - mPotions;
@@ -900,7 +923,7 @@ function aloneCheck(msToWait = 30000)
 
 function letsGo()
 {
-	if(checkBuffs() && checkPotionInventory())
+	if(checkIfReady())
 	{
 		log("Let's go!");
 
@@ -918,7 +941,7 @@ function letsGo()
 	}
 	else
 	{
-		readyCheck();
+		sendReadyCheck();
 	}
 }
 
@@ -1018,7 +1041,7 @@ function stopFarmMode()
 
 function validTargetForSkill(target)
 {
-	if(specialMonsters.includes(target.name))
+	if(specialMonsters.includes(target.mtype))
 	{
 		return true;
 	}
@@ -1090,7 +1113,7 @@ function storeInventoryInBankVault(bankVaultId)
 
 		if(item)
 		{
-			if(itemsToHoldOnTo.includes(item.name) || vendorTrash.includes(item.name))
+			if(itemsToHoldOnTo.includes(item.name) || vendorTrash.includes(item.name) || xynTypes.includes(G.items[item.name].type))
 			{
 				continue;
 			}
@@ -1099,6 +1122,7 @@ function storeInventoryInBankVault(bankVaultId)
 				continue;
 			}
 
+			log("Stashing " + G.items[item.name].name);
 			bank_store(i, bankVaultId);
 		}
 	}
@@ -1115,10 +1139,85 @@ function lookForSpecialTargets()
 	for(let i = 0; i < specialMonsters.length; i++)
 	{
 		target = getTargetMonster(specialMonsters[i]);
-		if(target && specialMonsters.includes(target.name))
+		if(target && specialMonsters.includes(target.mtype))
 		{
 			broadCastTarget(target);
 			return target;
+		}
+	}
+
+	return null;
+}
+
+function checkElixirBuff()
+{
+	let buffToExpect = null;
+
+	if(character.ctype == "priest")
+	{
+		buffToExpect = "elixirint";
+	}
+	else if(character.ctype == "mage")
+	{
+		buffToExpect = "elixirint";
+	}
+	else if(character.ctype == "ranger")
+	{
+		buffToExpect = "elixirdex";
+	}
+	else if(character.ctype == "warrior")
+	{
+		buffToExpect = "elixirstr";
+	}
+	else if(character.ctype == "rogue")
+	{
+		buffToExpect = "elixirdex";
+	}
+
+	//	need elixir buff
+	if(!character.slots.elixir && !noElixirs)
+	{
+		//	find an elixir in your inventory
+		let elixir = getElixirInventorySlot(buffToExpect);
+
+		//	if you have an elixir, drink it
+		if(elixir)
+		{
+			log("Drinking " + G.items[character.items[elixir].name].name);
+			use(elixir);
+			return true;
+		}
+		//	if not, ask the merchant for one
+		else
+		{
+			if(sentRequests.find(x=>x.message=="elixir"))
+			{
+				log("Waiting on elixir, resending request...");
+			}
+			else
+			{
+				sentRequests.push({message:"elixir",type:buffToExpect});
+			}
+
+			send_cm(merchantName, {message:"elixir",type:buffToExpect});
+
+			return false;
+		}
+	}
+
+	return true;
+}
+
+function getElixirInventorySlot(elixirBaseName)
+{
+	let elixir = null;
+	for(let i = 0; i <= 2; i++)
+	{
+		elixir = locate_item(elixirBaseName+i);
+
+		if(elixir > -1)
+		{
+			return elixir;
 		}
 	}
 
