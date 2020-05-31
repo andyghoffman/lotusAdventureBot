@@ -81,13 +81,17 @@ function merchantLateUpdate()
 		return;
 	}
 
-	if(vendorMode && craftingOn && isInTown())
+	if(vendorMode && isInTown())
 	{
 		sellVendorTrash();
 		exchangeWithXyn();
 		exchangeSeashells();
-		craftUpgrades();
-		craftCompounds();
+
+		if(craftingOn)
+		{
+			craftUpgrades();
+			craftCompounds();
+		}
 
 		if(character.gold > minimumGold)
 		{
@@ -95,11 +99,9 @@ function merchantLateUpdate()
 			buyBasicItems();
 			buyFromPonty();
 		}
-
-		return;
 	}
 
-	if(checkForLowInventorySpace() && autoPlay)
+	if(checkForLowInventorySpace())
 	{
 		disableVendorMode();
 		depositInventoryAtBank();

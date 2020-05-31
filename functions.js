@@ -283,6 +283,11 @@ function personalSpace()
 		target = get_nearest_monster();
 	}
 
+	if(dontKite.includes(target.name))
+	{
+		return;
+	}
+
 	//	try to move out of the monster's range
     if(target && (distance(character, target) < target.range || distance(character, target) < minimumMonsterDistance))
     {
@@ -313,7 +318,7 @@ function personalSpace()
 
 		if(character.name != partyLeader)
 		{
-			let leader = parent.entities[get_player(partyLeader)];
+			let leader = parent.entities[partyLeader];
 
 			//	make sure you dont run away from party
 			if(leader && distance(adjustment, leader) < maxLeaderDistance)
@@ -526,10 +531,7 @@ function toggleCraftingMode()
 
 function followLeader()
 {
-	if(character.ctype === "merchant" || character.name == partyLeader)
-		return;
-
-	var leader = get_player(partyLeader);
+	var leader = parent.entities[partyLeader];
 
 	if(leader)
 	{
@@ -537,12 +539,6 @@ function followLeader()
 		{
 			approachTarget(leader);
 		}
-
-		return true;
-	}
-	else
-	{
-		return false;
 	}
 }
 
@@ -563,78 +559,82 @@ function broadCastTarget(broadCastTarget)
     });
 }
 
-function getMonsterFarmTarget(farmTarget)
+function getTargetMonster(farmTarget)
 {
     let target = get_targeted_monster();
 
-	//	if already have target, keep it
+	//	if you already have a target, keep it
     if(target)
     {
         return target;
 	}
-	//	find a target
-	else if(!target)
+
+	//	party leader checks for nearest monster to itself that is targeting party leader
+	if(character.name == partyLeader)
 	{
-		//	party leader checks for nearest monster to itself
-        if(character.name == partyLeader)
-        {
-			target = get_nearest_monster
-			({
-				target:character.name
-			});
+		target = get_nearest_monster
+		({
+			type:farmTarget,
+			target:character.name
+		});
+
+		if(target)
+		{
+			return target;
+		}
+	}
+	//	other party members check if leader has a target
+	else
+	{
+		let leader = get_player(parent.entities[partyLeader]);
+		if(leader && leader.target != null)
+		{
+			target = leader.targetId;
+			change_target(target, true);
+			return target;
+		}
+	}
+
+	//	target a monster that is targeting another party member
+	parent.party_list.forEach(p =>
+	{
+		if(p != character.name)
+		{
+			target = get_nearest_monster({target:p});
 
 			if(target)
 			{
-				return target;
-			}
-		}
-		//	other party members check if leader has a target
-		else
-		{
-			let leader = get_player(parent.entities[partyLeader]);
-			if(leader && leader.target != null)
-			{
-				target = leader.targetId;
 				change_target(target, true);
 				return target;
 			}
 		}
+	});
 
-		//	target a monster that is targeting another party member
-		if(!target)
-		{
-			parent.party_list.forEach(partyMemberName =>
-			{
-					target = get_nearest_monster({target:partyMemberName});
-					if(target)
-					{
-						change_target(target, true);
-						return target;
-					}
-			});
-		}
+	//	target nearest monster that is targeting you
+	target = get_nearest_monster
+	({
+		type:farmTarget,
+		target:character.name
+	});
 
-		//	target nearest monster to yourself that is targeting you
+	//	target nearest monster that has no target
+	if(!target)
+	{
 		target = get_nearest_monster
 		({
-			target:character.name
-        });
+			type:farmTarget,
+			no_target:true
+		});
+	}
 
-		//	target nearest monster that has no target
-		if(!target)
-		{
-			target = get_nearest_monster
-			({
-				type:farmTarget,
-				no_target:true
-			});
-		}
-
-		if(target)
-		{
-			change_target(target, true);
-			return target;
-		}
+	if(target)
+	{
+		change_target(target, true);
+		return target;
+	}
+	else
+	{
+		return null;
 	}
 }
 
@@ -1071,7 +1071,7 @@ function lookForSpecialTargets()
 {
 	for(let i = 0; i < specialMonsters.length; i++)
 	{
-		target = getMonsterFarmTarget(specialMonsters[i]);
+		target = getTargetMonster(specialMonsters[i]);
 		if(target && specialMonsters.includes(target.name))
 		{
 			broadCastTarget(target);

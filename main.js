@@ -37,7 +37,8 @@ const farmMonsterName = "crabx";
 const farmMap = "winterland";   //  only used if farmMode is 'coords' or 'number'
 const farmMonsterSpawnNumber = 6;   //  only used if farmMode is 'number'
 const farmCoords = {x:1312.8, y:-853.8};    //  only used if farmMode is 'coords'
-const specialMonsters = ["snowman","phoenix"];
+const specialMonsters = ["snowman","phoenix"];  //  priority targets
+const dontKite = ["phoenix"];   //  any monsters to not try to kite
 //////
 
 ///     party/character settings      ///
@@ -162,16 +163,17 @@ function main()
         }
     }
 
-    //  look for the monster you are farming
-    let target = get_targeted_monster();
+
+    //  look for a target
+    let target = lookForSpecialTargets();
+
     if(!target)
     {
-        //  look for any special targets
-        target = lookForSpecialTargets();
+        target = get_targeted_monster();
 
         if(!target)
         {
-            target = getMonsterFarmTarget(farmMonsterName);
+            target = getTargetMonster(farmMonsterName);
         }
     }
 
@@ -214,10 +216,7 @@ function main()
         personalSpace();
 
         //  if leader is too far away approach him
-        if(parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) > maxLeaderDistance)
-        {
-            followLeader();
-        }
+        followLeader();
     }
 }
 
@@ -236,15 +235,26 @@ function lateUpdate()
         initParty();
     }
 
-    if(character.ctype === "merchant")
+    //  merchant update is delayed an additional 1000ms so if requests are sent in the same interval merchant doesnt have to wait an additioanl interval
+    if(character.name == merchantName)
 	{
-        //  merchant update is delayed an additional 1000ms so if requests are sent in the same interval merchant doesnt have to wait an additioanl interval
         setTimeout(merchantLateUpdate, 1000);
         return;
 	}
 
-    //  don't do anything past here if autoPlay is off, or if you are moving
-    if(!autoPlay || is_moving(character) || smart.moving)
+    //  don't do anything past here if autoPlay is off
+    if(!autoPlay)
+    {
+        return;
+    }
+
+    //  if the merchant is nearby, send him your items (token minimum amount so it doesn't get spammed)
+    if(parent.entities[merchantName] && character.gold > 10000)
+    {
+        transferAllToMerchant();
+    }
+
+    if(is_moving(character) || smart.moving)
     {
         return;
     }
@@ -252,12 +262,6 @@ function lateUpdate()
     //  check if you need anything
     checkPotionInventory();
     checkBuffs();
-
-    //  if the merchant is nearby, send him your items (token minimum amount so it doesn't get spammed)
-    if(parent.entities[merchantName] && character.gold > 10000)
-    {
-        transferAllToMerchant();
-    }
 
     //  party leader keeps things in check
 	if(character.name == partyLeader)
