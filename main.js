@@ -67,7 +67,7 @@ map_key("1", "snippet", "initParty()")
 map_key("2", "snippet", "returnPartyToTown()")
 map_key("3", "snippet", "stopCharacters()")
 map_key("4", "snippet", "transferAllToMerchant()")
-map_key("5", "snippet", "toggleAutoPlay()")
+map_key("5", "snippet", "togglePartyAuto()")
 map_key("6", "snippet", "toggleCraftingMode()")
 map_key("7", "snippet", "depositInventoryAtBank()")
 
@@ -230,7 +230,7 @@ function lateUpdate()
 
     checkSentRequests();
 
-    if(character.name == partyLeader && !partyPresent())
+    if(character.name == partyLeader && !partyPresent() && autoPlay)
     {
         initParty();
     }

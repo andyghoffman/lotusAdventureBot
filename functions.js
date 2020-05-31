@@ -124,6 +124,8 @@ function on_cm(sender, data)
 	}
 	else if(data.message == "town")
 	{
+		autoPlay = false;
+		farmingModeActive = false;
 		returnToTown();
 		return;
 	}
@@ -455,7 +457,7 @@ function checkBuffs()
 	//	check that you have mLuck from merchant
 	if(!checkMluck(character))
 	{
-		//	if you have someone elses mluck and in town just accept it, merchant will fix it after it leaves
+		//	if you have someone elses mluck and in town just accept it, merchant will fix it after party leaves town
 		if(character.s.mluck && isInTown())
 		{
 			return true;
@@ -527,17 +529,19 @@ function checkPotionInventory()
 
 function transferAllToMerchant()
 {
-	if(character.ctype === "merchant")
+	if(character.name == merchantName)
+	{
 		return;
+	}
 
-	let merchant = get_player(merchantName);
+	let merchant = parent.entities[merchantName];
 
-    if(character.ctype !== "merchant" && merchant && merchant.owner === character.owner && distance(character, merchant) < 400)
+    if(merchant && merchant.owner == character.owner && distance(character, merchant) < 400)
 	{
 		//	hold onto gold if you don't have potions, probably means merchant is stuck and you need to buy them yourself
-		if(!checkPotionInventory())
+		if(checkPotionInventory())
 		{
-			send_gold(merchant, character.gold)
+			send_gold(merchantName, character.gold)
 		}
 
         for(let i = 0; i < character.items.length; i++)
@@ -756,7 +760,11 @@ function travelToFarmSpot()
 function returnToTown(delay)
 {
 	if(returningToTown)
+	{
 		return;
+	}
+
+	stop();
 
 	log(character.name + " returning to town.");
 
@@ -914,7 +922,7 @@ function letsGo()
 	}
 }
 
-function toggleAutoPlay(forceState=null)
+function togglePartyAuto(forceState=null)
 {
 	if(forceState != null)
 	{
@@ -949,12 +957,12 @@ function returnPartyToTown()
 {
     log("Returning party to town.");
 
-	toggleAutoPlay(false);
+	togglePartyAuto(false);
 	returnToTown();
 
 	for(let p of partyList)
 	{
-		if(character.name != p)
+		if(character.name != p && character.name != merchantName)
 		{
 			send_cm(p, {message:"town"});
 		}
@@ -981,11 +989,17 @@ function characterOffline(name)
 
 function stopCharacters()
 {
-	stop_character(mageName);
-    stop_character(rangerName);
+	for(let p of partyList)
+	{
+		if(p == character.name)
+		{
+			continue;
+		}
+
+		stop_character(p);
+	}
 
 	stopFarmMode();
-
     autoPlay = false;
 
 	log("Characters stopped!");
@@ -1025,7 +1039,7 @@ function checkForLowInventorySpace()
 		{
 			emptyInvSlots++;
 		}
-		//	don't count things you are upgrading toward low inventory. compound items do count since these can take up a lot of space
+		//	don't count things you are upgrading toward low inventory. compound items do count since these can take up a lot of space without being actively consumed
 		else if(character.name == merchantName && isItemOnCraftList(item.name) && !itemsToCompound.includes(item.name))
 		{
 			emptyInvSlots++;
@@ -1092,7 +1106,7 @@ function storeInventoryInBankVault(bankVaultId)
 
 function isItemOnCraftList(itemName)
 {
-	let r = (!itemsToHoldOnTo.includes(itemName) && (itemsToUpgrade.includes(itemName) || itemsToCompound.includes(itemName)));
+	let r = (itemsToUpgrade.includes(itemName) || itemsToCompound.includes(itemName));
 	return r;
 }
 
