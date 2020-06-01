@@ -1,5 +1,5 @@
 ///		Priest Settings		///
-const healThreshold = 0.8;
+const healThreshold = 0.95;
 const manaReserve = 0.25;
 //////
 
@@ -7,6 +7,9 @@ var healMode = false;
 
 function priestAuto(target)
 {
+	//	heal
+	autoHeal();
+
 	//	save mana for healing if low
 	if(character.mp < (character.max_mp * manaReserve))
 	{
@@ -14,7 +17,7 @@ function priestAuto(target)
 	}
 
 	//	cast curse
-	if(character.mp >= G.skills.curse.mp && !is_on_cooldown("curse") && !target.s.curse && validTargetForSkill(target))
+	if(target && character.mp >= G.skills.curse.mp && !is_on_cooldown("curse") && !target.s.curse && validTargetForSkill(target))
 	{
 		use_skill("curse", target);
 		reduce_cooldown("curse", character.ping);

@@ -98,8 +98,8 @@ function merchantLateUpdate()
 
 		if(craftingOn)
 		{
-			craftUpgrades();
 			craftCompounds();
+			craftUpgrades();
 		}
 
 		if(character.gold > minimumGold)
@@ -120,7 +120,7 @@ function merchantLateUpdate()
 
 		sellVendorTrash();
 
-		if(checkForLowInventorySpace())
+		if(checkForLowInventorySpace() && (!hasUpgradableItems() && craftingOn))
 		{
 			disableVendorMode();
 			depositInventoryAtBank();
@@ -518,18 +518,20 @@ function buyPotionsFor(name, healthPots, manaPots)
 		return;
 	}
 
-	log(getEmptyInventorySlotCount());
-
-	if(getEmptyInventorySlotCount() <= 8)
+	if(getEmptyInventorySlotCount() < 8)
 	{
 		sellVendorTrash();
 
-		if(getEmptyInventorySlotCount() <= 8)
+		if(getEmptyInventorySlotCount() < 8 && (!hasUpgradableItems() && craftingOn))
 		{
 			log("Need inventory space to buy potions, going to bank.");
 			disableVendorMode();
 			depositInventoryAtBank();
 			return;
+		}
+		else
+		{
+			log("Continuing to craft in order to free inventory space.");
 		}
 	}
 

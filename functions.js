@@ -485,19 +485,27 @@ function checkBuffs()
 	let mluck = false;
 	let elixir = false;
 
-	//	check that you have mLuck from merchant
-	if(!checkMluck(character))
+	//	check that you have mLuck from your own merchant
+	if(checkMluck(character))
 	{
-		//	if you have someone elses mluck and in town just accept it, merchant will fix it after party leaves town
+		mluck = true;
+	}
+	else
+	{
+		//	if you have someone elses mluck and are in town just accept it, merchant will fix it after party leaves town
 		if(character.s.mluck && isInTown())
 		{
 			mluck = true;
 		}
 		else
 		{
-			requestMluck();
 			mluck = false;
 		}
+	}
+
+	if(!mluck)
+	{
+		requestMluck();
 	}
 
 	elixir = checkElixirBuff();
@@ -1103,7 +1111,7 @@ function checkForLowInventorySpace()
 			emptyInvSlots++;
 		}
 		//	don't count things you are upgrading toward low inventory. compound items do count since these can take up a lot of space without being actively consumed
-		else if(character.name == merchantName && itemsToUpgrade.includes(item.name))
+		else if(character.name == merchantName && itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop)
 		{
 			emptyInvSlots++;
 		}
@@ -1308,4 +1316,14 @@ function dropInvalidTarget(target)
 	}
 
 	return target;
+}
+
+function hasUpgradableItems()
+{
+	if(character.items.find((x)=>{if(x && itemsToUpgrade.includes(x.name) && x.level < upgradeLevelToStop) return x;}))
+	{
+		return true;
+	}
+
+	return false;
 }

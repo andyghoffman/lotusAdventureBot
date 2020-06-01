@@ -7,16 +7,16 @@ load_code("rangerLogic");
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 2000000;    //  merchant won't go below this amount of gold in wallet
-const basicItemsToCraft = ["coat","pants","gloves","helmet","shoes"];   //  keep buying and upgrading these
-const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","quiver"];
+const basicItemsToCraft = ["pants","gloves","helmet","shoes"];   //  keep buying and upgrading these
+const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","shield","quiver","coat","pants","gloves","helmet","shoes"];
 const upgradeLevelToStop = 7;
 const upgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
-const itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt","wbook0"];
+const itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt","wbook0","strearring"];
 const compoundLevelToStop = 2;
 const vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll","cshell"];
 const buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow","seashell"];
 const pontyExclude = ["ringsj"];    //  any craft-items you don't want to buy from ponty
-const elixirs = ["elixirint0", "elixitint1", "elixirint2", "elixirdex0", "elixirdex1", "elixirdex2"];
+const elixirs = ["elixirint0", "elixirint0", "elixirint2", "elixirdex0", "elixirdex1", "elixirdex2"];
 const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
 const xynTypes = ["gem","box"]; //  item types to be exchanged with Xyn
 elixirs.forEach(x=>{merchantItems.push(x)});
@@ -123,11 +123,10 @@ function main()
     //  prioritize heal checks by calling it before anything else (heal shares a cooldown with autoattack)
     else if(character.name == priestName)
     {
-        autoHeal();
+        priestAuto(get_targeted_monster());
     }
-
     //  make sure you attack even if you are moving (normal routine is not called while moving)
-    if(get_targeted_monster())
+    else if(get_targeted_monster())
     {
         autoAttack(get_targeted_monster());
     }
