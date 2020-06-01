@@ -100,7 +100,7 @@ function on_cm(sender, data)
 	{
         log(character.name + " recieved Let's Go from " + sender);
 		farmingModeActive = true;
-		autoPlay = fullAuto;
+		autoPlay = true;
 
 		return;
     }
@@ -151,7 +151,7 @@ function on_cm(sender, data)
 	//	this should remain the last check
 	if(data.message == "confirmDelivery")
 	{
-		if(sentRequests.length == 0 || !sentRequests.find((x)=>{return(x.name == sender);}))
+		if(sentRequests.length == 0 || !sentRequests.find((x)=>{if(x.name == sender) return x;}))
 		{
 			send_cm(sender, {message:"deliveryConfirmation",confirm:true});
 		}
@@ -482,26 +482,27 @@ function usePotions(healthPotThreshold = 0.9, manaPotThreshold = 0.9)
 
 function checkBuffs()
 {
+	let mluck = false;
+	let elixir = false;
+
 	//	check that you have mLuck from merchant
 	if(!checkMluck(character))
 	{
 		//	if you have someone elses mluck and in town just accept it, merchant will fix it after party leaves town
 		if(character.s.mluck && isInTown())
 		{
-			return true;
+			mluck = true;
 		}
+		else
+		{
+			requestMluck();
+			mluck = false;
+		}
+	}
 
-		requestMluck();
-		return false;
-	}
-	else if(!checkElixirBuff())
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+	elixir = checkElixirBuff();
+
+	return (mluck && elixir);
 }
 
 //	returns true if potion inventory is OK, false if you need potions
@@ -593,6 +594,11 @@ function transferAllToMerchant()
 		}
 
         log(character.name + " sent gold & items to merchant.");
+	}
+	else
+	{
+		log("Need to get closer to merchant to transfer items.");
+		approachTarget(merchantName);
 	}
 }
 
@@ -912,13 +918,10 @@ function aloneCheck(msToWait = 30000)
 
     if(!partyPresent() && !aloneChecking)
     {
-        if(character.name != partyLeader)
+        if(character.name != partyLeader && parent.entities[partyLeader])
         {
-            if(parent.entities[partyLeader])
-            {
-                followLeader();
-                return false;
-            }
+			followLeader();
+			return false;
         }
 
         aloneChecking = true;

@@ -183,39 +183,22 @@ function main()
     //  if the monster is targeting another player, drop the target unless it's a special monster
     target = dropInvalidTarget(target);
 
-    //  party leader standard routine
-	if(character.name == partyLeader)
-	{
-		if(target)
-		{
-            classRoutine(target);
-		}
-		else if(!traveling)
-		{
-            log(character.name + " going to farm map... ");
-            travelToFarmSpot();
-        }
-
-        //  keep personal space
-        personalSpace();
+    if(target)
+    {
+        classRoutine(target);
     }
-    //  codeBot party follower routines
-	else
-	{
-		if(target)
-		{
-            classRoutine(target);
-		}
-		else if(!traveling)
-		{
-            log(character.name + " going to farm map... ");
-            travelToFarmSpot();
-        }
+    else if(!traveling)
+    {
+        log(character.name + " going to farm map... ");
+        travelToFarmSpot();
+    }
 
-        //  keep personal space
-        personalSpace();
+    //  keep personal space
+    personalSpace();
 
-        //  if leader is too far away approach him
+    //  if leader is too far away approach him
+    if(character.name != partyLeader)
+    {
         followLeader();
     }
 }

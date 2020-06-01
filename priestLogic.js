@@ -47,6 +47,7 @@ function priestAuto(target)
 function autoHeal()
 {
 	let damagedPartyMembers = 0;
+
 	parent.party_list.forEach(function(partyMemberName)
 	{
 		let partyMember = parent.entities[partyMemberName];
@@ -62,30 +63,21 @@ function autoHeal()
 
 			if(damagedPartyMembers > 1 && character.mp >= G.skills.partyheal.mp && !is_on_cooldown("partyheal"))
 			{
+				log("Priest is healing party!");
 				use_skill("partyheal");
 				reduce_cooldown("partyheal", character.ping);
-
-				log("Priest is healing party!");
-
 				return;
 			}
 			else if(!is_on_cooldown("heal") && character.mp >= G.skills.heal.mp)
 			{
 				log("Priest is healing " + partyMember.name);
-
+				heal(partyMember);
 				reduce_cooldown("heal", character.ping);
-				heal(partyMember);/*.then((message) =>
-				{
-
-				}).catch((message) =>
-				{
-					log(character.name + " Heal failed: " + message.reason);
-				});*/
 			}
 		}
 	});
 
-	if(damagedPartyMembers == 0)
+	if(damagedPartyMembers == 0 && !is_on_cooldown("heal"))
 	{
 		healMode = false;
 	}
