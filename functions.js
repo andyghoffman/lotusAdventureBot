@@ -1100,7 +1100,7 @@ function checkForLowInventorySpace()
 			emptyInvSlots++;
 		}
 		//	don't count things you are upgrading toward low inventory. compound items do count since these can take up a lot of space without being actively consumed
-		else if(character.name == merchantName && isItemOnCraftList(item.name) && !itemsToCompound.includes(item.name))
+		else if(character.name == merchantName && itemsToUpgrade.includes(item.name))
 		{
 			emptyInvSlots++;
 		}
@@ -1110,6 +1110,7 @@ function checkForLowInventorySpace()
 	{
 		return true;
 	}
+
 	return false;
 }
 
