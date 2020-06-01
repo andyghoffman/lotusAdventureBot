@@ -83,6 +83,7 @@ function merchantAuto(target)
 function merchantLateUpdate()
 {
 	checkRequests();
+	confirmDeliveries();
 
 	if(!autoPlay || isBusy())
 	{
@@ -190,7 +191,7 @@ function merchant_on_cm(sender, data)
 	}
 	else if(data.message == "thanks")
 	{
-		log("Recieved delivery confirmation from " + sender);
+		log("Successful delivery confirmation from " + sender);
 
 		if(data.request == "mluck")
 		{
@@ -220,6 +221,7 @@ function merchant_on_cm(sender, data)
 		{
 			if(deliveryRequests[i].sender == sender)
 			{
+				log("Cleaning up delivery list...");
 				deliveryRequests.splice(i, 1);
 			}
 		}
@@ -228,6 +230,7 @@ function merchant_on_cm(sender, data)
 		{
 			if(deliveryShipments[i].name == sender)
 			{
+				log("Cleaning up delivery list...");
 				deliveryShipments.splice(i, 1);
 			}
 		}
@@ -337,11 +340,22 @@ function getShipmentFor(name)
 
 function craftUpgrades()
 {
+	for(let i = 1; i <= upgradeLevelToStop; i++)
+	{
+		if(craftUpgrade(i))
+		{
+			break;
+		}
+	}
+}
+
+function craftUpgrade(targetUpgradeLevel)
+{
 	for(let i = 0; i < character.items.length; i++)
 	{
 		let item = character.items[i];
 
-		if(item && itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop)
+		if(item && itemsToUpgrade.includes(item.name) && item.level < targetUpgradeLevel)
 		{
 			log("Upgrading " + G.items[item.name].name + "...");
 
@@ -504,11 +518,13 @@ function buyPotionsFor(name, healthPots, manaPots)
 		return;
 	}
 
-	if(checkForLowInventorySpace())
+	log(getEmptyInventorySlotCount());
+
+	if(getEmptyInventorySlotCount() <= 8)
 	{
 		sellVendorTrash();
 
-		if(checkForLowInventorySpace())
+		if(getEmptyInventorySlotCount() <= 8)
 		{
 			log("Need inventory space to buy potions, going to bank.");
 			disableVendorMode();
@@ -764,7 +780,7 @@ function sortMerchantInventory()
 //	don't like that this feels necessary, but this should clean up requests not being cleaned up properly even when they are successfully completed (leading to the merchant gettings stuck)
 function confirmDeliveries()
 {
-	if(deliveryRequests.length == 0 && shipmentToDeliver.level == 0)
+	if(deliveryRequests.length == 0 && deliveryShipments.length == 0)
 	{
 		return true;
 	}
@@ -772,5 +788,13 @@ function confirmDeliveries()
 	for(let r of deliveryRequests)
 	{
 		send_cm(r.sender, {message:"confirmDelivery"});
+	}
+
+	for(let r of deliveryShipments)
+	{
+		if(!deliveryRequests.find((x)=>{if(x.sender == r.name) return x;}))
+		{
+			send_cm(r.sender, {message:"confirmDelivery"});
+		}
 	}
 }

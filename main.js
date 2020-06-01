@@ -120,11 +120,12 @@ function main()
     {
         standCheck();
     }
-    //  make sure you heal even if you are moving (normal routine is not called while moving)
+    //  prioritize heal checks by calling it before anything else (heal shares a cooldown with autoattack)
     else if(character.name == priestName)
     {
         autoHeal();
     }
+
     //  make sure you attack even if you are moving (normal routine is not called while moving)
     if(get_targeted_monster())
     {
@@ -180,10 +181,7 @@ function main()
     }
 
     //  if the monster is targeting another player, drop the target unless it's a special monster
-    if(target && target.target && target.target.player && !partyList.includes(target.target.name) && !specialMonsters.includes(target.mtype))
-    {
-        target = null;
-    }
+    target = dropInvalidTarget(target);
 
     //  party leader standard routine
 	if(character.name == partyLeader)

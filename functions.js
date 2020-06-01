@@ -536,13 +536,21 @@ function checkPotionInventory()
 			{
 				log(character.name + " has no potions, is returning to town.");
 				farmingModeActive = false;
-				goBackToTown();
-				setTimeout(()=>
+
+				if(!returningToTown && !traveling)
 				{
-					log(character.name + " attempting to buy potions.");
-					buy_with_gold(healthPotsNeeded);
-					buy_with_gold(manaPotsNeeded);
-				}, 10000);
+					traveling = true;
+					goBackToTown();
+
+					setTimeout(()=>
+					{
+						log(character.name + " attempting to buy potions.");
+						buy_with_gold("hpot0", healthPotsNeeded);
+						buy_with_gold("mpot0", manaPotsNeeded);
+
+						traveling = false;
+					}, 10000);
+				}
 			}
 		}
 		else
@@ -728,6 +736,11 @@ function approachTarget(target, onComplete)
 
 function autoAttack(target)
 {
+	if(character.name == priestName && healMode)
+	{
+		return;
+	}
+
     if(!is_in_range(target, "attack"))
 	{
 		approachTarget(target);
@@ -1093,7 +1106,25 @@ function checkForLowInventorySpace()
 		}
 	}
 
-	return emptyInvSlots <= lowInventoryThreshold;
+	if(emptyInvSlots <= lowInventoryThreshold)
+	{
+		return true;
+	}
+	return false;
+}
+
+function getEmptyInventorySlotCount()
+{
+	let emptyInvSlots = 0;
+	for(let item of character.items)
+	{
+		if(!item)
+		{
+			emptyInvSlots++;
+		}
+	}
+
+	return emptyInvSlots;
 }
 
 function depositInventoryAtBank()
@@ -1110,14 +1141,16 @@ function depositInventoryAtBank()
 	smart_move("bank", ()=>
 	{
 		//	store in first bank
-		storeInventoryInBankVault(0);
+		let storeCompounds = (getEmptyInventorySlotCount() < 8);
+		storeInventoryInBankVault(0, storeCompounds);
 
 		//	store in second bank
 		if(checkForLowInventorySpace())
 		{
 			setTimeout(()=>
 			{
-				storeInventoryInBankVault(1);
+				storeCompounds = (getEmptyInventorySlotCount() < 8);
+				storeInventoryInBankVault(1, storeCompounds);
 				banking = false;
 
 			}, 1000);
@@ -1129,7 +1162,7 @@ function depositInventoryAtBank()
 	});
 }
 
-function storeInventoryInBankVault(bankVaultId)
+function storeInventoryInBankVault(bankVaultId, storeCompounds = false)
 {
 	for(let i = 0; i < character.items.length; i++)
 	{
@@ -1141,7 +1174,7 @@ function storeInventoryInBankVault(bankVaultId)
 			{
 				continue;
 			}
-			if(character.name == merchantName && (itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
+			if(character.name == merchantName && (!storeCompounds && itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
 			{
 				continue;
 			}
@@ -1261,4 +1294,14 @@ function getElixirInventorySlot(elixirBaseName, elixirLevel = -1)
 	}
 
 	return null;
+}
+
+function dropInvalidTarget(target)
+{
+	if(target && target.target && target.target.player && !partyList.includes(target.target.name) && !specialMonsters.includes(target.mtype))
+    {
+        target = null;
+	}
+
+	return target;
 }

@@ -3,11 +3,10 @@ const healThreshold = 0.8;
 const manaReserve = 0.25;
 //////
 
+var healMode = false;
+
 function priestAuto(target)
 {
-	//	heal
-	autoHeal();
-
 	//	save mana for healing if low
 	if(character.mp < (character.max_mp * manaReserve))
 	{
@@ -39,7 +38,7 @@ function priestAuto(target)
 		}
 	}
 
-	if(target)
+	if(target && !healMode)
 	{
 		autoAttack(target);
 	}
@@ -51,38 +50,45 @@ function autoHeal()
 	parent.party_list.forEach(function(partyMemberName)
 	{
 		let partyMember = parent.entities[partyMemberName];
-
-		if(partyMember && !partyMember.rip)
+		if(partyMemberName == character.name)
 		{
-			if(partyMember.hp < (partyMember.max_hp * healThreshold))
+			partyMember = character;
+		}
+
+		if(partyMember && !partyMember.rip && partyMember.hp < (partyMember.max_hp * healThreshold))
+		{
+			healMode = true;
+			damagedPartyMembers++;
+
+			if(damagedPartyMembers > 1 && character.mp >= G.skills.partyheal.mp && !is_on_cooldown("partyheal"))
 			{
-				damagedPartyMembers++;
+				use_skill("partyheal");
+				reduce_cooldown("partyheal", character.ping);
 
-				if(damagedPartyMembers > 1 && character.mp >= G.skills.partyheal.mp && !is_on_cooldown("partyheal"))
+				log("Priest is healing party!");
+
+				return;
+			}
+			else if(!is_on_cooldown("heal") && character.mp >= G.skills.heal.mp)
+			{
+				log("Priest is healing " + partyMember.name);
+
+				reduce_cooldown("heal", character.ping);
+				heal(partyMember);/*.then((message) =>
 				{
-					use_skill("partyheal");
-                    reduce_cooldown("partyheal", character.ping);
 
-                    log("Priest is healing party!");
-
-					return;
-				}
-				else if(!is_on_cooldown("heal") && character.mp >= G.skills.heal.mp)
+				}).catch((message) =>
 				{
-					log("Priest is healing " + partyMember.name);
-
-					reduce_cooldown("heal", character.ping);
-					heal(partyMember).then((message) =>
-					{
-
-					}).catch((message) =>
-					{
-						log(character.name + " Heal failed: " + message.reason);
-					});
-				}
+					log(character.name + " Heal failed: " + message.reason);
+				});*/
 			}
 		}
-    });
+	});
+
+	if(damagedPartyMembers == 0)
+	{
+		healMode = false;
+	}
 }
 
 function priest_on_cm(name, data)
