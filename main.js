@@ -11,20 +11,19 @@ const basicItemsToCraft = ["coat","pants","gloves","helmet","shoes"];   //  keep
 const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","mushroomstaff","shield","quiver"];
 const upgradeLevelToStop = 7;
 const upgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
-const itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt"];
+const itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt","wbook0"];
 const compoundLevelToStop = 2;
-const vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll"];
+const vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll","cshell"];
 const buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow","seashell"];
 const pontyExclude = ["ringsj"];    //  any craft-items you don't want to buy from ponty
-const elixirs = ["elixirint0", "elixitint1", "elixirdex0", "elixirdex1"];
+const elixirs = ["elixirint0", "elixitint1", "elixirint2", "elixirdex0", "elixirdex1", "elixirdex2"];
 const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
 const xynTypes = ["gem","box"]; //  item types to be exchanged with Xyn
 elixirs.forEach(x=>{merchantItems.push(x)});
 basicItemsToCraft.forEach(x=>{itemsToUpgrade.push(x)});
 itemsToUpgrade.forEach(x=>{buyFromPontyList.push(x)});
 itemsToCompound.forEach(x=>{buyFromPontyList.push(x)});
-buyFromPontyList.forEach(x=>{elixirs.push(x)});
-pontyExclude.forEach(x=>{buyFromPontyList.splice(buyFromPontyList.indexOf(x), 1)});
+elixirs.forEach(x=>{buyFromPontyList.push(x)});
 //////
 
 ///     farming settings        ///
@@ -121,12 +120,12 @@ function main()
     {
         standCheck();
     }
-    //  make sure you heal even if you are moving
+    //  make sure you heal even if you are moving (normal routine is not called while moving)
     else if(character.name == priestName)
     {
         autoHeal();
     }
-    //  make sure you attack even if you are moving
+    //  make sure you attack even if you are moving (normal routine is not called while moving)
     if(get_targeted_monster())
     {
         autoAttack(get_targeted_monster());

@@ -120,13 +120,13 @@ function on_cm(sender, data)
 	{
 		autoPlay = false;
 		farmingModeActive = false;
-		returnToTown();
+		goBackToTown();
 		return;
 	}
 	else if(data.message == "noelixirs")
 	{
 		noElixirs = true;
-		sentRequests.splice(sentRequests.indexOf(sentRequests.find(x=>x.request=="elixir"), 1));
+		sentRequests.splice(sentRequests.indexOf(sentRequests.find((x)=>{if(x.request=="elixir") return x;}), 1));
 		log("Continuing without elixir.");
 		return;
 	}
@@ -146,6 +146,15 @@ function on_cm(sender, data)
 	else if(character.ctpye === "ranger")
 	{
 		ranger_on_cm(sender, data);
+	}
+
+	//	this should remain the last check
+	if(data.message == "confirmDelivery")
+	{
+		if(sentRequests.length == 0 || !sentRequests.find((x)=>{return(x.name == sender);}))
+		{
+			send_cm(sender, {message:"deliveryConfirmation",confirm:true});
+		}
 	}
 }
 
@@ -363,7 +372,7 @@ function stuckCheck(originalPosition)
 			log(character.name + " is still stuck and returning to town.");
 			isStuck = false;
 			stopFarmMode();
-            returnToTown();
+            goBackToTown();
 
 		}, 30000);
 	}
@@ -395,7 +404,7 @@ function partyPresent()
 
 function requestMluck()
 {
-	if(sentRequests.find(x=>x.message=="mluck"))
+	if(sentRequests.find((x)=>{if(x.message=="mluck") return x;}))
 	{
 		log(character.name + " waiting for Mluck, resending request...");
 	}
@@ -518,7 +527,7 @@ function checkPotionInventory()
 		let potsList = {message:"buyPots", hPots:healthPotsNeeded, mPots:manaPotsNeeded};
 		send_cm(merchantName, potsList);
 
-		if(sentRequests.find(x=>x.message=="potions"))
+		if(sentRequests.find((x)=>{if(x.message=="potions") return x;}))
 		{
 			log(character.name + " waiting for potions, resending request... ");
 
@@ -527,7 +536,7 @@ function checkPotionInventory()
 			{
 				log(character.name + " has no potions, is returning to town.");
 				farmingModeActive = false;
-				returnToTown();
+				goBackToTown();
 				setTimeout(()=>
 				{
 					log(character.name + " attempting to buy potions.");
@@ -780,7 +789,7 @@ function travelToFarmSpot()
 	}
 }
 
-function returnToTown(delay)
+function goBackToTown(delay)
 {
 	if(returningToTown)
 	{
@@ -799,6 +808,21 @@ function returnToTown(delay)
 	{
 		goTo(merchantStandMap,merchantStandCoords,()=>{returningToTown=false});
 	}, 5000);
+}
+
+function getLastEmptyInventorySlotNumber()
+{
+	let lastEmptySlot = -1;
+	for(let i = 0; i < character.items.length; i++)
+	{
+		let item = character.items[i];
+		if(!item)
+		{
+			lastEmptySlot = i;
+		}
+	}
+
+	return lastEmptySlot;
 }
 
 //	sorts inventory to push all items toward the back
@@ -901,7 +925,7 @@ function aloneCheck(msToWait = 30000)
                 log(character.name + " is lost & returning to town.");
 
                 stopFarmMode();
-                returnToTown();
+                goBackToTown();
             }
 
             aloneChecking = false;
@@ -981,7 +1005,7 @@ function returnPartyToTown()
     log("Returning party to town.");
 
 	togglePartyAuto(false);
-	returnToTown();
+	goBackToTown();
 
 	for(let p of partyList)
 	{
@@ -1076,7 +1100,7 @@ function depositInventoryAtBank()
 {
 	if(!isInTown())
 	{
-		returnToTown();
+		goBackToTown();
 		return;
 	}
 
@@ -1190,7 +1214,7 @@ function checkElixirBuff()
 		//	if not, ask the merchant for one
 		else
 		{
-			if(sentRequests.find(x=>x.message=="elixir"))
+			if(sentRequests.find((x)=>{if(x.message=="elixir") return x;}))
 			{
 				log("Waiting on elixir, resending request...");
 			}
@@ -1208,9 +1232,24 @@ function checkElixirBuff()
 	return true;
 }
 
-function getElixirInventorySlot(elixirBaseName)
+//	if requesting a specific level, will return null if it's not found, otherwise will return first found, checking lower levels first
+function getElixirInventorySlot(elixirBaseName, elixirLevel = -1)
 {
 	let elixir = null;
+
+	if(elixirLevel > -1)
+	{
+		elixir = locate_item(elixirBaseName+elixirLevel);
+		if(elixir > -1)
+		{
+			return elixir;
+		}
+		else
+		{
+			return null;
+		}
+	}
+
 	for(let i = 0; i <= 2; i++)
 	{
 		elixir = locate_item(elixirBaseName+i);

@@ -10,16 +10,24 @@ var exchangeMode = false;		//	true when the merchant is busy exchanging items wi
 var deliveryShipments = [];
 var deliveryRequests = [];
 
+const mluckDuration = 3600000;
+
 function merchantOnStart()
 {
+	pontyExclude.forEach(x=>{buyFromPontyList.splice(buyFromPontyList.indexOf(x), 1)});
 	merchantItems.forEach(x=>{itemsToHoldOnTo.push(x)});
 	enableVendorMode();
 }
 
 function merchantAuto(target)
 {
+	if(!isBusy())
+	{
+		sortMerchantInventory();
+	}
+
 	//	keep magic luck on yourself
-	if(!checkMluck(character))
+	if(!checkMluck(character)&& !is_on_cooldown("mluck"))
 	{
 		log("mlucking self");
 		use_skill("mluck", character);
@@ -46,7 +54,7 @@ function merchantAuto(target)
 				{
 					deliverItems(shipment);
 				}
-				else if(!checkMluck(friendlyTarget) && !is_on_cooldown("mluck"))
+				else if((!checkMluck(friendlyTarget) || (!isInTown() && (!friendlyTarget.s.mluck || friendlyTarget.s.mluck.ms < mluckDuration*0.95))) && !is_on_cooldown("mluck"))
 				{
 					log("Giving mluck to " + friendlyTarget.name);
 					use_skill("mluck", friendlyTarget);
@@ -105,7 +113,7 @@ function merchantLateUpdate()
 	{
 		if(!isInTown())
 		{
-			returnToTown();
+			goBackToTown();
 			return;
 		}
 
@@ -127,7 +135,7 @@ function merchantLateUpdate()
 		}
 		else
 		{
-			returnToTown();
+			goBackToTown();
 		}
 	}
 }
@@ -136,7 +144,7 @@ function merchant_on_cm(sender, data)
 {
 	if(data.message == "buyPots")
 	{
-		if(deliveryRequests.find(x=>x.request=="potions" && x.sender==sender))
+		if(deliveryRequests.find((x)=>{if(x.request=="potions" && x.sender==sender) return x;}))
 		{
 			log("Already have potion request from " + sender);
 			return;
@@ -147,7 +155,7 @@ function merchant_on_cm(sender, data)
 	}
 	else if(data.message == "elixir")
 	{
-		if(deliveryRequests.find(x=>x.request=="elixir" && x.sender==sender))
+		if(deliveryRequests.find((x)=>{if(x.request=="elixir" && x.sender==sender) return x;}))
 		{
 			log("Already have elixir request from " + sender);
 			return;
@@ -171,7 +179,7 @@ function merchant_on_cm(sender, data)
 	}
 	else if(data.message == "mluck")
 	{
-		if(deliveryRequests.find(x=>x.request=="mluck"))
+		if(deliveryRequests.find((x)=>{if(x.request=="mluck") return x;}))
 		{
 			log("Already have mluck request.");
 			return;
@@ -199,6 +207,31 @@ function merchant_on_cm(sender, data)
 			deliveryRequests.splice(deliveryRequests.indexOf(x=>x.sender == sender && x.request == request), 1);
 		}
 	}
+
+	//	this should remain the last check
+	if(data.message == "deliveryConfirmation")
+	{
+		if(!data.confirm)
+		{
+			return;
+		}
+
+		for(let i = deliveryRequests.length-1; i >= 0; i--)
+		{
+			if(deliveryRequests[i].sender == sender)
+			{
+				deliveryRequests.splice(i, 1);
+			}
+		}
+
+		for(let i = deliveryShipments.length-1; i >= 0; i--)
+		{
+			if(deliveryShipments[i].name == sender)
+			{
+				deliveryShipments.splice(i, 1);
+			}
+		}
+	}
 }
 
 function merchant_on_magiport(name)
@@ -215,14 +248,14 @@ function merchant_on_magiport(name)
 //	returns true if the merchant is occupied with a task
 function isBusy()
 {
-	let r = returningToTown || deliveryMode || banking || exchangeMode;
+	let r = returningToTown || deliveryMode || banking || exchangeMode || character.q.upgrade || character.q.compound;
 	return r;
 }
 
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
 function checkMluck(target)
 {
-	if(!target.s.mluck || target.s.mluck.f != merchantName || target.s.mluck.ms < 1800000)
+	if(!target.s.mluck || target.s.mluck.f != merchantName || target.s.mluck.ms < mluckDuration*0.5)
 	{
 		return false;
 	}
@@ -487,7 +520,7 @@ function buyPotionsFor(name, healthPots, manaPots)
 	if(!isInTown())
 	{
 		log("Returning to buy potions...");
-		returnToTown();
+		goBackToTown();
 		return;
 	}
 
@@ -558,7 +591,7 @@ function enableVendorMode()
 
 	if(!isInTown())
 	{
-		returnToTown();
+		goBackToTown();
 	}
 	else
 	{
@@ -700,5 +733,44 @@ function exchangeWithXyn()
 				return;
 			}
 		}
+	}
+}
+
+//	keeps the merchant's inventory bottom row in a set order for organization
+function sortMerchantInventory()
+{
+	return;
+
+	for(let m = 0; m < merchantItems.length; m++)
+	{
+		for(let i = character.items.length-1; i >= 0; i--)
+		{
+			let item = character.items[i];
+
+			if(!item || (item && item.name != merchantItems[m]))
+			{
+				let correctItem = locate_item(merchantItems[m]);
+
+				if(correctItem > -1)
+				{
+					swap(i, correctItem);
+					break;
+				}
+			}
+		}
+	}
+}
+
+//	don't like that this feels necessary, but this should clean up requests not being cleaned up properly even when they are successfully completed (leading to the merchant gettings stuck)
+function confirmDeliveries()
+{
+	if(deliveryRequests.length == 0 && shipmentToDeliver.level == 0)
+	{
+		return true;
+	}
+
+	for(let r of deliveryRequests)
+	{
+		send_cm(r.sender, {message:"confirmDelivery"});
 	}
 }
