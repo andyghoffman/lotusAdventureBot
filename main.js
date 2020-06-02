@@ -7,9 +7,9 @@ load_code("rangerLogic");
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 2000000;    //  merchant won't go below this amount of gold in wallet
-const basicItemsToCraft = ["pants","gloves","helmet","shoes"];   //  keep buying and upgrading these
-const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","shield","quiver","coat","pants","gloves","helmet","shoes"];
-const upgradeLevelToStop = 7;
+const basicItemsToCraft = ["pants","gloves","shoes"];   //  keep buying and upgrading these
+const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","shield","quiver","pants","gloves","shoes"];
+const upgradeLevelToStop = 8;
 const upgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
 const itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt","wbook0","strearring"];
 const compoundLevelToStop = 2;

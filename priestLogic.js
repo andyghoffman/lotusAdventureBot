@@ -16,22 +16,25 @@ function priestAuto(target)
 		return;
 	}
 
-	//	cast curse
-	if(target && character.mp >= G.skills.curse.mp && !is_on_cooldown("curse") && !target.s.curse && validTargetForSkill(target))
-	{
-		use_skill("curse", target);
-		reduce_cooldown("curse", character.ping);
-	}
+	tauntOffPartyMembers(target);
+	useCurse(target);
 
+	if(!healMode)
+	{
+		autoAttack(target);
+	}
+}
+
+function tauntOffPartyMembers(target)
+{
 	//	taunt things off of other party members and focus fire them
 	for(let e in parent.entities)
 	{
 		let tauntTarget = parent.entities[e];
 		let targetOfTarget = tauntTarget.target;
 
-		if(!tauntTarget.player && targetOfTarget && targetOfTarget != character.name && parent.party_list.includes(targetOfTarget) && character.mp >= G.skills.absorb.mp && !is_on_cooldown("absorb"))
+		if(!is_on_cooldown("absorb") && is_in_range(target, "absorb") && !tauntTarget.player && targetOfTarget && targetOfTarget != character.name && parent.party_list.includes(targetOfTarget) && character.mp >= G.skills.absorb.mp)
 		{
-			change_target(targetOfTarget);
 			use_skill("absorb", targetOfTarget);
 			reduce_cooldown("absorb", character.ping);
 			change_target(tauntTarget);
@@ -41,9 +44,16 @@ function priestAuto(target)
 		}
 	}
 
-	if(target && !healMode)
+	return target;
+}
+
+function useCurse(target)
+{
+	//	cast curse
+	if(!is_on_cooldown("curse") && is_in_range(target, "curse") && !target.s.curse && validTargetForSkill(target))
 	{
-		autoAttack(target);
+		use_skill("curse", target);
+		reduce_cooldown("curse", character.ping);
 	}
 }
 

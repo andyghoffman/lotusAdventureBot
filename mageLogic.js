@@ -27,10 +27,7 @@ function mageAuto(target)
 	}
 
 	//	auto attack
-	if(target)
-	{
-		autoAttack(target);
-	}
+	autoAttack(target);
 }
 
 function mage_on_cm(name, data)
