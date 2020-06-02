@@ -7,7 +7,7 @@ load_code("rangerLogic");
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 2000000;    //  merchant won't go below this amount of gold in wallet
-const basicItemsToCraft = ["pants","gloves","shoes"];   //  keep buying and upgrading these
+const basicItemsToCraft = [];   //  keep buying and upgrading these
 const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","shield","quiver","pants","gloves","shoes"];
 const upgradeLevelToStop = 8;
 const upgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
@@ -66,13 +66,15 @@ const itemsToHoldOnTo = ["hpot0","mpot0"];
 partyList.forEach(x=>{whiteList.push(x)});
 //////
 
-map_key("1", "snippet", "initParty()")
-map_key("2", "snippet", "returnPartyToTown()")
-map_key("3", "snippet", "stopCharacters()")
-map_key("4", "snippet", "transferAllToMerchant()")
-map_key("5", "snippet", "togglePartyAuto()")
-map_key("6", "snippet", "toggleCraftingMode()")
-map_key("7", "snippet", "depositInventoryAtBank()")
+map_key("1", "snippet", "initParty()");
+map_key("2", "snippet", "returnPartyToTown()");
+map_key("3", "snippet", "stopCharacters()");
+map_key("4", "snippet", "transferAllToMerchant()");
+map_key("5", "snippet", "togglePartyAuto()");
+map_key("6", "snippet", "toggleCraftingMode()");
+map_key("7", "snippet", "depositInventoryAtBank()");
+map_key("8", "snippet", "xpReport()");
+
 
 var autoPlay = fullAuto;
 var craftingOn = craftingEnabled;
@@ -218,10 +220,10 @@ function lateUpdate()
         initParty();
     }
 
-    //  merchant update is delayed an additional 1000ms so if requests are sent in the same interval merchant doesnt have to wait an additioanl interval
+    //  merchant has it's own lateUpdate
     if(character.name == merchantName)
 	{
-        setTimeout(merchantLateUpdate, 1000);
+        merchantLateUpdate();
         return;
 	}
 
@@ -231,7 +233,7 @@ function lateUpdate()
         return;
     }
 
-    //  if the merchant is nearby, send him your items (token minimum amount so it doesn't get spammed)
+    //  if the merchant is nearby, send him your items & gold (token minimum gold amount so it doesn't get spammed)
     if(parent.entities[merchantName] && character.gold > 10000)
     {
         transferAllToMerchant();

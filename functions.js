@@ -1339,3 +1339,20 @@ function isShiny(item)
 {
 	return item.p;
 }
+
+function xpReport()
+{
+	let output = "";
+
+	for(let p of partyList)
+	{
+		let player = get_player(p);
+
+		if(player)
+		{
+			output += player.name + ": " + (player.xp/G.levels[player.level]) + "     ";
+		}
+	}
+
+	show_json(output);
+}
