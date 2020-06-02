@@ -274,7 +274,7 @@ function sellVendorTrash()
 	{
 		let item = character.items[i];
 
-		if(item && vendorTrash.includes(item.name))
+		if(item && vendorTrash.includes(item.name) && !isShiny(item))
 		{
 			log("Selling " + item.name + " to vendor.");
 			sell(i, item.q);
@@ -355,7 +355,7 @@ function craftUpgrade(targetUpgradeLevel)
 	{
 		let item = character.items[i];
 
-		if(item && itemsToUpgrade.includes(item.name) && item.level < targetUpgradeLevel)
+		if(item && itemsToUpgrade.includes(item.name) && item.level < targetUpgradeLevel && !isShiny(item))
 		{
 			log("Upgrading " + G.items[item.name].name + "...");
 
@@ -406,7 +406,7 @@ function craftCompound(levelToUse)
 		for(let k = 0; k < character.items.length; k++)
 		{
 			let item = character.items[k];
-			if(item  && item.name == itemsToCompound[i] && item.level == levelToUse && count < 3)
+			if(item  && item.name == itemsToCompound[i] && item.level == levelToUse && count < 3 && !isShiny(item))
 			{
 				triple[count] = k;
 				count++;
@@ -448,6 +448,27 @@ function buyBasicItems()
 {
 	let count = 0;
 
+	if(count == 0)
+	{
+		for(let i = 0; i < basicItemsToCraft.length; i++)
+		{
+			if(!G.items[basicItemsToCraft[i]])
+			{
+				log(basicItemsToCraft[i] + " is not a valid item name!");
+				return;
+			}
+
+			if(character.items.find((x)=>{if(x && x.name == basicItemsToCraft[i] && x.level < upgradeLevelToStop) return x;}))
+			{
+				continue;
+			}
+
+			log("Buying a " + G.items[basicItemsToCraft[i]].name);
+			buy_with_gold(basicItemsToCraft[i]);
+		}
+	}
+
+	/*
 	//	only buy if we are out of items in inventory to upgrade
 	for(let k = 0; k < character.items.length; k++)
 	{
@@ -471,7 +492,7 @@ function buyBasicItems()
 			log("Buying a " + G.items[basicItemsToCraft[i]].name);
 			buy_with_gold(basicItemsToCraft[i]);
 		}
-	}
+	}*/
 }
 
 function stockScrolls()
@@ -654,6 +675,11 @@ function buyFromPonty()
 	{
 		for(let pontyItem of data)
 		{
+			if(pontyItem.p)
+			{
+				show_json("Found shiny ponty item : " + G.items[pontyItem.name].name);
+			}
+
 			if (itemsToBuy.includes(pontyItem.name))
 			{
 				let buy = false;

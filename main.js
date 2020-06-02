@@ -107,14 +107,6 @@ function main()
         return;
     }
 
-    //  standard routine
-    usePotions(healthPotThreshold, manaPotThreshold);
-    loot();
-    if(autoPlay)
-    {
-        tidyInventory();
-    }
-
     //  don't walk with merchant stand, don't idle without it
     if(character.name == merchantName)
     {
@@ -129,6 +121,14 @@ function main()
     else if(get_targeted_monster())
     {
         autoAttack(get_targeted_monster());
+    }
+
+    loot();
+    usePotions(healthPotThreshold, manaPotThreshold);
+
+    if(autoPlay)
+    {
+        tidyInventory();
     }
 
     //  finish what you are doing before checking past here

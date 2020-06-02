@@ -1327,3 +1327,8 @@ function hasUpgradableItems()
 
 	return false;
 }
+
+function isShiny(item)
+{
+	return item.p;
+}

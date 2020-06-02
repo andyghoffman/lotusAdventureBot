@@ -71,7 +71,7 @@ function autoHeal()
 				reduce_cooldown("partyheal", character.ping);
 				return;
 			}
-			else if(!is_on_cooldown("heal") && character.mp >= G.skills.heal.mp)
+			else if(!is_on_cooldown("heal"))
 			{
 				log("Priest is healing " + partyMember.name);
 				heal(partyMember);
