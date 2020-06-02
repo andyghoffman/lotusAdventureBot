@@ -16,7 +16,7 @@ const compoundLevelToStop = 2;
 const vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll","cshell"];
 const buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow","seashell"];
 const pontyExclude = ["ringsj"];    //  any craft-items you don't want to buy from ponty
-const elixirs = ["elixirint0", "elixirint0", "elixirint2", "elixirdex0", "elixirdex1", "elixirdex2"];
+const elixirs = ["elixirint0", "elixirint1", "elixirint2", "elixirdex0", "elixirdex1", "elixirdex2"];
 const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
 const xynTypes = ["gem","box"]; //  item types to be exchanged with Xyn
 elixirs.forEach(x=>{merchantItems.push(x)});
@@ -59,6 +59,7 @@ const lowPotionsThreshold = 100;
 const minimumMonsterDistance = 45;
 const maxLeaderDistance = 60;
 const lowInventoryThreshold = 14;
+const veryLowInventoryThreshold = 7;
 const monsterHpThresholdForSkills = 0.5;
 const healthPotThreshold = 0.98, manaPotThreshold = 0.95;
 const itemsToHoldOnTo = ["hpot0","mpot0"];
@@ -112,7 +113,7 @@ function main()
     {
         standCheck();
     }
-    //  prioritize heal checks by calling it before anything else (heal shares a cooldown with autoattack)
+    //  prioritize priest functions before anything else (because heal shares a cooldown with autoattack)
     else if(character.name == priestName)
     {
         priestAuto(get_targeted_monster());

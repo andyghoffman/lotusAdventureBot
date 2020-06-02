@@ -54,7 +54,7 @@ function merchantAuto(target)
 				{
 					deliverItems(shipment);
 				}
-				else if((!checkMluck(friendlyTarget) || (!isInTown() && (!friendlyTarget.s.mluck || friendlyTarget.s.mluck.ms < mluckDuration*0.95))) && !is_on_cooldown("mluck"))
+				else if(!checkMluck(friendlyTarget))
 				{
 					log("Giving mluck to " + friendlyTarget.name);
 					use_skill("mluck", friendlyTarget);
@@ -70,7 +70,7 @@ function merchantAuto(target)
 		else if(friendlyTarget)
 		{
 			//	mluck others but some safety checks to make sure you don't spam it
-			if(!checkMluck(friendlyTarget) && is_in_range(friendlyTarget, "mluck") && !is_on_cooldown("mluck") && !friendlyTarget.afk && !friendlyTarget.stand && character.mp > character.max_mp*0.5)
+			if(!is_on_cooldown("mluck") && !checkMluck(friendlyTarget) && is_in_range(friendlyTarget, "mluck") && !friendlyTarget.afk && !friendlyTarget.stand && character.mp > character.max_mp*0.5)
 			{
 				log("Giving mluck to " + friendlyTarget.name);
 				use_skill("mluck", friendlyTarget);
@@ -110,7 +110,7 @@ function merchantLateUpdate()
 		}
 	}
 
-	if(checkForLowInventorySpace() && (autoPlay && !isBusy()))
+	if(checkForLowInventorySpace())
 	{
 		if(!isInTown())
 		{
@@ -120,7 +120,7 @@ function merchantLateUpdate()
 
 		sellVendorTrash();
 
-		if(checkForLowInventorySpace() && (!hasUpgradableItems() && craftingOn))
+		if(checkForLowInventorySpace())
 		{
 			disableVendorMode();
 			depositInventoryAtBank();
@@ -187,7 +187,7 @@ function merchant_on_cm(sender, data)
 		}
 
 		log("Recieved mluck request from " + sender);
-		deliveryRequests.push({request:"mluck",from:sender});
+		deliveryRequests.push({request:"mluck",sender:sender});
 	}
 	else if(data.message == "thanks")
 	{
@@ -251,21 +251,15 @@ function merchant_on_magiport(name)
 //	returns true if the merchant is occupied with a task
 function isBusy()
 {
-	let r = returningToTown || deliveryMode || banking || exchangeMode || character.q.upgrade || character.q.compound;
-	return r;
+	let busy = returningToTown || deliveryMode || banking || exchangeMode || character.q.upgrade || character.q.compound;
+	return busy;
 }
 
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
 function checkMluck(target)
 {
-	if(!target.s.mluck || target.s.mluck.f != merchantName || target.s.mluck.ms < mluckDuration*0.5)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+	let mluck = (!target.s.mluck || target.s.mluck.f != merchantName || target.s.mluck.ms < mluckDuration*0.5);
+	return mluck;
 }
 
 function sellVendorTrash()
@@ -467,32 +461,6 @@ function buyBasicItems()
 			buy_with_gold(basicItemsToCraft[i]);
 		}
 	}
-
-	/*
-	//	only buy if we are out of items in inventory to upgrade
-	for(let k = 0; k < character.items.length; k++)
-	{
-		let item = character.items[k];
-		if(item && (isItemOnCraftList(item.name) && !itemsToCompound.includes(item.name) && item.level < upgradeLevelToStop))
-		{
-			count++;
-		}
-	}
-
-	if(count == 0)
-	{
-		for(let i = 0; i < basicItemsToCraft.length; i++)
-		{
-			if(!G.items[basicItemsToCraft[i]])
-			{
-				log(basicItemsToCraft[i] + " is not a valid item name!");
-				return;
-			}
-
-			log("Buying a " + G.items[basicItemsToCraft[i]].name);
-			buy_with_gold(basicItemsToCraft[i]);
-		}
-	}*/
 }
 
 function stockScrolls()

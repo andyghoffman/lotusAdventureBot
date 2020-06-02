@@ -151,6 +151,8 @@ function on_cm(sender, data)
 	//	this should remain the last check
 	if(data.message == "confirmDelivery")
 	{
+		log("recieved delivery confirmation check");
+
 		if(sentRequests.length == 0 || !sentRequests.find((x)=>{if(x.name == sender) return x;}))
 		{
 			send_cm(sender, {message:"deliveryConfirmation",confirm:true});
@@ -1104,25 +1106,40 @@ function validTargetForSkill(target)
 function checkForLowInventorySpace()
 {
 	let emptyInvSlots = 0;
-	for(let item of character.items)
-	{
-		if(!item)
-		{
-			emptyInvSlots++;
-		}
-		//	don't count things you are upgrading toward low inventory. compound items do count since these can take up a lot of space without being actively consumed
-		else if(character.name == merchantName && itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop)
-		{
-			emptyInvSlots++;
-		}
-	}
 
-	if(emptyInvSlots <= lowInventoryThreshold)
+	if(character.name != merchantName)
 	{
-		return true;
-	}
+		emptyInvSlots = getEmptyInventorySlotCount();
 
-	return false;
+		if(emptyInvSlots < lowInventoryThreshold)
+		{
+			return true;
+		}
+
+		return false;
+	}
+	else if(character.name == merchantName)
+	{
+		for(let item of character.items)
+		{
+			if(!item)
+			{
+				emptyInvSlots++;
+			}
+			//	don't count things you are upgrading toward low inventory. compound items do count since these can take up a lot of space without being actively consumed
+			else if(itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop)
+			{
+				emptyInvSlots++;
+			}
+		}
+
+		if(emptyInvSlots < veryLowInventoryThreshold)
+		{
+			return true;
+		}
+
+		return false;
+	}
 }
 
 function getEmptyInventorySlotCount()

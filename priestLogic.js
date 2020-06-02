@@ -1,5 +1,5 @@
 ///		Priest Settings		///
-const healThreshold = 0.95;
+const healThreshold = 0.9;
 const manaReserve = 0.25;
 //////
 
