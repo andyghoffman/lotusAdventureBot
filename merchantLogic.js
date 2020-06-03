@@ -134,7 +134,7 @@ function merchantLateUpdate()
 		{
 			enableVendorMode();
 		}
-		else
+		else if(!isInTown())
 		{
 			goBackToTown();
 		}
