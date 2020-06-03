@@ -1,7 +1,6 @@
 ///		Merchant Settings		///
 const lowScrolls = 1;
 const scrollsToStock = [100, 20, 0];
-const merchantItems = ["stand0","scroll0","scroll1","cscroll0","cscroll1","seashell"];
 //////
 
 var vendorMode = false;			//	true when in town with shop, false when busy delivering items
@@ -531,10 +530,20 @@ function buyPotionsFor(name, healthPots, manaPots)
 		return;
 	}
 
-	buy_with_gold("hpot0", healthPots);
-	log("Buying " + healthPots + " health potions");
-	buy_with_gold("mpot0", manaPots);
-	log("Buying " + manaPots + " mana potions");
+	let h = healthPots - quantity(potions[0]);
+	let m = manaPots - quantity(potions[1]);
+
+	if(h > 0)
+	{
+		buy_with_gold(potions[0], h);
+		log("Buying " + healthPots + " health potions");
+	}
+
+	if(m > 0)
+	{
+		buy_with_gold(potions[1], m);
+		log("Buying " + manaPots + " mana potions");
+	}
 
 	let potionShipment = {name:name, hPots:healthPots, mPots:manaPots};
 	deliveryShipments.push(potionShipment);
@@ -578,8 +587,8 @@ function deliverPotions(shipment)
 		log("Delivering potions to " + shipment.name);
 		let index = deliveryShipments.indexOf(shipment);
 		deliveryShipments.splice(index, 1);
-		send_item(shipment.name,locate_item("hpot0"), shipment.hPots);
-		send_item(shipment.name,locate_item("mpot0"), shipment.mPots);
+		send_item(shipment.name,locate_item(potions[0]), shipment.hPots);
+		send_item(shipment.name,locate_item(potions[1]), shipment.mPots);
 	}
 	else
 	{

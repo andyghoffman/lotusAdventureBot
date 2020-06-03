@@ -7,15 +7,7 @@ var healMode = false;
 
 function priestAuto(target)
 {
-	//	heal
 	autoHeal();
-
-	//	save mana for healing if low
-	if(character.mp < (character.max_mp * manaReserve))
-	{
-		return;
-	}
-
 	tauntOffPartyMembers(target);
 	useCurse(target);
 
@@ -37,8 +29,6 @@ function tauntOffPartyMembers(target)
 		{
 			use_skill("absorb", targetOfTarget);
 			reduce_cooldown("absorb", character.ping);
-			change_target(tauntTarget);
-			broadCastTarget(tauntTarget);
 			target = tauntTarget;
 			break;
 		}
@@ -81,7 +71,7 @@ function autoHeal()
 				reduce_cooldown("partyheal", character.ping);
 				return;
 			}
-			else if(!is_on_cooldown("heal"))
+			else if(!is_on_cooldown("attack"))
 			{
 				log("Priest is healing " + partyMember.name);
 				heal(partyMember);
@@ -90,7 +80,7 @@ function autoHeal()
 		}
 	});
 
-	if(damagedPartyMembers == 0 && !is_on_cooldown("heal"))
+	if(damagedPartyMembers == 0 && !is_on_cooldown("attack"))
 	{
 		healMode = false;
 	}

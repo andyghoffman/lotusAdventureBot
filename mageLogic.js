@@ -1,5 +1,6 @@
 ///		Mage Settings		///
-const defaultEnergizeTarget = "LotusRanger"
+const defaultEnergizeTarget = "LotusRanger";
+const defaultReflectionTarget = "LotusPriest";
 //////
 
 function mageAuto(target)
@@ -13,7 +14,7 @@ function mageAuto(target)
 		{
 			let partyMember = parent.entities[partyPlayer];
 
-			if(partyMember && partyMember.name != character.name && partyMember.mp < partyMember.max_mp*0.5)
+			if(partyMember && partyMember.name != character.name && partyMember.mp < partyMember.max_mp*0.75)
 			{
 				energizeTarget = partyMember;
 			}
@@ -23,6 +24,28 @@ function mageAuto(target)
 		{
 			use_skill("energize", energizeTarget);
 			reduce_cooldown("energize", character.ping);
+		}
+	}
+
+
+	if(!is_on_cooldown("reflection"))
+	{
+		let reflectionTarget = parent.entities[defaultReflectionTarget];
+
+		parent.party_list.forEach(function(partyPlayer)
+		{
+			let partyMember = parent.entities[partyPlayer];
+
+			if(partyMember && partyMember.name != character.name && partyMember.hp < partyMember.max_hp*0.75)
+			{
+				reflectionTarget = partyMember;
+			}
+		});
+
+		if(reflectionTarget && !reflectionTarget.s.reflection && is_in_range(reflectionTarget, "reflection"))
+		{
+			use_skill("reflection", reflectionTarget);
+			reduce_cooldown("reflection", character.ping);
 		}
 	}
 

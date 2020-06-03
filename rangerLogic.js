@@ -4,6 +4,9 @@
 
 function rangerAuto(target)
 {
+	//	cast 3shot
+	//tripleShot(target);
+
 	//	cast hunters mark
 	useHuntersMark(target);
 
@@ -42,6 +45,26 @@ function useHuntersMark(target)
 			reduce_cooldown("huntersmark", character.ping);
 			return;
 		}
+	}
+}
+
+//	use 3shot
+function tripleShot(target)
+{
+	count = 1;
+	for(let e in parent.entities)
+	{
+		if(target.mtype == e.mtype && is_in_range(e, "supershot"))
+		{
+			count++;
+		}
+	}
+
+	if(count >= 3 && !is_on_cooldown("3shot"))
+	{
+		log("3 Shot!");
+		use_skill("3shot", target);
+		reduce_cooldown("3shot", character.ping);
 	}
 }
 

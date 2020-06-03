@@ -111,6 +111,7 @@ function on_cm(sender, data)
 		if(!autoPlay)
 		{
 			farmingModeActive = false;
+			stop();
 		}
 
         log("autoPlay: " + autoPlay);
@@ -361,6 +362,7 @@ function stuckCheck(originalPosition)
 
 	if(isStuck)
 	{
+		stop();
 		log(character.name + " is stuck!");
 		setTimeout(()=>
 		{
@@ -516,8 +518,8 @@ function checkBuffs()
 //	returns true if potion inventory is OK, false if you need potions
 function checkPotionInventory()
 {
-	let	hPotions = quantity("hpot0");
-	let mPotions = quantity("mpot0");
+	let	hPotions = quantity(potions[0]);
+	let mPotions = quantity(potions[1]);
 
 	if(mPotions < lowPotionsThreshold || hPotions < lowPotionsThreshold)
 	{
@@ -554,8 +556,8 @@ function checkPotionInventory()
 					setTimeout(()=>
 					{
 						log(character.name + " attempting to buy potions.");
-						buy_with_gold("hpot0", healthPotsNeeded);
-						buy_with_gold("mpot0", manaPotsNeeded);
+						buy_with_gold(potions[0], healthPotsNeeded);
+						buy_with_gold(potions[1], manaPotsNeeded);
 
 						traveling = false;
 					}, 10000);
@@ -646,7 +648,7 @@ function broadCastTarget(broadCastTarget)
     });
 }
 
-function getTargetMonster(farmTarget)
+function getTargetMonster(farmTarget, canPullNewMonsters = true)
 {
     let target = get_targeted_monster();
 
@@ -705,7 +707,7 @@ function getTargetMonster(farmTarget)
 	});
 
 	//	target nearest monster that has no target
-	if(!target)
+	if(!target && canPullNewMonsters)
 	{
 		target = get_nearest_monster
 		({
@@ -812,7 +814,13 @@ function travelToFarmSpot()
 	}
 	else if(farmMode == "number")
 	{
+		let coords = {x:0,y:0};
+		let monster = G.maps[farmMap].monsters.find((x)=>{if(x.type == farmMonsterName && x.count==farmMonsterSpawnNumber) return x;});
 
+		coords.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
+		coords.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
+
+		goTo(farmMap, coords);
 	}
 }
 
@@ -1006,7 +1014,8 @@ function togglePartyAuto(forceState=null)
 
     if(!autoPlay)
     {
-        farmingModeActive = false;
+		farmingModeActive = false;
+		stop();
     }
 
     if(character.name == partyLeader)
@@ -1024,7 +1033,7 @@ function togglePartyAuto(forceState=null)
     log("autoPlay: " + autoPlay);
 }
 
-function returnPartyToTown()
+function townParty()
 {
     log("Returning party to town.");
 
@@ -1355,4 +1364,15 @@ function xpReport()
 	}
 
 	show_json(output);
+}
+
+function isInFarmSpawnBounds(coords)
+{
+	let monster = G.maps[farmMap].monsters.find((x)=>{if(x.type == farmMonsterName && x.count==farmMonsterSpawnNumber) return x;});
+
+	// if(coords.x >= )
+	// coords.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
+	// coords.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
+
+	return coords;
 }
