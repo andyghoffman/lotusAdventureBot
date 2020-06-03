@@ -19,13 +19,18 @@ function priestAuto(target)
 
 function tauntOffPartyMembers(target)
 {
+	if (character.mp < G.skills.absorb.mp)
+	{
+		return;
+	}
+
 	//	taunt things off of other party members and focus fire them
 	for (let e in parent.entities)
 	{
 		let tauntTarget = parent.entities[e];
 		let targetOfTarget = tauntTarget.target;
 
-		if (!is_on_cooldown("absorb") && is_in_range(target, "absorb") && !tauntTarget.player && targetOfTarget && targetOfTarget != character.name && parent.party_list.includes(targetOfTarget) && character.mp >= G.skills.absorb.mp)
+		if (!is_on_cooldown("absorb") && is_in_range(target, "absorb") && !tauntTarget.player && targetOfTarget && targetOfTarget != character.name && parent.party_list.includes(targetOfTarget))
 		{
 			use_skill("absorb", targetOfTarget);
 			reduce_cooldown("absorb", character.ping);
@@ -39,6 +44,11 @@ function tauntOffPartyMembers(target)
 
 function useCurse(target)
 {
+	if (character.mp < G.skills.curse.mp)
+	{
+		return;
+	}
+
 	//	cast curse
 	if (!is_on_cooldown("curse") && is_in_range(target, "curse") && !target.s.curse && validTargetForSkill(target))
 	{
