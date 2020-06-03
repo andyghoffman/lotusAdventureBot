@@ -56,9 +56,9 @@ function tripleShot(target)
 		return;
 	}
 
-	use_skill("3shot", target);
-	reduce_cooldown("3shot", character.ping);
-	return;
+	// use_skill("3shot", target);
+	// reduce_cooldown("3shot", character.ping);
+	// return;
 
 	count = 1;
 	for(let e in parent.entities)
@@ -69,7 +69,7 @@ function tripleShot(target)
 		}
 	}
 
-	if(count >= 3)
+	if(count <= 3)
 	{
 		log("3 Shot!");
 		use_skill("3shot", target);

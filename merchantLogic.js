@@ -94,6 +94,7 @@ function merchantLateUpdate()
 		sellVendorTrash();
 		exchangeWithXyn();
 		exchangeSeashells();
+		exchangeLeather();
 
 		if(craftingOn)
 		{
@@ -127,9 +128,9 @@ function merchantLateUpdate()
 		}
 	}
 
-	if(autoPlay && !vendorMode && !isBusy())
+	if(autoPlay && !isBusy())
 	{
-		if(isInTown())
+		if(isInTown() && !vendorMode)
 		{
 			enableVendorMode();
 		}
@@ -721,6 +722,11 @@ function exchangeItems(npcName, itemName, numberOfExchanges, onComplete)
 
 function exchangeSeashells()
 {
+	if(isBusy())
+	{
+		return;
+	}
+
 	let seashells = character.items[locate_item("seashell")];
 
 	if(!seashells || seashells.q < 20)
@@ -732,6 +738,26 @@ function exchangeSeashells()
 
 	let exchanges = Math.floor(seashells.q/20);
 	exchangeItems("fisherman", "seashell", exchanges);
+}
+
+function exchangeLeather()
+{
+	if(isBusy())
+	{
+		return;
+	}
+
+	let leather = character.items[locate_item("leather")];
+
+	if(!leather || leather.q < 40)
+	{
+		return;
+	}
+
+	log("Exchanging leather...");
+
+	let exchanges = Math.floor(leather.q/40);
+	exchangeItems("leathermerchant", "leather", exchanges);
 }
 
 function exchangeWithXyn()
