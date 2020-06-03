@@ -315,20 +315,20 @@ function personalSpace()
 
 		if(target.x < character.x)
 		{
-			right = -(target.range+minimumMonsterDistance) * reverse;
+			right = -(minimumMonsterDistance) * reverse;
 		}
 		else
 		{
-			right = (target.range+minimumMonsterDistance) * reverse;
+			right = (minimumMonsterDistance) * reverse;
 		}
 
 		if(target.y < character.y)
 		{
-			up = (target.range+minimumMonsterDistance) * reverse;
+			up = (minimumMonsterDistance) * reverse;
 		}
 		else
 		{
-			up = -(target.range+minimumMonsterDistance) * reverse;
+			up = -(minimumMonsterDistance) * reverse;
 		}
 
 		adjustment = {x:character.x+right, y:character.y+up};

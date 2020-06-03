@@ -51,6 +51,15 @@ function useHuntersMark(target)
 //	use 3shot
 function tripleShot(target)
 {
+	if(is_on_cooldown("3shot"))
+	{
+		return;
+	}
+
+	use_skill("3shot", target);
+	reduce_cooldown("3shot", character.ping);
+	return;
+
 	count = 1;
 	for(let e in parent.entities)
 	{
@@ -60,7 +69,7 @@ function tripleShot(target)
 		}
 	}
 
-	if(count >= 3 && !is_on_cooldown("3shot"))
+	if(count >= 3)
 	{
 		log("3 Shot!");
 		use_skill("3shot", target);

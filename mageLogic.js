@@ -5,52 +5,61 @@ const defaultReflectionTarget = "LotusPriest";
 
 function mageAuto(target)
 {
-	//	cast energize on party members
-	if(!is_on_cooldown("energize"))
-	{
-		let energizeTarget = parent.entities[defaultEnergizeTarget];
-
-		parent.party_list.forEach(function(partyPlayer)
-		{
-			let partyMember = parent.entities[partyPlayer];
-
-			if(partyMember && partyMember.name != character.name && partyMember.mp < partyMember.max_mp*0.75)
-			{
-				energizeTarget = partyMember;
-			}
-		});
-
-		if(energizeTarget && !energizeTarget.s.energized && is_in_range(energizeTarget, "energize"))
-		{
-			use_skill("energize", energizeTarget);
-			reduce_cooldown("energize", character.ping);
-		}
-	}
-
-
-	if(!is_on_cooldown("reflection"))
-	{
-		let reflectionTarget = parent.entities[defaultReflectionTarget];
-
-		parent.party_list.forEach(function(partyPlayer)
-		{
-			let partyMember = parent.entities[partyPlayer];
-
-			if(partyMember && partyMember.name != character.name && partyMember.hp < partyMember.max_hp*0.75)
-			{
-				reflectionTarget = partyMember;
-			}
-		});
-
-		if(reflectionTarget && !reflectionTarget.s.reflection && is_in_range(reflectionTarget, "reflection"))
-		{
-			use_skill("reflection", reflectionTarget);
-			reduce_cooldown("reflection", character.ping);
-		}
-	}
-
-	//	auto attack
+	castEnergize();
+	castReflection();
 	autoAttack(target);
+}
+
+function castEnergize()
+{
+	if(is_on_cooldown("energize"))
+	{
+		return;
+	}
+
+	let energizeTarget = parent.entities[defaultEnergizeTarget];
+
+	parent.party_list.forEach(function(partyPlayer)
+	{
+		let partyMember = parent.entities[partyPlayer];
+
+		if(partyMember && partyMember.name != character.name && partyMember.mp < partyMember.max_mp*0.75)
+		{
+			energizeTarget = partyMember;
+		}
+	});
+
+	if(energizeTarget && !energizeTarget.s.energized && is_in_range(energizeTarget, "energize"))
+	{
+		use_skill("energize", energizeTarget);
+		reduce_cooldown("energize", character.ping);
+	}
+}
+
+function castReflection()
+{
+	if(is_on_cooldown("reflection"))
+	{
+		return;
+	}
+
+	let reflectionTarget = parent.entities[defaultReflectionTarget];
+
+	parent.party_list.forEach(function(partyPlayer)
+	{
+		let partyMember = parent.entities[partyPlayer];
+
+		if(partyMember && partyMember.name != character.name && partyMember.hp < partyMember.max_hp*0.75)
+		{
+			reflectionTarget = partyMember;
+		}
+	});
+
+	if(reflectionTarget && !reflectionTarget.s.reflection && is_in_range(reflectionTarget, "reflection"))
+	{
+		use_skill("reflection", reflectionTarget);
+		reduce_cooldown("reflection", character.ping);
+	}
 }
 
 function mage_on_cm(name, data)
