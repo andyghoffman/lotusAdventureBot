@@ -1,19 +1,18 @@
 ///     crafting settings       ///
 const craftingEnabled = true;
 const minimumGold = 2000000;    //  merchant won't go below this amount of gold in wallet
-const basicItemsToCraft = [];   //  keep buying and upgrading these
-const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","shield","quiver","pants","gloves","shoes"];
+const basicItemsToCraft = ["bow","bow","bow","bow","bow"];   //  keep buying and upgrading these
 const upgradeLevelToStop = 8;
 const upgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
-const itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt","wbook0","strearring"];
 const compoundLevelToStop = 2;
+const itemsToUpgrade = ["wattire","wgloves","wbreeches","wshoes","wcap","shield","quiver","pants","gloves","shoes"];
+const itemsToCompound = ["intring","strring","dexring","ringsj","intearring","dexearring","dexamulet","intamulet","orbofint","orbofdex","dexbelt","intbelt","wbook0","strearring"];
 const vendorTrash = ["cclaw","hpamulet","hpbelt","vitring","vitearring","vitscroll","cshell"];
 const buyFromPontyList = ["firestaff","suckerpunch","t2dexamulet","t2intamulet","rabbitsfoot","ringofluck","cape","ecape","angelwings","bcape","orbg","hbow","t2bow","seashell"];
 const pontyExclude = ["ringsj"];    //  any craft-items you don't want to buy from ponty
 const elixirs = ["elixirint0", "elixirint1", "elixirint2", "elixirdex0", "elixirdex1", "elixirdex2"];
 const scrolls = ["scroll0","scroll1","cscroll0","cscroll1"];
 const xynTypes = ["gem","box"]; //  item types to be exchanged with Xyn
-
 //////
 
 ///     farming settings        ///
@@ -27,7 +26,8 @@ const fullAuto = true;  //  if true will automatically start farming on connect 
 const farmMode = "name";
 const farmMonsterName = "boar";
 const farmMap = "winterland";
-const farmMonsterSpawnNumber = 8;   //  only used if farmMode is 'number'
+const farmMonsterSpawnNumber = 8;
+const farmRadius = 400;
 const farmCoords = {x:1202, y:-782};    //  only used if farmMode is 'coords'
 const specialMonsters = ["snowman","phoenix","goldenbat"];  //  priority targets
 const dontKite = ["phoenix","bat","goldenbat"];   //  any monsters to not try to kite

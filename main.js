@@ -107,7 +107,6 @@ function main()
         }
     }
 
-
     //  look for a target
     let target = get_targeted_monster();
     if(!target)

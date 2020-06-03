@@ -331,7 +331,12 @@ function personalSpace()
 			up = -(minimumMonsterDistance) * reverse;
 		}
 
-		adjustment = {x:character.x+right, y:character.y+up};
+		let adjustment = {x:character.x+right, y:character.y+up};
+
+		if(!isInFarmSpawnBounds(adjustment))
+		{
+			adjustment = {x:character.x-right, y:character.y-up};
+		}
 
 		if(character.name != partyLeader)
 		{
@@ -1359,7 +1364,8 @@ function xpReport()
 
 		if(player)
 		{
-			output += player.name + ": " + (player.xp/G.levels[player.level]) + "     ";
+            let percent = (player.xp/G.levels[player.level])*100;
+            output += player.name + ": L" + player.level +" with "+ Math.round(percent) + "%     ";
 		}
 	}
 
@@ -1370,9 +1376,17 @@ function isInFarmSpawnBounds(coords)
 {
 	let monster = G.maps[farmMap].monsters.find((x)=>{if(x.type == farmMonsterName && x.count==farmMonsterSpawnNumber) return x;});
 
-	// if(coords.x >= )
-	// coords.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
-	// coords.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
+	let center = {x:0,y:0};
+	center.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
+	center.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
 
-	return coords;
+	if(distance(coords, center) < farmRadius)
+	{
+		return true;
+	}
+	else
+	{
+		log(distance(coords, center));
+		return false;
+	}
 }
