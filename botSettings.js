@@ -29,7 +29,7 @@ const farmMap = "winterland";
 const farmMonsterSpawnNumber = 8;
 const farmRadius = 400;
 const farmCoords = {x:1202, y:-782};    //  only used if farmMode is 'coords'
-const specialMonsters = ["snowman","phoenix","goldenbat"];  //  priority targets
+const specialMonsters = [/* "snowman", */"phoenix","goldenbat"];  //  priority targets
 const dontKite = ["phoenix","bat","goldenbat"];   //  any monsters to not try to kite
 //////
 
