@@ -1,9 +1,8 @@
 ///		Priest Settings		///
 const healThreshold = 0.9;
-const manaReserve = 0.25;
 //////
 
-var healMode = false;
+let healMode = false;
 
 function priestAuto(target)
 {
@@ -30,7 +29,7 @@ function tauntOffPartyMembers(target)
 		let tauntTarget = parent.entities[e];
 		let targetOfTarget = tauntTarget.target;
 
-		if (!is_on_cooldown("absorb") && is_in_range(target, "absorb") && !tauntTarget.player && targetOfTarget && targetOfTarget != character.name && parent.party_list.includes(targetOfTarget))
+		if (!is_on_cooldown("absorb") && is_in_range(target, "absorb") && !tauntTarget.player && targetOfTarget && targetOfTarget !== character.name && parent.party_list.includes(targetOfTarget))
 		{
 			use_skill("absorb", targetOfTarget);
 			reduce_cooldown("absorb", character.ping);
@@ -61,10 +60,10 @@ function autoHeal()
 {
 	let damagedPartyMembers = 0;
 
-	parent.party_list.forEach(function (partyMemberName)
+	parent.party_list.forEach((partyMemberName)=>
 	{
 		let partyMember = parent.entities[partyMemberName];
-		if (partyMemberName == character.name)
+		if (partyMemberName === character.name)
 		{
 			partyMember = character;
 		}
@@ -79,7 +78,6 @@ function autoHeal()
 				log("Priest is healing party!");
 				use_skill("partyheal");
 				reduce_cooldown("partyheal", character.ping);
-				return;
 			}
 			else if (!is_on_cooldown("attack"))
 			{
@@ -90,7 +88,7 @@ function autoHeal()
 		}
 	});
 
-	if (damagedPartyMembers == 0 && !is_on_cooldown("attack"))
+	if (damagedPartyMembers === 0 && !is_on_cooldown("attack"))
 	{
 		healMode = false;
 	}

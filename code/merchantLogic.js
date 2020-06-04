@@ -3,11 +3,11 @@ const lowScrolls = 1;
 const scrollsToStock = [100, 20, 0];
 //////
 
-var vendorMode = false;			//	true when in town with shop, false when busy delivering items
-var deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
-var exchangeMode = false;		//	true when the merchant is busy exchanging items with an npc
-var deliveryShipments = [];
-var deliveryRequests = [];
+let vendorMode = false;			//	true when in town with shop, false when busy delivering items
+let deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
+let exchangeMode = false;		//	true when the merchant is busy exchanging items with an npc
+const deliveryShipments = [];
+const deliveryRequests = [];
 
 const mluckDuration = 3600000;
 
@@ -143,9 +143,9 @@ function merchantLateUpdate()
 
 function merchant_on_cm(sender, data)
 {
-	if (data.message == "buyPots")
+	if (data.message === "buyPots")
 	{
-		if (deliveryRequests.find((x) => { if (x.request == "potions" && x.sender == sender) return x; }))
+		if (deliveryRequests.find((x) => { if (x.request === "potions" && x.sender === sender) return x; }))
 		{
 			log("Already have potion request from " + sender);
 			return;
@@ -154,9 +154,9 @@ function merchant_on_cm(sender, data)
 		log("Recieved potion request from " + sender);
 		deliveryRequests.push({ request: "potions", sender: sender, shipment: null, hPots: data.hPots, mPots: data.mPots });
 	}
-	else if (data.message == "elixir")
+	else if (data.message === "elixir")
 	{
-		if (deliveryRequests.find((x) => { if (x.request == "elixir" && x.sender == sender) return x; }))
+		if (deliveryRequests.find((x) => { if (x.request === "elixir" && x.sender === sender) return x; }))
 		{
 			log("Already have elixir request from " + sender);
 			return;
@@ -178,7 +178,7 @@ function merchant_on_cm(sender, data)
 			send_cm(sender, { message: "noelixirs" });
 		}
 	}
-	else if (data.message == "mluck")
+	else if (data.message === "mluck")
 	{
 		if (deliveryRequests.find((x) => { if (x.request == "mluck") return x; }))
 		{
@@ -189,15 +189,15 @@ function merchant_on_cm(sender, data)
 		log("Recieved mluck request from " + sender);
 		deliveryRequests.push({ request: "mluck", sender: sender });
 	}
-	else if (data.message == "thanks")
+	else if (data.message === "thanks")
 	{
 		log("Successful delivery confirmation from " + sender);
 
-		if (data.request == "mluck")
+		if (data.request === "mluck")
 		{
 			for (let i = deliveryRequests.length - 1; i >= 0; i--)
 			{
-				if (deliveryRequests[i].request == "mluck")
+				if (deliveryRequests[i].request === "mluck")
 				{
 					deliveryRequests.splice(i, 1);
 				}
@@ -205,12 +205,12 @@ function merchant_on_cm(sender, data)
 		}
 		else
 		{
-			deliveryRequests.splice(deliveryRequests.indexOf(x => x.sender == sender && x.request == data.request), 1);
+			deliveryRequests.splice(deliveryRequests.indexOf(x => x.sender === sender && x.request === data.request), 1);
 		}
 	}
 
 	//	this should remain the last check
-	if (data.message == "deliveryConfirmation")
+	if (data.message === "deliveryConfirmation")
 	{
 		if (!data.confirm)
 		{
@@ -219,7 +219,7 @@ function merchant_on_cm(sender, data)
 
 		for (let i = deliveryRequests.length - 1; i >= 0; i--)
 		{
-			if (deliveryRequests[i].sender == sender)
+			if (deliveryRequests[i].sender === sender)
 			{
 				log("Cleaning up delivery list...");
 				deliveryRequests.splice(i, 1);
@@ -228,7 +228,7 @@ function merchant_on_cm(sender, data)
 
 		for (let i = deliveryShipments.length - 1; i >= 0; i--)
 		{
-			if (deliveryShipments[i].name == sender)
+			if (deliveryShipments[i].name === sender)
 			{
 				log("Cleaning up delivery list...");
 				deliveryShipments.splice(i, 1);
@@ -257,7 +257,7 @@ function isBusy()
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
 function checkMluck(target)
 {
-	return (target.s.mluck && target.s.mluck.f == merchantName) || (target.s.mluck && target.s.mluck.ms < mluckDuration * 0.5);
+	return (target.s.mluck && target.s.mluck.f === merchantName) || (target.s.mluck && target.s.mluck.ms < mluckDuration * 0.5);
 }
 
 function sellVendorTrash()
@@ -276,7 +276,7 @@ function sellVendorTrash()
 
 function checkRequests()
 {
-	if (deliveryRequests.length == 0)
+	if (deliveryRequests.length === 0)
 	{
 		deliveryMode = false;
 		return;
@@ -290,12 +290,12 @@ function checkRequests()
 		for (let i = 0; i < deliveryRequests.length; i++)
 		{
 			//	go buy potions
-			if (deliveryRequests[i].request == "potions" && !deliveryRequests[i].shipment)
+			if (deliveryRequests[i].request === "potions" && !deliveryRequests[i].shipment)
 			{
 				buyPotionsFor(deliveryRequests[i].sender, deliveryRequests[i].hPots, deliveryRequests[i].mPots);
 			}
 			//	deliver to recipient
-			else if (deliveryRequests[i].shipment || deliveryRequests[i].request == "mluck")
+			else if (deliveryRequests[i].shipment || deliveryRequests[i].request === "mluck")
 			{
 				let recipient = parent.entities[deliveryRequests[i].sender];
 				if (recipient)
@@ -316,7 +316,7 @@ function getShipmentFor(name)
 {
 	for (let i = 0; i < deliveryShipments.length; i++)
 	{
-		if (deliveryShipments[i].name == name)
+		if (deliveryShipments[i].name === name)
 		{
 			return deliveryShipments[i];
 		}
@@ -393,7 +393,7 @@ function craftCompound(levelToUse)
 		for (let k = 0; k < character.items.length; k++)
 		{
 			let item = character.items[k];
-			if (item && item.name == itemsToCompound[i] && item.level == levelToUse && count < 3 && !isShiny(item))
+			if (item && item.name === itemsToCompound[i] && item.level === levelToUse && count < 3 && !isShiny(item))
 			{
 				triple[count] = k;
 				count++;
@@ -401,7 +401,7 @@ function craftCompound(levelToUse)
 		}
 
 		//	found a triple, stop looking
-		if (triple[0] != -1 && triple[1] != -1 && triple[2] != -1)
+		if (triple[0] !== -1 && triple[1] !== -1 && triple[2] !== -1)
 		{
 			foundItem = itemsToCompound[i];
 			break;
@@ -409,7 +409,7 @@ function craftCompound(levelToUse)
 	}
 
 	//	no triple
-	if (foundItem == "")
+	if (foundItem === "")
 	{
 		return false;
 	}
@@ -433,26 +433,20 @@ function craftCompound(levelToUse)
 
 function buyBasicItems()
 {
-	let count = 0;
-
-	if (count == 0)
+	for (let i = 0; i < basicItemsToCraft.length; i++) 
 	{
-		for (let i = 0; i < basicItemsToCraft.length; i++)
-		{
-			if (!G.items[basicItemsToCraft[i]])
-			{
-				log(basicItemsToCraft[i] + " is not a valid item name!");
-				return;
-			}
-
-			if (character.items.find((x) => { if (x && x.name == basicItemsToCraft[i] && x.level < upgradeLevelToStop) return x; }))
-			{
-				continue;
-			}
-
-			log("Buying a " + G.items[basicItemsToCraft[i]].name);
-			buy_with_gold(basicItemsToCraft[i]);
+		if (!G.items[basicItemsToCraft[i]]) {
+			log(basicItemsToCraft[i] + " is not a valid item name!");
+			return;
 		}
+
+		if (character.items.find((x) => { if (x && x.name === basicItemsToCraft[i] && x.level < upgradeLevelToStop) return x;})) 
+		{
+			continue;
+		}
+
+		log("Buying a " + G.items[basicItemsToCraft[i]].name);
+		buy_with_gold(basicItemsToCraft[i]);
 	}
 }
 
@@ -488,7 +482,7 @@ function buyPotionsFor(name, healthPots, manaPots)
 {
 	let request = deliveryRequests.find((x) =>
 	{
-		if (x.sender == name && x.request == "potions")
+		if (x.sender === name && x.request === "potions")
 		{
 			return x;
 		}
@@ -694,7 +688,7 @@ function exchangeItems(npcName, itemName, numberOfExchanges, onComplete)
 			{
 				exchange(locate_item(itemName));
 
-				if (x == numberOfExchanges - 1)
+				if (x === numberOfExchanges - 1)
 				{
 					exchangeMode = false;
 
@@ -762,7 +756,7 @@ function exchangeWithXyn()
 		{
 			let item = character.items[i];
 
-			if (item && G.items[item.name].type == itemType)
+			if (item && G.items[item.name].type === itemType)
 			{
 				writeToLog("Exchanging " + item.name + " with Xyn.. ");
 				exchangeItems("exchange", item.name, 1, () => { exchangeWithXyn(); });
@@ -772,35 +766,10 @@ function exchangeWithXyn()
 	}
 }
 
-//	keeps the merchant's inventory bottom row in a set order for organization
-function sortMerchantInventory()
-{
-	return;
-
-	for (let m = 0; m < merchantItems.length; m++)
-	{
-		for (let i = character.items.length - 1; i >= 0; i--)
-		{
-			let item = character.items[i];
-
-			if (!item || (item && item.name != merchantItems[m]))
-			{
-				let correctItem = locate_item(merchantItems[m]);
-
-				if (correctItem > -1)
-				{
-					swap(i, correctItem);
-					break;
-				}
-			}
-		}
-	}
-}
-
 //	don't like that this feels necessary, but this should clean up requests not being cleaned up properly even when they are successfully completed (leading to the merchant gettings stuck)
 function confirmDeliveries()
 {
-	if (deliveryRequests.length == 0 && deliveryShipments.length == 0)
+	if (deliveryRequests.length === 0 && deliveryShipments.length === 0)
 	{
 		return true;
 	}
@@ -812,7 +781,7 @@ function confirmDeliveries()
 
 	for (let r of deliveryShipments)
 	{
-		if (!deliveryRequests.find((x) => { if (x.sender == r.name) return x; }))
+		if (!deliveryRequests.find((x) => { if (x.sender === r.name) return x; }))
 		{
 			send_cm(r.sender, { message: "confirmDelivery" });
 		}

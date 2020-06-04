@@ -33,7 +33,6 @@ function useHuntersMark(target)
 	{
 		use_skill("huntersmark", target);
 		reduce_cooldown("huntersmark", character.ping);
-		return;
 	}
 }
 
@@ -54,7 +53,7 @@ function tripleShot(target)
 	{
 		let t = parent.entities[e];
 
-		if (target.mtype == t.mtype && is_in_range(t, "supershot"))
+		if (target.mtype === t.mtype && is_in_range(t, "supershot"))
 		{
 			count++;
 		}

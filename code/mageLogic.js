@@ -23,7 +23,7 @@ function castEnergize()
 	{
 		let partyMember = parent.entities[partyPlayer];
 
-		if (partyMember && partyMember.name != character.name && partyMember.mp < partyMember.max_mp * 0.75)
+		if (partyMember && partyMember.name !== character.name && partyMember.mp < partyMember.max_mp * 0.75)
 		{
 			energizeTarget = partyMember;
 		}
@@ -49,7 +49,7 @@ function castReflection()
 	{
 		let partyMember = parent.entities[partyPlayer];
 
-		if (partyMember && partyMember.name != character.name && partyMember.hp < partyMember.max_hp * 0.75)
+		if (partyMember && partyMember.name !== character.name && partyMember.hp < partyMember.max_hp * 0.75)
 		{
 			reflectionTarget = partyMember;
 		}
@@ -64,13 +64,7 @@ function castReflection()
 
 function mage_on_cm(name, data)
 {
-	if (data.message == "test")
-	{
-		log(data.content);
-		return;
-	}
-
-	if (data.message == "magiPort")
+	if (data.message === "magiPort")
 	{
 		log("Recieved MagiPort request from " + name);
 		use_skill("magiport", name);

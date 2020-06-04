@@ -12,7 +12,7 @@ function on_cm(sender, data)
 		return;
 	}
 
-	if (data.message == "target")
+	if (data.message === "target")
 	{
 		let target = get_entity(data.targetId);
 
@@ -32,14 +32,14 @@ function on_cm(sender, data)
 
 		return;
 	}
-	else if (data.message == "readyCheck")
+	else if (data.message === "readyCheck")
 	{
 		log(character.name + " recieved readyCheck from " + sender);
 		stopFarmMode();
 
 		let ready = false;
 
-		if (character.name == merchantName)
+		if (character.name === merchantName)
 		{
 			ready = parent.party_list.includes(partyLeader);
 		}
@@ -52,16 +52,16 @@ function on_cm(sender, data)
 
 		return;
 	}
-	else if (data.message == "readyReply")
+	else if (data.message === "readyReply")
 	{
 		let response = character.name + " recieved readyReply from " + sender + ". " + sender + " is " + (data.isReady ? "ready!" : "not ready. ")
 		log(response);
 
-		if (sender == partyLeader)
+		if (sender === partyLeader)
 		{
 			whosReady.leader = data.isReady;
 		}
-		else if (sender == merchantName)
+		else if (sender === merchantName)
 		{
 			whosReady.merchant = data.isReady;
 		}
@@ -81,7 +81,7 @@ function on_cm(sender, data)
 		{
 			for (let p of partyList)
 			{
-				if (p != character.name)
+				if (p !== character.name)
 				{
 					send_cm(p, { message: "partyReady" });
 				}
@@ -90,13 +90,13 @@ function on_cm(sender, data)
 
 		return;
 	}
-	else if (data.message == "partyReady")
+	else if (data.message === "partyReady")
 	{
 		log(character.name + " readyCheck approved!");
 		whosReady = { leader: true, merchant: true, codeBotOne: true, codeBotTwo: true };
 		return;
 	}
-	else if (data.message == "letsGo")
+	else if (data.message === "letsGo")
 	{
 		log(character.name + " recieved Let's Go from " + sender);
 		farmingModeActive = true;
@@ -104,7 +104,7 @@ function on_cm(sender, data)
 
 		return;
 	}
-	else if (data.message == "autoToggle")
+	else if (data.message === "autoToggle")
 	{
 		autoPlay = data.auto;
 
@@ -117,17 +117,17 @@ function on_cm(sender, data)
 		log("autoPlay: " + autoPlay);
 		return;
 	}
-	else if (data.message == "town")
+	else if (data.message === "town")
 	{
 		autoPlay = false;
 		farmingModeActive = false;
 		goBackToTown();
 		return;
 	}
-	else if (data.message == "noelixirs")
+	else if (data.message === "noelixirs")
 	{
 		noElixirs = true;
-		sentRequests.splice(sentRequests.indexOf(sentRequests.find((x) => { if (x.request == "elixir") return x; }), 1));
+		sentRequests.splice(sentRequests.indexOf(sentRequests.find((x) => { if (x.request === "elixir") return x; }), 1));
 		log("Continuing without elixir.");
 		return;
 	}
@@ -150,9 +150,9 @@ function on_cm(sender, data)
 	}
 
 	//	this should remain the last check
-	if (data.message == "confirmDelivery")
+	if (data.message === "confirmDelivery")
 	{
-		if (sentRequests.length == 0 || !sentRequests.find((x) => { if (x.name == sender) return x; }))
+		if (sentRequests.length === 0 || !sentRequests.find((x) => { if (x.name === sender) return x; }))
 		{
 			send_cm(sender, { message: "deliveryConfirmation", confirm: true });
 		}
@@ -171,7 +171,7 @@ function on_party_invite(name)
 
 function on_magiport(name)
 {
-	if (name == mageName)
+	if (name === mageName)
 	{
 		if (character.ctype === "merchant")
 		{
@@ -182,19 +182,19 @@ function on_magiport(name)
 
 function classRoutine(target)
 {
-	if (character.ctype == "merchant")
+	if (character.ctype === "merchant")
 	{
 		merchantAuto(target);
 	}
-	else if (character.ctype == "priest")
+	else if (character.ctype === "priest")
 	{
 		priestAuto(target);
 	}
-	else if (character.ctype == "mage")
+	else if (character.ctype === "mage")
 	{
 		mageAuto(target);
 	}
-	else if (character.ctype == "ranger")
+	else if (character.ctype === "ranger")
 	{
 		rangerAuto(target);
 	}
@@ -221,11 +221,11 @@ function sendReadyCheck()
 
 	let ready = checkIfReady();
 
-	if (character.name == partyLeader)
+	if (character.name === partyLeader)
 	{
 		whosReady.leader = ready;
 	}
-	else if (character.name == merchantName)
+	else if (character.name === merchantName)
 	{
 		whosReady.merchant = ready;
 	}
@@ -247,7 +247,7 @@ function sendReadyCheck()
 		{
 			for (let p of partyList)
 			{
-				if (p != character.name)
+				if (p !== character.name)
 				{
 					send_cm(p, { message: "readyCheck", isReady: ready });
 				}
@@ -338,7 +338,7 @@ function personalSpace()
 			adjustment = { x: character.x - right, y: character.y - up };
 		}
 
-		if (character.name != partyLeader)
+		if (character.name !== partyLeader)
 		{
 			let leader = parent.entities[partyLeader];
 
@@ -386,7 +386,7 @@ function stuckCheck(originalPosition)
 
 function isInTown()
 {
-	return (character.map == merchantStandMap && distance(character, merchantStandCoords) < 200);
+	return (character.map === merchantStandMap && distance(character, merchantStandCoords) < 200);
 }
 
 function partyPresent()
@@ -396,21 +396,14 @@ function partyPresent()
 		return false;
 	}
 
-	if ((character.name === partyLeader || parent.entities[partyLeader]) &&
+	return !!((character.name === partyLeader || parent.entities[partyLeader]) &&
 		(character.name === partyList[1] || parent.entities[partyList[1]]) &&
-		(character.name === partyList[2] || parent.entities[partyList[2]]))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+		(character.name === partyList[2] || parent.entities[partyList[2]]));
 }
 
 function requestMluck()
 {
-	if (sentRequests.find((x) => { if (x.message == "mluck") return x; }))
+	if (sentRequests.find((x) => { if (x.message === "mluck") return x; }))
 	{
 		log(character.name + " waiting for Mluck, resending request...");
 	}
@@ -434,7 +427,7 @@ function requestMagiPort()
 
 function checkSentRequests()
 {
-	if (sentRequests.length == 0)
+	if (sentRequests.length === 0)
 	{
 		return;
 	}
@@ -445,7 +438,7 @@ function checkSentRequests()
 	{
 		let recieved = false;
 
-		if (sentRequests[i].message == "mluck")
+		if (sentRequests[i].message === "mluck")
 		{
 			if (checkMluck(character))
 			{
@@ -453,7 +446,7 @@ function checkSentRequests()
 				recieved = true;
 			}
 		}
-		else if (sentRequests[i].message == "potions")
+		else if (sentRequests[i].message === "potions")
 		{
 			if (checkPotionInventory())
 			{
@@ -461,7 +454,7 @@ function checkSentRequests()
 				recieved = true;
 			}
 		}
-		else if (sentRequests[i].message == "elixir")
+		else if (sentRequests[i].message === "elixir")
 		{
 			if (checkElixirBuff())
 			{
@@ -488,8 +481,8 @@ function usePotions(healthPotThreshold = 0.9, manaPotThreshold = 0.9)
 
 function checkBuffs()
 {
-	let mluck = false;
-	let elixir = false;
+	let mluck;
+	let elixir;
 
 	//	check that you have mLuck from your own merchant
 	if (checkMluck(character))
@@ -499,14 +492,7 @@ function checkBuffs()
 	else
 	{
 		//	if you have someone elses mluck and are in town just accept it, merchant will fix it after party leaves town
-		if (character.s.mluck && isInTown())
-		{
-			mluck = true;
-		}
-		else
-		{
-			mluck = false;
-		}
+		mluck = !!(character.s.mluck && isInTown());
 	}
 
 	if (!mluck)
@@ -542,12 +528,12 @@ function checkPotionInventory()
 		let potsList = { message: "buyPots", hPots: healthPotsNeeded, mPots: manaPotsNeeded };
 		send_cm(merchantName, potsList);
 
-		if (sentRequests.find((x) => { if (x.message == "potions") return x; }))
+		if (sentRequests.find((x) => { if (x.message === "potions") return x; }))
 		{
 			log(character.name + " waiting for potions, resending request... ");
 
 			//	try to fix the problem yourself if the merchant isn't responding
-			if (hPotions == 0 || mPotions == 0)
+			if (hPotions === 0 || mPotions === 0)
 			{
 				log(character.name + " has no potions, is returning to town.");
 				farmingModeActive = false;
@@ -584,14 +570,14 @@ function checkPotionInventory()
 
 function transferAllToMerchant()
 {
-	if (character.name == merchantName)
+	if (character.name === merchantName)
 	{
 		return;
 	}
 
 	let merchant = parent.entities[merchantName];
 
-	if (merchant && merchant.owner == character.owner && distance(character, merchant) < 400)
+	if (merchant && merchant.owner === character.owner && distance(character, merchant) < 400)
 	{
 		//	hold onto gold if you don't have potions, probably means merchant is stuck and you need to buy them yourself
 		if (checkPotionInventory())
@@ -624,7 +610,7 @@ function toggleCraftingMode()
 
 function followLeader()
 {
-	var leader = parent.entities[partyLeader];
+	let leader = parent.entities[partyLeader];
 
 	if (leader)
 	{
@@ -639,11 +625,11 @@ function broadCastTarget(broadCastTarget)
 {
 	parent.party_list.forEach(function (partyPlayer)
 	{
-		if (partyPlayer != character.name)
+		if (partyPlayer !== character.name)
 		{
 			let partyMember = parent.entities[partyPlayer];
 
-			if (partyMember && partyMember.name != merchantName && partyMember.name != broadCastTarget.name)
+			if (partyMember && partyMember.name !== merchantName && partyMember.name !== broadCastTarget.name)
 			{
 				log(character.name + " broadcasting target " + broadCastTarget.name + " to " + partyMember.name);
 				send_cm(partyMember.name, { message: "target", targetId: broadCastTarget.id });
@@ -663,7 +649,7 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 	}
 
 	//	party leader checks for nearest monster to itself that is targeting party leader
-	if (character.name == partyLeader)
+	if (character.name === partyLeader)
 	{
 		target = get_nearest_monster
 			({
@@ -691,7 +677,7 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 	//	target a monster that is targeting another party member
 	parent.party_list.forEach(p =>
 	{
-		if (p != character.name)
+		if (p !== character.name)
 		{
 			target = get_nearest_monster({ target: p });
 
@@ -753,7 +739,7 @@ function approachTarget(target, onComplete)
 
 function autoAttack(target)
 {
-	if (character.name == priestName && healMode)
+	if (character.name === priestName && healMode)
 	{
 		return;
 	}
@@ -778,7 +764,7 @@ function goTo(mapName = "main", coords = { x: 0, y: 0 }, oncomplete = null)
 {
 	traveling = true;
 
-	if (character.map != mapName)
+	if (character.map !== mapName)
 	{
 		if (oncomplete != null)
 		{
@@ -805,16 +791,16 @@ function goTo(mapName = "main", coords = { x: 0, y: 0 }, oncomplete = null)
 function travelToFarmSpot()
 {
 	// @ts-ignore
-	if (farmMode == "coords")
+	if (farmMode === "coords")
 	{
 		goTo(farmMap, farmCoords);
 	}
-	else if (farmMode == "name")
+	else if (farmMode === "name")
 	{
 		traveling = true;
 		smart_move(farmMonsterName, () => { traveling = false; });
 	}
-	else if (farmMode == "number")
+	else if (farmMode === "number")
 	{
 		let coords = { x: 0, y: 0 };
 		let monster = G.maps[farmMap].monsters.find((x) => { if (x.type == farmMonsterName && x.count == farmMonsterSpawnNumber) return x; });
@@ -847,21 +833,6 @@ function goBackToTown(delay)
 	}, 5000);
 }
 
-function getLastEmptyInventorySlotNumber()
-{
-	let lastEmptySlot = -1;
-	for (let i = 0; i < character.items.length; i++)
-	{
-		let item = character.items[i];
-		if (!item)
-		{
-			lastEmptySlot = i;
-		}
-	}
-
-	return lastEmptySlot;
-}
-
 //	sorts inventory to push all items toward the back
 function tidyInventory()
 {
@@ -876,16 +847,16 @@ function tidyInventory()
 	{
 		let item = character.items[i];
 
-		if (item && item.name == "placeholder")
+		if (item && item.name === "placeholder")
 		{
 			continue;
 		}
 
-		if (item && slotToMove == -1)
+		if (item && slotToMove === -1)
 		{
 			slotToMove = i;
 		}
-		else if (slotToMove != -1 && !item)
+		else if (slotToMove !== -1 && !item)
 		{
 			lastEmptySlot = i;
 		}
@@ -906,7 +877,7 @@ function initParty()
 
 	for (let p of partyList)
 	{
-		if (character.name == p)
+		if (character.name === p)
 		{
 			continue;
 		}
@@ -936,7 +907,7 @@ function aloneCheck(msToWait = 30000)
 
 	if (!partyPresent() && !aloneChecking)
 	{
-		if (character.name != partyLeader && parent.entities[partyLeader])
+		if (character.name !== partyLeader && parent.entities[partyLeader])
 		{
 			followLeader();
 			return false;
@@ -947,7 +918,7 @@ function aloneCheck(msToWait = 30000)
 
 		setTimeout(() =>
 		{
-			if (character.name != partyLeader && parent.entities[partyLeader])
+			if (character.name !== partyLeader && parent.entities[partyLeader])
 			{
 				aloneChecking = false;
 				followLeader();
@@ -987,7 +958,7 @@ function letsGo()
 
 		for (let p of partyList)
 		{
-			if (p != character.name)
+			if (p !== character.name)
 			{
 				send_cm(p, { message: "letsGo" });
 			}
@@ -1020,11 +991,11 @@ function togglePartyAuto(forceState = null)
 		stop();
 	}
 
-	if (character.name == partyLeader)
+	if (character.name === partyLeader)
 	{
 		for (let p in partyList)
 		{
-			if (p != character.name)
+			if (p !== character.name)
 			{
 				send_cm(character.name, { message: "autoToggle", auto: autoPlay });
 				log("sending autoPlayToggle to " + character.name);
@@ -1044,7 +1015,7 @@ function townParty()
 
 	for (let p of partyList)
 	{
-		if (character.name != p && character.name != merchantName)
+		if (character.name !== p && character.name !== merchantName)
 		{
 			send_cm(p, { message: "town" });
 		}
@@ -1054,26 +1025,19 @@ function townParty()
 //	returns true if character is offline
 function characterOffline(name)
 {
-	if (parent.X.characters.filter((x) => { return (x.name == name && x.online == 0) }).length == 0)
+	if (parent.X.characters.filter((x) => { return (x.name === name && x.online === 0) }).length === 0)
 	{
 		return false;
 	}
 
-	if (!get_active_characters()[name])
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return !get_active_characters()[name];
 }
 
 function stopCharacters()
 {
 	for (let p of partyList)
 	{
-		if (p == character.name)
+		if (p === character.name)
 		{
 			continue;
 		}
@@ -1089,11 +1053,7 @@ function stopCharacters()
 
 function stopFarmMode()
 {
-	if (is_moving(character) || smart.moving)
-	{
-		stop("move");
-	}
-
+	stop();
 	farmingModeActive = false;
 	whosReady = { leader: false, merchant: false, codeBotOne: false, codeBotTwo: false };
 }
@@ -1116,11 +1076,11 @@ function checkForLowInventorySpace()
 {
 	let emptyInvSlots = 0;
 
-	if (character.name != merchantName)
+	if (character.name !== merchantName)
 	{
 		emptyInvSlots = getEmptyInventorySlotCount();
 	}
-	else if (character.name == merchantName)
+	else if (character.name === merchantName)
 	{
 		for (let item of character.items)
 		{
@@ -1204,7 +1164,7 @@ function storeInventoryInBankVault(bankVaultId, storeCompounds = false)
 			{
 				continue;
 			}
-			if (character.name == merchantName && (!storeCompounds && itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
+			if (character.name === merchantName && (!storeCompounds && itemsToCompound.includes(item.name) && item.level < compoundLevelToStop) || (itemsToUpgrade.includes(item.name) && item.level < upgradeLevelToStop))
 			{
 				continue;
 			}
@@ -1239,23 +1199,23 @@ function checkElixirBuff()
 {
 	let buffToExpect = null;
 
-	if (character.ctype == "priest")
+	if (character.ctype === "priest")
 	{
 		buffToExpect = "elixirint";
 	}
-	else if (character.ctype == "mage")
+	else if (character.ctype === "mage")
 	{
 		buffToExpect = "elixirint";
 	}
-	else if (character.ctype == "ranger")
+	else if (character.ctype === "ranger")
 	{
 		buffToExpect = "elixirdex";
 	}
-	else if (character.ctype == "warrior")
+	else if (character.ctype === "warrior")
 	{
 		buffToExpect = "elixirstr";
 	}
-	else if (character.ctype == "rogue")
+	else if (character.ctype === "rogue")
 	{
 		buffToExpect = "elixirdex";
 	}
@@ -1276,7 +1236,7 @@ function checkElixirBuff()
 		//	if not, ask the merchant for one
 		else
 		{
-			if (sentRequests.find((x) => { if (x.message == "elixir") return x; }))
+			if (sentRequests.find((x) => { if (x.message === "elixir") return x; }))
 			{
 				log("Waiting on elixir, resending request...");
 			}
@@ -1370,18 +1330,11 @@ function xpReport()
 
 function isInFarmSpawnBounds(coords)
 {
-	let monster = G.maps[farmMap].monsters.find((x) => { if (x.type == farmMonsterName && x.count == farmMonsterSpawnNumber) return x; });
+	let monster = G.maps[farmMap].monsters.find((x) => { if (x.type === farmMonsterName && x.count === farmMonsterSpawnNumber) return x; });
 
 	let center = { x: 0, y: 0 };
 	center.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
 	center.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
 
-	if (distance(coords, center) < farmRadius)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return distance(coords, center) < farmRadius;
 }
