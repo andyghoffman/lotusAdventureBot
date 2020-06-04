@@ -1,43 +1,65 @@
-const fs = require('fs');
-
 function todaysLogName()
 {
-	let name = "";
+	let date = new Date();
+	let month = date.getMonth() + 1;
+	let day = date.getDate();
+	let year = date.getFullYear();
 
-
-
+	let name = "logs/" + month + "-" + day + "-" + year + ".txt";
 	return name;
 }
 
-function getCurrentLog()
+function logForTodayExists()
 {
-	let logFile = fs.readFile('logs/test.txt', (error, data) =>
+	let fs = require('fs');
+	let logFile = fs.readFile(todaysLogName(), (error, data) =>
 	{
 		if (error)
 		{
-			throw (error);
-		}
-
-		if (data)
-		{
-			console.log(data.toString());
+			return false;
 		}
 	});
 
-	if (logFile)
-	{
-
-	}
-	else
-	{
-
-	}
+	return true;
 }
 
 function createNewLogFile()
 {
-	let fileName = "";
+	let fs = require('fs');
+	let fileName = todaysLogName();
+	let newFile = fs.writeFile(fileName, "", (error) =>
+	{
+		if (error)
+		{
+			log(error);
+		}
+
+		log("Created new log file at " + fileName);
+	});
+
+	return newFile;
 }
 
-let testDate = new Date();
-console.log(testDate.toLocaleString());
+function writeToLog(data)
+{
+	if (!logForTodayExists())
+	{
+		createNewLogFile();
+	}
+
+	let fs = require('fs');
+	let write = new Date().toLocaleTimeString() + ": " + data + "\n";
+
+	fs.appendFile(todaysLogName(), write, (error) =>
+	{
+		if (error)
+		{
+			log(error);
+			throw error;
+		}
+		else
+		{
+			log(write);
+		}
+	});
+}
