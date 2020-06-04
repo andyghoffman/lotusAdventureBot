@@ -5,6 +5,7 @@ load_code("merchantLogic");
 load_code("mageLogic");
 load_code("rangerLogic");
 load_code("logging");
+load_code("events");
 
 map_key("1", "snippet", "initParty()");
 map_key("2", "snippet", "townParty()");

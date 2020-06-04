@@ -4,10 +4,7 @@
 //	Level Up Event
 game.on("level_up", (data) =>
 {
-	if (partyList.includes(data.id))
-	{
-		writeToLog(data.name + " is now level " + data.level + "!");
-	}
+	writeToLog(data.name + " is now level " + data.level + "!");
 });
 
 //	Action Event (character is the source of the action)

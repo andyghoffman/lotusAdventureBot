@@ -1352,7 +1352,7 @@ function isShiny(item)
 
 function xpReport()
 {
-	let output = "";
+	let output = [];
 
 	for (let p of partyList)
 	{
@@ -1361,7 +1361,7 @@ function xpReport()
 		if (player)
 		{
 			let percent = (player.xp / G.levels[player.level]) * 100;
-			output += player.name + ": L" + player.level + " with " + Math.round(percent) + "%     ";
+			output.push(player.name + ": L" + player.level + " with " + percent.toString("0.00") + "%");
 		}
 	}
 

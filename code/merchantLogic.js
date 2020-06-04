@@ -723,7 +723,7 @@ function exchangeSeashells()
 		return;
 	}
 
-	log("Exchanging seashells...");
+	writeToLog("Exchanging seashells...");
 
 	let exchanges = Math.floor(seashells.q / 20);
 	exchangeItems("fisherman", "seashell", exchanges);
@@ -743,7 +743,7 @@ function exchangeLeather()
 		return;
 	}
 
-	log("Exchanging leather...");
+	writeToLog("Exchanging leather...");
 
 	let exchanges = Math.floor(leather.q / 40);
 	exchangeItems("leathermerchant", "leather", exchanges);
@@ -764,7 +764,7 @@ function exchangeWithXyn()
 
 			if (item && G.items[item.name].type == itemType)
 			{
-				log("Exchanging " + item.name + " with Xyn.. ");
+				writeToLog("Exchanging " + item.name + " with Xyn.. ");
 				exchangeItems("exchange", item.name, 1, () => { exchangeWithXyn(); });
 				return;
 			}

@@ -46,7 +46,7 @@ function writeToLog(data)
 	}
 
 	let fs = require('fs');
-	let write = new Date().toLocaleTimeString() + ": " + data + "\n";
+	let write = "[" + new Date().toLocaleTimeString() + "]: " + data + "\n";
 
 	fs.appendFile(todaysLogName(), write, (error) =>
 	{
