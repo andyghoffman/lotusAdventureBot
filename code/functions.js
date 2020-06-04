@@ -79,6 +79,8 @@ function on_cm(sender, data)
 
 		if (readyToGo())
 		{
+
+
 			for (let p of partyList)
 			{
 				if (p != character.name)

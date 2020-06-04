@@ -6,5 +6,5 @@ function load_file(fileName) {
 
 var library=document.createElement("script");
     library.type="text/javascript";
-    library.text=load_file("C:/GitHub/lotusAdventureBot/main.js");
+    library.text=load_file("C:/GitHub/lotusAdventureBot/code/main.js");
     document.getElementsByTagName("head")[0].appendChild(library);
