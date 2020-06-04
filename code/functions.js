@@ -367,7 +367,7 @@ function stuckCheck(originalPosition)
 	if (isStuck)
 	{
 		stop();
-		log(character.name + " is stuck!");
+		writeToLog(character.name + " is stuck!");
 		setTimeout(() =>
 		{
 			if (!isStuck)
@@ -375,7 +375,7 @@ function stuckCheck(originalPosition)
 				return;
 			}
 
-			log(character.name + " is still stuck and returning to town.");
+			writeToLog(character.name + " is still stuck and returning to town.");
 			isStuck = false;
 			stopFarmMode();
 			goBackToTown();
@@ -943,9 +943,9 @@ function aloneCheck(msToWait = 30000)
 		}
 
 		aloneChecking = true;
-		log(character.name + " is checking if they are lost...");
+		writeToLog(character.name + " is checking if they are lost...");
 
-		setTimeout(function ()
+		setTimeout(() =>
 		{
 			if (character.name != partyLeader && parent.entities[partyLeader])
 			{
@@ -956,7 +956,7 @@ function aloneCheck(msToWait = 30000)
 
 			if (!isInTown() && !partyPresent() && aloneChecking)
 			{
-				log(character.name + " is lost & returning to town.");
+				writeToLog(character.name + " is lost & returning to town.");
 
 				stopFarmMode();
 				goBackToTown();
@@ -1217,8 +1217,7 @@ function storeInventoryInBankVault(bankVaultId, storeCompounds = false)
 
 function isItemOnCraftList(itemName)
 {
-	let r = (itemsToUpgrade.includes(itemName) || itemsToCompound.includes(itemName));
-	return r;
+	return (itemsToUpgrade.includes(itemName) || itemsToCompound.includes(itemName));
 }
 
 function lookForSpecialTargets()

@@ -251,15 +251,13 @@ function merchant_on_magiport(name)
 //	returns true if the merchant is occupied with a task
 function isBusy()
 {
-	let busy = returningToTown || deliveryMode || banking || exchangeMode || character.q.upgrade || character.q.compound;
-	return busy;
+	return returningToTown || deliveryMode || banking || exchangeMode || character.q.upgrade || character.q.compound;
 }
 
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
 function checkMluck(target)
 {
-	let mluck = (target.s.mluck && target.s.mluck.f == merchantName) || (target.s.mluck && target.s.mluck.ms < mluckDuration * 0.5);
-	return mluck;
+	return (target.s.mluck && target.s.mluck.f == merchantName) || (target.s.mluck && target.s.mluck.ms < mluckDuration * 0.5);
 }
 
 function sellVendorTrash()
@@ -316,11 +314,6 @@ function checkRequests()
 //	returns null if no shipment
 function getShipmentFor(name)
 {
-	if (deliveryShipments.length == 0)
-	{
-		return null;
-	}
-
 	for (let i = 0; i < deliveryShipments.length; i++)
 	{
 		if (deliveryShipments[i].name == name)
@@ -507,20 +500,16 @@ function buyPotionsFor(name, healthPots, manaPots)
 		return;
 	}
 
-	if (getEmptyInventorySlotCount() < 8)
+	if (getEmptyInventorySlotCount() < veryLowInventoryThreshold)
 	{
 		sellVendorTrash();
 
-		if (getEmptyInventorySlotCount() < 8 && (!hasUpgradableItems() && craftingOn))
+		if (getEmptyInventorySlotCount() < veryLowInventoryThreshold)
 		{
 			log("Need inventory space to buy potions, going to bank.");
 			disableVendorMode();
 			depositInventoryAtBank();
 			return;
-		}
-		else
-		{
-			log("Continuing to craft in order to free inventory space.");
 		}
 	}
 

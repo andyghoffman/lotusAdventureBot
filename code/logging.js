@@ -12,7 +12,7 @@ function todaysLogName()
 function logForTodayExists()
 {
 	let fs = require('fs');
-	let logFile = fs.readFile(todaysLogName(), (error, data) =>
+	fs.readFile(todaysLogName(), (error, data) =>
 	{
 		if (error)
 		{
@@ -27,7 +27,7 @@ function createNewLogFile()
 {
 	let fs = require('fs');
 	let fileName = todaysLogName();
-	let newFile = fs.writeFile(fileName, "", (error) =>
+	fs.writeFile(fileName, "", (error) =>
 	{
 		if (error)
 		{
@@ -36,8 +36,6 @@ function createNewLogFile()
 
 		log("Created new log file at " + fileName);
 	});
-
-	return newFile;
 }
 
 function writeToLog(data)
