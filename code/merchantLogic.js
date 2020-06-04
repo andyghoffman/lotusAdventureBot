@@ -33,7 +33,7 @@ function merchantAuto(target)
 		reduce_cooldown("mluck", character.ping);
 	}
 
-	for (other in parent.entities)
+	for (let other in parent.entities)
 	{
 		let isPartyMember = parent.party_list.includes(other);
 		let friendlyTarget = parent.entities[other];
@@ -205,7 +205,7 @@ function merchant_on_cm(sender, data)
 		}
 		else
 		{
-			deliveryRequests.splice(deliveryRequests.indexOf(x => x.sender == sender && x.request == request), 1);
+			deliveryRequests.splice(deliveryRequests.indexOf(x => x.sender == sender && x.request == data.request), 1);
 		}
 	}
 
@@ -472,15 +472,15 @@ function stockScrolls()
 		if (amount <= lowScrolls)
 		{
 			let q = 0;
-			if (s.includes(0))
+			if (s.includes('0'))
 			{
 				q = scrollsToStock[0];
 			}
-			else if (s.includes(1))
+			else if (s.includes('1'))
 			{
 				q = scrollsToStock[1];
 			}
-			else if (s.includes(2))
+			else if (s.includes('2'))
 			{
 				q = scrollsToStock[2];
 			}

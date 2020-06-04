@@ -35,17 +35,6 @@ function useHuntersMark(target)
 		reduce_cooldown("huntersmark", character.ping);
 		return;
 	}
-
-	//	pull a new target if current target was skipped
-	for (let e in parent.entities)
-	{
-		if (e.type == target.mtype && is_in_range(target, "huntersmark") && !target.s.huntersmark && validTargetForSkill(target))
-		{
-			use_skill("huntersmark", e);
-			reduce_cooldown("huntersmark", character.ping);
-			return;
-		}
-	}
 }
 
 //	use 3shot
@@ -60,10 +49,12 @@ function tripleShot(target)
 	// reduce_cooldown("3shot", character.ping);
 	// return;
 
-	count = 1;
+	let count = 1;
 	for (let e in parent.entities)
 	{
-		if (target.mtype == e.mtype && is_in_range(e, "supershot"))
+		let t = parent.entities[e];
+
+		if (target.mtype == t.mtype && is_in_range(t, "supershot"))
 		{
 			count++;
 		}
@@ -95,10 +86,12 @@ function poisonArrowSpam(target)
 
 	for (let e in parent.entities)
 	{
-		if (!is_on_cooldown("poisonarrow") && !e.s.poisoned && is_in_range(e, "poisonarrow"))
+		let target = parent.entities[e];
+
+		if (!is_on_cooldown("poisonarrow") && !target.s.poisoned && is_in_range(target, "poisonarrow"))
 		{
 			log("Using poison arrow");
-			use_skill("poisonarrow", e);
+			use_skill("poisonarrow", target);
 			reduce_cooldown("poisonarrow", character.ping);
 			return;
 		}

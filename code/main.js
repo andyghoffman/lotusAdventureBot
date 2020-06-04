@@ -117,7 +117,7 @@ function main()
 
         if (!target)
         {
-            canPullNew = character.name == partyLeader;
+            let canPullNew = character.name == partyLeader;
             target = getTargetMonster(farmMonsterName, canPullNew);
         }
     }

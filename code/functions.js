@@ -14,7 +14,7 @@ function on_cm(sender, data)
 
 	if (data.message == "target")
 	{
-		target = get_entity(data.targetId);
+		let target = get_entity(data.targetId);
 
 		if (target)
 		{
@@ -79,8 +79,6 @@ function on_cm(sender, data)
 
 		if (readyToGo())
 		{
-
-
 			for (let p of partyList)
 			{
 				if (p != character.name)
@@ -749,10 +747,7 @@ function approachTarget(target, onComplete)
 	}
 	else
 	{
-		smart_move(
-			character.x + (target.x - character.x) * 0.3,
-			character.y + (target.y - character.y) * 0.3
-			, () => { onComplete(); });
+		smart_move({ x: character.x + (target.x - character.x) * 0.3, y: character.y + (target.y - character.y) * 0.3 }, () => { onComplete(); });
 	}
 }
 
@@ -809,6 +804,7 @@ function goTo(mapName = "main", coords = { x: 0, y: 0 }, oncomplete = null)
 
 function travelToFarmSpot()
 {
+	// @ts-ignore
 	if (farmMode == "coords")
 	{
 		goTo(farmMap, farmCoords);
@@ -1229,7 +1225,7 @@ function lookForSpecialTargets()
 {
 	for (let i = 0; i < specialMonsters.length; i++)
 	{
-		target = getTargetMonster(specialMonsters[i]);
+		let target = getTargetMonster(specialMonsters[i]);
 		if (target && specialMonsters.includes(target.mtype))
 		{
 			broadCastTarget(target);
