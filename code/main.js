@@ -16,18 +16,18 @@ map_key("6", "snippet", "toggleCraftingMode()");
 map_key("7", "snippet", "depositInventoryAtBank()");
 map_key("8", "snippet", "xpReport()");
 
-let autoPlay = fullAuto;
-let craftingOn = craftingEnabled;
-let whosReady = {leader: false, merchant: false, codeBotOne: false, codeBotTwo: false};
-const sentRequests = [];
-let aloneChecking = false;
-let farmingModeActive = false;
-let readyChecking = false;
-let traveling = false;
-let returningToTown = false;
-let banking = false;
-let noElixirs = false;
-let isStuck = false;
+let AutoPlay = FullAuto;
+let CraftingOn = CraftingEnabled;
+let AloneChecking = false;
+let FarmingModeActive = false;
+let ReadyChecking = false;
+let Traveling = false;
+let ReturningToTown = false;
+let Banking = false;
+let NoElixirs = false;
+let IsStuck = false;
+let WhosReady = {leader: false, merchant: false, codeBotOne: false, codeBotTwo: false};
+const SentRequests = [];
 
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
@@ -36,7 +36,7 @@ setInterval(lateUpdate, 5000);
 onStart();
 function onStart()
 {
-	if (character.name === merchantName)
+	if (character.name === MerchantName)
 	{
 		merchantOnStart();
 	}
@@ -52,12 +52,12 @@ function main()
 	}
 
 	//  don't walk with merchant stand, don't idle without it
-	if (character.name === merchantName)
+	if (character.name === MerchantName)
 	{
 		standCheck();
 	}
 	//  prioritize priest functions before anything else (because heal shares a cooldown with autoattack)
-	else if (character.name === priestName)
+	else if (character.name === PriestName)
 	{
 		priestAuto(get_targeted_monster());
 	}
@@ -68,21 +68,21 @@ function main()
 	}
 
 	loot();
-	usePotions(healthPotThreshold, manaPotThreshold);
+	usePotions(HealthPotThreshold, ManaPotThreshold);
 
-	if (autoPlay)
+	if (AutoPlay)
 	{
 		tidyInventory();
 	}
 
 	//  finish what you are doing before checking past here
-	if (is_moving(character) || smart.moving || returningToTown || character.q.upgrade || character.q.compound)
+	if (is_moving(character) || smart.moving || ReturningToTown || character.q.upgrade || character.q.compound)
 	{
 		return;
 	}
 
 	//  merchant standard routine
-	if (character.name === merchantName)
+	if (character.name === MerchantName)
 	{
 		merchantAuto();
 		return;
@@ -91,17 +91,17 @@ function main()
 	else
 	{
 		//  autofollow leader when not auto-farming
-		if (character.name !== partyLeader && !farmingModeActive && parent.entities[partyLeader])
+		if (character.name !== PartyLeader && !FarmingModeActive && parent.entities[PartyLeader])
 		{
 			followLeader();
 			return;
 		}
 
 		//  make sure party is together
-		if (!autoPlay || !readyToGo() || !farmingModeActive || !partyPresent())
+		if (!AutoPlay || !readyToGo() || !FarmingModeActive || !partyPresent())
 		{
 			//  party leader will only aloneCheck if autoplay is active, other characters will tether to leader regardless of autoplay
-			if ((character.name !== partyLeader) || (character.name === partyLeader && autoPlay))
+			if ((character.name !== PartyLeader) || (character.name === PartyLeader && AutoPlay))
 			{
 				aloneCheck();
 			}
@@ -118,8 +118,8 @@ function main()
 
 		if (!target)
 		{
-			let canPullNew = character.name === partyLeader;
-			target = getTargetMonster(farmMonsterName, canPullNew);
+			let canPullNew = character.name === PartyLeader;
+			target = getTargetMonster(FarmMonsterName, canPullNew);
 		}
 	}
 
@@ -130,9 +130,9 @@ function main()
 	{
 		classRoutine(target);
 	}
-	else if (!traveling)
+	else if (!Traveling)
 	{
-		if (character.name !== partyLeader && parent.entities[partyLeader] && distance(character, parent.entities[partyLeader]) < 400 && character.map === farmMap)
+		if (character.name !== PartyLeader && parent.entities[PartyLeader] && distance(character, parent.entities[PartyLeader]) < 400 && character.map === FarmMap)
 		{
 			followLeader();
 		}
@@ -147,7 +147,7 @@ function main()
 	personalSpace();
 
 	//  if leader is too far away approach him
-	if (character.name !== partyLeader)
+	if (character.name !== PartyLeader)
 	{
 		followLeader();
 	}
@@ -163,26 +163,26 @@ function lateUpdate()
 
 	checkSentRequests();
 
-	if (character.name === partyLeader && !partyPresent() && autoPlay)
+	if (character.name === PartyLeader && !partyPresent() && AutoPlay)
 	{
 		initParty();
 	}
 
 	//  merchant has it's own lateUpdate
-	if (character.name === merchantName)
+	if (character.name === MerchantName)
 	{
 		merchantLateUpdate();
 		return;
 	}
 
 	//  don't do anything past here if autoPlay is off
-	if (!autoPlay)
+	if (!AutoPlay)
 	{
 		return;
 	}
 
 	//  if the merchant is nearby, send him your items & gold (token minimum gold amount so it doesn't get spammed)
-	if (parent.entities[merchantName] && character.gold > 10000)
+	if (parent.entities[MerchantName] && character.gold > 10000)
 	{
 		transferAllToMerchant();
 	}
@@ -196,13 +196,13 @@ function lateUpdate()
 	checkIfReady();
 
 	//  party leader keeps things in check
-	if (character.name === partyLeader)
+	if (character.name === PartyLeader)
 	{
-		if (readyToGo() && partyPresent() && !farmingModeActive)
+		if (readyToGo() && partyPresent() && !FarmingModeActive)
 		{
 			letsGo();
 		}
-		else if (partyPresent() && !farmingModeActive)
+		else if (partyPresent() && !FarmingModeActive)
 		{
 			sendReadyCheck();
 		}

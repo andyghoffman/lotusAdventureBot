@@ -13,18 +13,13 @@ const mluckDuration = 3600000;
 
 function merchantOnStart()
 {
-	pontyExclude.forEach(x => { buyFromPontyList.splice(buyFromPontyList.indexOf(x), 1) });
-	merchantItems.forEach(x => { itemsToHoldOnTo.push(x) });
+	PontyExclude.forEach(x => { BuyFromPonty.splice(BuyFromPonty.indexOf(x), 1) });
+	MerchantItems.forEach(x => { ItemsToHoldOnTo.push(x) });
 	enableVendorMode();
 }
 
 function merchantAuto(target)
 {
-	if (!isBusy())
-	{
-		sortMerchantInventory();
-	}
-
 	//	keep magic luck on yourself
 	if (!checkMluck(character) && !is_on_cooldown("mluck"))
 	{
@@ -60,7 +55,7 @@ function merchantAuto(target)
 					reduce_cooldown("mluck", character.ping);
 				}
 			}
-			else if (deliveryMode && !returningToTown && deliveryRequests.length > 0)
+			else if (deliveryMode && !ReturningToTown && deliveryRequests.length > 0)
 			{
 				log("Moving closer to recipient.");
 				approachTarget(friendlyTarget);
@@ -84,7 +79,7 @@ function merchantLateUpdate()
 	checkRequests();
 	confirmDeliveries();
 
-	if (!autoPlay || isBusy())
+	if (!AutoPlay || isBusy())
 	{
 		return;
 	}
@@ -96,13 +91,13 @@ function merchantLateUpdate()
 		exchangeSeashells();
 		exchangeLeather();
 
-		if (craftingOn)
+		if (CraftingOn)
 		{
 			craftCompounds();
 			craftUpgrades();
 		}
 
-		if (character.gold > minimumGold)
+		if (character.gold > MinimumGold)
 		{
 			stockScrolls();
 			buyBasicItems();
@@ -239,7 +234,7 @@ function merchant_on_cm(sender, data)
 
 function merchant_on_magiport(name)
 {
-	if (!deliveryMode || (returningToTown || banking || exchangeMode))
+	if (!deliveryMode || (ReturningToTown || Banking || exchangeMode))
 	{
 		return;
 	}
@@ -251,13 +246,13 @@ function merchant_on_magiport(name)
 //	returns true if the merchant is occupied with a task
 function isBusy()
 {
-	return returningToTown || deliveryMode || banking || exchangeMode || character.q.upgrade || character.q.compound;
+	return ReturningToTown || deliveryMode || Banking || exchangeMode || character.q.upgrade || character.q.compound;
 }
 
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
 function checkMluck(target)
 {
-	return (target.s.mluck && target.s.mluck.f === merchantName) || (target.s.mluck && target.s.mluck.ms < mluckDuration * 0.5);
+	return (target.s.mluck && target.s.mluck.f === MerchantName) || (target.s.mluck && target.s.mluck.ms < mluckDuration * 0.5);
 }
 
 function sellVendorTrash()
@@ -266,7 +261,7 @@ function sellVendorTrash()
 	{
 		let item = character.items[i];
 
-		if (item && vendorTrash.includes(item.name) && !isShiny(item))
+		if (item && VendorTrash.includes(item.name) && !isShiny(item))
 		{
 			log("Selling " + item.name + " to vendor.");
 			sell(i, item.q);
@@ -327,7 +322,7 @@ function getShipmentFor(name)
 
 function craftUpgrades()
 {
-	for (let i = 1; i <= upgradeLevelToStop; i++)
+	for (let i = 1; i <= UpgradeLevelToStop; i++)
 	{
 		if (craftUpgrade(i))
 		{
@@ -342,12 +337,12 @@ function craftUpgrade(targetUpgradeLevel)
 	{
 		let item = character.items[i];
 
-		if (item && itemsToUpgrade.includes(item.name) && item.level < targetUpgradeLevel && !isShiny(item))
+		if (item && ItemsToUpgrade.includes(item.name) && item.level < targetUpgradeLevel && !isShiny(item))
 		{
 			log("Upgrading " + G.items[item.name].name + "...");
 
 			let scroll = "scroll0";
-			if (item.level >= upgradeLevelToUseTierTwoScroll || item.level >= G.items[item.name].grades[0])
+			if (item.level >= UpgradeLevelToUseTierTwoScroll || item.level >= G.items[item.name].grades[0])
 			{
 				scroll = "scroll1";
 			}
@@ -371,7 +366,7 @@ function craftUpgrade(targetUpgradeLevel)
 
 function craftCompounds()
 {
-	for (let i = 0; i < compoundLevelToStop; i++)
+	for (let i = 0; i < CompoundLevelToStop; i++)
 	{
 		if (craftCompound(i))
 		{
@@ -385,7 +380,7 @@ function craftCompound(levelToUse)
 	let triple = [-1, -1, -1];
 	let foundItem = "";
 
-	for (let i = 0; i < itemsToCompound.length; i++)
+	for (let i = 0; i < ItemsToCompound.length; i++)
 	{
 		let count = 0;
 		triple = [-1, -1, -1];
@@ -393,7 +388,7 @@ function craftCompound(levelToUse)
 		for (let k = 0; k < character.items.length; k++)
 		{
 			let item = character.items[k];
-			if (item && item.name === itemsToCompound[i] && item.level === levelToUse && count < 3 && !isShiny(item))
+			if (item && item.name === ItemsToCompound[i] && item.level === levelToUse && count < 3 && !isShiny(item))
 			{
 				triple[count] = k;
 				count++;
@@ -403,7 +398,7 @@ function craftCompound(levelToUse)
 		//	found a triple, stop looking
 		if (triple[0] !== -1 && triple[1] !== -1 && triple[2] !== -1)
 		{
-			foundItem = itemsToCompound[i];
+			foundItem = ItemsToCompound[i];
 			break;
 		}
 	}
@@ -433,28 +428,28 @@ function craftCompound(levelToUse)
 
 function buyBasicItems()
 {
-	for (let i = 0; i < basicItemsToCraft.length; i++) 
+	for (let i = 0; i < BasicItemsToCraft.length; i++) 
 	{
-		if (!G.items[basicItemsToCraft[i]]) {
-			log(basicItemsToCraft[i] + " is not a valid item name!");
+		if (!G.items[BasicItemsToCraft[i]]) {
+			log(BasicItemsToCraft[i] + " is not a valid item name!");
 			return;
 		}
 
-		if (character.items.find((x) => { if (x && x.name === basicItemsToCraft[i] && x.level < upgradeLevelToStop) return x;})) 
+		if (character.items.find((x) => { if (x && x.name === BasicItemsToCraft[i] && x.level < UpgradeLevelToStop) return x;})) 
 		{
 			continue;
 		}
 
-		log("Buying a " + G.items[basicItemsToCraft[i]].name);
-		buy_with_gold(basicItemsToCraft[i]);
+		log("Buying a " + G.items[BasicItemsToCraft[i]].name);
+		buy_with_gold(BasicItemsToCraft[i]);
 	}
 }
 
 function stockScrolls()
 {
-	for (let i = 0; i < scrolls.length; i++)
+	for (let i = 0; i < Scrolls.length; i++)
 	{
-		let s = scrolls[i];
+		let s = Scrolls[i];
 		let amount = quantity(s);
 		if (amount <= lowScrolls)
 		{
@@ -494,11 +489,11 @@ function buyPotionsFor(name, healthPots, manaPots)
 		return;
 	}
 
-	if (getEmptyInventorySlotCount() < veryLowInventoryThreshold)
+	if (getEmptyInventorySlotCount() < VeryLowInventoryThreshold)
 	{
 		sellVendorTrash();
 
-		if (getEmptyInventorySlotCount() < veryLowInventoryThreshold)
+		if (getEmptyInventorySlotCount() < VeryLowInventoryThreshold)
 		{
 			log("Need inventory space to buy potions, going to bank.");
 			disableVendorMode();
@@ -514,18 +509,18 @@ function buyPotionsFor(name, healthPots, manaPots)
 		return;
 	}
 
-	let h = healthPots - quantity(potions[0]);
-	let m = manaPots - quantity(potions[1]);
+	let h = healthPots - quantity(Potions[0]);
+	let m = manaPots - quantity(Potions[1]);
 
 	if (h > 0)
 	{
-		buy_with_gold(potions[0], h);
+		buy_with_gold(Potions[0], h);
 		log("Buying " + healthPots + " health potions");
 	}
 
 	if (m > 0)
 	{
-		buy_with_gold(potions[1], m);
+		buy_with_gold(Potions[1], m);
 		log("Buying " + manaPots + " mana potions");
 	}
 
@@ -571,8 +566,8 @@ function deliverPotions(shipment)
 		log("Delivering potions to " + shipment.name);
 		let index = deliveryShipments.indexOf(shipment);
 		deliveryShipments.splice(index, 1);
-		send_item(shipment.name, locate_item(potions[0]), shipment.hPots);
-		send_item(shipment.name, locate_item(potions[1]), shipment.mPots);
+		send_item(shipment.name, locate_item(Potions[0]), shipment.hPots);
+		send_item(shipment.name, locate_item(Potions[1]), shipment.mPots);
 	}
 	else
 	{
@@ -582,7 +577,7 @@ function deliverPotions(shipment)
 
 function enableVendorMode()
 {
-	if (returningToTown || deliveryMode || banking)
+	if (ReturningToTown || deliveryMode || Banking)
 	{
 		return;
 	}
@@ -595,10 +590,10 @@ function enableVendorMode()
 	}
 	else
 	{
-		smart_move(merchantStandCoords, () =>
+		smart_move(MerchantStandCoords, () =>
 		{
 			log("Merchant entered vendor mode.");
-			log("Crafting Mode: " + craftingOn);
+			log("Crafting Mode: " + CraftingOn);
 			parent.open_merchant(locate_item("stand0"));
 			vendorMode = true;
 		});
@@ -615,7 +610,7 @@ function disableVendorMode()
 
 function standCheck()
 {
-	if (is_moving(character) || smart.moving || returningToTown)
+	if (is_moving(character) || smart.moving || ReturningToTown)
 	{
 		if (character.stand)
 		{
@@ -630,7 +625,7 @@ function standCheck()
 
 function buyFromPonty()
 {
-	let itemsToBuy = buyFromPontyList;
+	let itemsToBuy = BuyFromPonty;
 
 	parent.socket.once("secondhands", function (data)
 	{
@@ -645,13 +640,13 @@ function buyFromPonty()
 			{
 				let buy = false;
 
-				if (itemsToUpgrade.includes(pontyItem.name) || itemsToCompound.includes(pontyItem.name))
+				if (ItemsToUpgrade.includes(pontyItem.name) || ItemsToCompound.includes(pontyItem.name))
 				{
-					if (itemsToUpgrade.includes(pontyItem.name) && (pontyItem.level <= upgradeLevelToStop))
+					if (ItemsToUpgrade.includes(pontyItem.name) && (pontyItem.level <= UpgradeLevelToStop))
 					{
 						buy = true;
 					}
-					else if (itemsToCompound.includes(pontyItem.name) && (pontyItem.level <= compoundLevelToStop))
+					else if (ItemsToCompound.includes(pontyItem.name) && (pontyItem.level <= CompoundLevelToStop))
 					{
 						buy = true;
 					}
@@ -750,7 +745,7 @@ function exchangeWithXyn()
 		return;
 	}
 
-	for (let itemType of xynTypes)
+	for (let itemType of XynTypes)
 	{
 		for (let i = 0; i < character.items.length; i++)
 		{

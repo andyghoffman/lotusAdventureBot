@@ -4,18 +4,14 @@
 
 function rangerAuto(target)
 {
-	//	cast 3shot
-	//tripleShot(target);
-
 	//	cast hunters mark
 	useHuntersMark(target);
 
+	//	cast 3shot
+	tripleShot(target);
+	
 	//	cast super shot
-	if (character.mp >= G.skills.supershot.mp && !is_on_cooldown("supershot") && is_in_range("supershot", target) && validTargetForSkill(target))
-	{
-		use_skill("supershot", target);
-		reduce_cooldown("supershot", character.ping);
-	}
+	useSuperShot(target);
 
 	//	auto attack
 	autoAttack(target);
@@ -36,6 +32,17 @@ function useHuntersMark(target)
 	}
 }
 
+function useSuperShot(target)
+{
+	if (character.mp < G.skills.supershot.mp || is_on_cooldown("supershot") || !is_in_range("supershot", target) || !validTargetForSkill(target))
+	{
+		return; 
+	}
+	
+	use_skill("supershot", target);
+	reduce_cooldown("supershot", character.ping);
+}
+
 //	use 3shot
 function tripleShot(target)
 {
@@ -44,27 +51,8 @@ function tripleShot(target)
 		return;
 	}
 
-	// use_skill("3shot", target);
-	// reduce_cooldown("3shot", character.ping);
-	// return;
-
-	let count = 1;
-	for (let e in parent.entities)
-	{
-		let t = parent.entities[e];
-
-		if (target.mtype === t.mtype && is_in_range(t, "supershot"))
-		{
-			count++;
-		}
-	}
-
-	if (count <= 3)
-	{
-		log("3 Shot!");
-		use_skill("3shot", target);
-		reduce_cooldown("3shot", character.ping);
-	}
+	use_skill("3shot", target);
+	reduce_cooldown("3shot", character.ping);
 }
 
 //	poison consumable probably not worth it
