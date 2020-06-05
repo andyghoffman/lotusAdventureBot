@@ -1,8 +1,8 @@
 ///		Priest Settings		///
-const healThreshold = 0.9;
+const PriestHealThreshold = 0.9;
 //////
 
-let healMode = false;
+let HealingMode = false;
 
 function priestAuto(target)
 {
@@ -10,7 +10,7 @@ function priestAuto(target)
 	tauntOffPartyMembers(target);
 	useCurse(target);
 
-	if (!healMode)
+	if (!HealingMode)
 	{
 		autoAttack(target);
 	}
@@ -68,9 +68,9 @@ function autoHeal()
 			partyMember = character;
 		}
 
-		if (partyMember && !partyMember.rip && partyMember.hp < (partyMember.max_hp * healThreshold))
+		if (partyMember && !partyMember.rip && partyMember.hp < (partyMember.max_hp * PriestHealThreshold))
 		{
-			healMode = true;
+			HealingMode = true;
 			damagedPartyMembers++;
 
 			if (damagedPartyMembers > 1 && character.mp >= G.skills.partyheal.mp && !is_on_cooldown("partyheal"))
@@ -90,7 +90,7 @@ function autoHeal()
 
 	if (damagedPartyMembers === 0 && !is_on_cooldown("attack"))
 	{
-		healMode = false;
+		HealingMode = false;
 	}
 }
 

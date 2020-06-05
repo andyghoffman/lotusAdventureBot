@@ -2,11 +2,11 @@
 	"compilerOptions": {
 		"module": "commonjs",
 		"target": "es6",
-		"checkJs": false
+		"checkJs": true
 	},
 	"exclude": [
 		"node_modules",
 		"gameFiles",
 		"logs"
-	],
+	]
 }

@@ -1,15 +1,15 @@
 ///		Merchant Settings		///
-const lowScrolls = 1;
-const scrollsToStock = [100, 20, 0];
+const LowScrolls = 1;
+const ScrollsToStock = [100, 20, 0];
 //////
 
-let vendorMode = false;			//	true when in town with shop, false when busy delivering items
-let deliveryMode = false;		//	true when the merchant has requests it needs to fulfill
-let exchangeMode = false;		//	true when the merchant is busy exchanging items with an npc
-const deliveryShipments = [];
-const deliveryRequests = [];
+let VendorMode = false;			//	true when in town with shop, false when busy delivering items
+let DeliveryMode = false;		//	true when the merchant has requests it needs to fulfill
+let ExchangeMode = false;		//	true when the merchant is busy exchanging items with an npc
+const DeliveryShipments = [];
+const DeliveryRequests = [];
 
-const mluckDuration = 3600000;
+const MLuckDuration = 3600000;
 
 function merchantOnStart()
 {
@@ -55,7 +55,7 @@ function merchantAuto(target)
 					reduce_cooldown("mluck", character.ping);
 				}
 			}
-			else if (deliveryMode && !ReturningToTown && deliveryRequests.length > 0)
+			else if (DeliveryMode && !ReturningToTown && DeliveryRequests.length > 0)
 			{
 				log("Moving closer to recipient.");
 				approachTarget(friendlyTarget);
@@ -84,7 +84,7 @@ function merchantLateUpdate()
 		return;
 	}
 
-	if (vendorMode && isInTown())
+	if (VendorMode && isInTown())
 	{
 		sellVendorTrash();
 		exchangeWithXyn();
@@ -125,7 +125,7 @@ function merchantLateUpdate()
 
 	if (!isBusy())
 	{
-		if (isInTown() && !vendorMode)
+		if (isInTown() && !VendorMode)
 		{
 			enableVendorMode();
 		}
@@ -140,18 +140,18 @@ function merchant_on_cm(sender, data)
 {
 	if (data.message === "buyPots")
 	{
-		if (deliveryRequests.find((x) => { if (x.request === "potions" && x.sender === sender) return x; }))
+		if (DeliveryRequests.find((x) => { if (x.request === "potions" && x.sender === sender) return x; }))
 		{
 			log("Already have potion request from " + sender);
 			return;
 		}
 
 		log("Recieved potion request from " + sender);
-		deliveryRequests.push({ request: "potions", sender: sender, shipment: null, hPots: data.hPots, mPots: data.mPots });
+		DeliveryRequests.push({ request: "potions", sender: sender, shipment: null, hPots: data.hPots, mPots: data.mPots });
 	}
 	else if (data.message === "elixir")
 	{
-		if (deliveryRequests.find((x) => { if (x.request === "elixir" && x.sender === sender) return x; }))
+		if (DeliveryRequests.find((x) => { if (x.request === "elixir" && x.sender === sender) return x; }))
 		{
 			log("Already have elixir request from " + sender);
 			return;
@@ -164,8 +164,8 @@ function merchant_on_cm(sender, data)
 		if (elixir)
 		{
 			let shipmentItem = character.items[elixir];
-			deliveryRequests.push({ request: "elixir", sender: sender, shipment: shipmentItem.name, type: data.type });
-			deliveryShipments.push({ name: sender, elixir: shipmentItem.name, type: data.type });
+			DeliveryRequests.push({ request: "elixir", sender: sender, shipment: shipmentItem.name, type: data.type });
+			DeliveryShipments.push({ name: sender, elixir: shipmentItem.name, type: data.type });
 		}
 		else
 		{
@@ -175,14 +175,14 @@ function merchant_on_cm(sender, data)
 	}
 	else if (data.message === "mluck")
 	{
-		if (deliveryRequests.find((x) => { if (x.request == "mluck") return x; }))
+		if (DeliveryRequests.find((x) => { if (x.request == "mluck") return x; }))
 		{
 			log("Already have mluck request.");
 			return;
 		}
 
 		log("Recieved mluck request from " + sender);
-		deliveryRequests.push({ request: "mluck", sender: sender });
+		DeliveryRequests.push({ request: "mluck", sender: sender });
 	}
 	else if (data.message === "thanks")
 	{
@@ -190,17 +190,17 @@ function merchant_on_cm(sender, data)
 
 		if (data.request === "mluck")
 		{
-			for (let i = deliveryRequests.length - 1; i >= 0; i--)
+			for (let i = DeliveryRequests.length - 1; i >= 0; i--)
 			{
-				if (deliveryRequests[i].request === "mluck")
+				if (DeliveryRequests[i].request === "mluck")
 				{
-					deliveryRequests.splice(i, 1);
+					DeliveryRequests.splice(i, 1);
 				}
 			}
 		}
 		else
 		{
-			deliveryRequests.splice(deliveryRequests.indexOf(x => x.sender === sender && x.request === data.request), 1);
+			DeliveryRequests.splice(DeliveryRequests.indexOf(x => x.sender === sender && x.request === data.request), 1);
 		}
 	}
 
@@ -212,21 +212,21 @@ function merchant_on_cm(sender, data)
 			return;
 		}
 
-		for (let i = deliveryRequests.length - 1; i >= 0; i--)
+		for (let i = DeliveryRequests.length - 1; i >= 0; i--)
 		{
-			if (deliveryRequests[i].sender === sender)
+			if (DeliveryRequests[i].sender === sender)
 			{
 				log("Cleaning up delivery list...");
-				deliveryRequests.splice(i, 1);
+				DeliveryRequests.splice(i, 1);
 			}
 		}
 
-		for (let i = deliveryShipments.length - 1; i >= 0; i--)
+		for (let i = DeliveryShipments.length - 1; i >= 0; i--)
 		{
-			if (deliveryShipments[i].name === sender)
+			if (DeliveryShipments[i].name === sender)
 			{
 				log("Cleaning up delivery list...");
-				deliveryShipments.splice(i, 1);
+				DeliveryShipments.splice(i, 1);
 			}
 		}
 	}
@@ -234,7 +234,7 @@ function merchant_on_cm(sender, data)
 
 function merchant_on_magiport(name)
 {
-	if (!deliveryMode || (ReturningToTown || Banking || exchangeMode))
+	if (!DeliveryMode || (ReturningToTown || Banking || ExchangeMode))
 	{
 		return;
 	}
@@ -246,13 +246,13 @@ function merchant_on_magiport(name)
 //	returns true if the merchant is occupied with a task
 function isBusy()
 {
-	return ReturningToTown || deliveryMode || Banking || exchangeMode || character.q.upgrade || character.q.compound;
+	return ReturningToTown || DeliveryMode || Banking || ExchangeMode || character.q.upgrade || character.q.compound;
 }
 
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
 function checkMluck(target)
 {
-	return (target.s.mluck && target.s.mluck.f === MerchantName) || (target.s.mluck && target.s.mluck.ms < mluckDuration * 0.5);
+	return (target.s.mluck && target.s.mluck.f === MerchantName) || (target.s.mluck && target.s.mluck.ms < MLuckDuration * 0.5);
 }
 
 function sellVendorTrash()
@@ -271,28 +271,28 @@ function sellVendorTrash()
 
 function checkRequests()
 {
-	if (deliveryRequests.length === 0)
+	if (DeliveryRequests.length === 0)
 	{
-		deliveryMode = false;
+		DeliveryMode = false;
 		return;
 	}
 
-	if (deliveryRequests.length > 0)
+	if (DeliveryRequests.length > 0)
 	{
-		deliveryMode = true;
+		DeliveryMode = true;
 		disableVendorMode();
 
-		for (let i = 0; i < deliveryRequests.length; i++)
+		for (let i = 0; i < DeliveryRequests.length; i++)
 		{
 			//	go buy potions
-			if (deliveryRequests[i].request === "potions" && !deliveryRequests[i].shipment)
+			if (DeliveryRequests[i].request === "potions" && !DeliveryRequests[i].shipment)
 			{
-				buyPotionsFor(deliveryRequests[i].sender, deliveryRequests[i].hPots, deliveryRequests[i].mPots);
+				buyPotionsFor(DeliveryRequests[i].sender, DeliveryRequests[i].hPots, DeliveryRequests[i].mPots);
 			}
 			//	deliver to recipient
-			else if (deliveryRequests[i].shipment || deliveryRequests[i].request === "mluck")
+			else if (DeliveryRequests[i].shipment || DeliveryRequests[i].request === "mluck")
 			{
-				let recipient = parent.entities[deliveryRequests[i].sender];
+				let recipient = parent.entities[DeliveryRequests[i].sender];
 				if (recipient)
 				{
 					approachTarget(recipient);
@@ -309,11 +309,11 @@ function checkRequests()
 //	returns null if no shipment
 function getShipmentFor(name)
 {
-	for (let i = 0; i < deliveryShipments.length; i++)
+	for (let i = 0; i < DeliveryShipments.length; i++)
 	{
-		if (deliveryShipments[i].name === name)
+		if (DeliveryShipments[i].name === name)
 		{
-			return deliveryShipments[i];
+			return DeliveryShipments[i];
 		}
 	}
 
@@ -451,20 +451,20 @@ function stockScrolls()
 	{
 		let s = Scrolls[i];
 		let amount = quantity(s);
-		if (amount <= lowScrolls)
+		if (amount <= LowScrolls)
 		{
 			let q = 0;
 			if (s.includes('0'))
 			{
-				q = scrollsToStock[0];
+				q = ScrollsToStock[0];
 			}
 			else if (s.includes('1'))
 			{
-				q = scrollsToStock[1];
+				q = ScrollsToStock[1];
 			}
 			else if (s.includes('2'))
 			{
-				q = scrollsToStock[2];
+				q = ScrollsToStock[2];
 			}
 
 			buy_with_gold(s, q);
@@ -475,7 +475,7 @@ function stockScrolls()
 
 function buyPotionsFor(name, healthPots, manaPots)
 {
-	let request = deliveryRequests.find((x) =>
+	let request = DeliveryRequests.find((x) =>
 	{
 		if (x.sender === name && x.request === "potions")
 		{
@@ -525,7 +525,7 @@ function buyPotionsFor(name, healthPots, manaPots)
 	}
 
 	let potionShipment = { name: name, hPots: healthPots, mPots: manaPots };
-	deliveryShipments.push(potionShipment);
+	DeliveryShipments.push(potionShipment);
 	request.shipment = potionShipment;
 }
 
@@ -548,8 +548,8 @@ function deliverElixir(shipment)
 	{
 		log("Delivering elixir to " + shipment.name);
 		let elixir = getElixirInventorySlot(shipment.type);
-		let index = deliveryShipments.indexOf(shipment);
-		deliveryShipments.splice(index, 1);
+		let index = DeliveryShipments.indexOf(shipment);
+		DeliveryShipments.splice(index, 1);
 		send_item(shipment.name, elixir, 1);
 	}
 	else
@@ -564,8 +564,8 @@ function deliverPotions(shipment)
 	if (distance(recipient, character) < 200)
 	{
 		log("Delivering potions to " + shipment.name);
-		let index = deliveryShipments.indexOf(shipment);
-		deliveryShipments.splice(index, 1);
+		let index = DeliveryShipments.indexOf(shipment);
+		DeliveryShipments.splice(index, 1);
 		send_item(shipment.name, locate_item(Potions[0]), shipment.hPots);
 		send_item(shipment.name, locate_item(Potions[1]), shipment.mPots);
 	}
@@ -577,7 +577,7 @@ function deliverPotions(shipment)
 
 function enableVendorMode()
 {
-	if (ReturningToTown || deliveryMode || Banking)
+	if (ReturningToTown || DeliveryMode || Banking)
 	{
 		return;
 	}
@@ -595,7 +595,7 @@ function enableVendorMode()
 			log("Merchant entered vendor mode.");
 			log("Crafting Mode: " + CraftingOn);
 			parent.open_merchant(locate_item("stand0"));
-			vendorMode = true;
+			VendorMode = true;
 		});
 	}
 }
@@ -605,7 +605,7 @@ function disableVendorMode()
 	log("Merchant exited vendor mode.");
 
 	parent.close_merchant();
-	vendorMode = false;
+	VendorMode = false;
 }
 
 function standCheck()
@@ -617,7 +617,7 @@ function standCheck()
 			parent.close_merchant();
 		}
 	}
-	else if (vendorMode)
+	else if (VendorMode)
 	{
 		parent.open_merchant(locate_item("stand0"));
 	}
@@ -671,7 +671,7 @@ function buyFromPonty()
 function exchangeItems(npcName, itemName, numberOfExchanges, onComplete)
 {
 	disableVendorMode();
-	exchangeMode = true;
+	ExchangeMode = true;
 
 	smart_move(npcName, () =>
 	{
@@ -685,7 +685,7 @@ function exchangeItems(npcName, itemName, numberOfExchanges, onComplete)
 
 				if (x === numberOfExchanges - 1)
 				{
-					exchangeMode = false;
+					ExchangeMode = false;
 
 					if (onComplete)
 					{
@@ -764,19 +764,19 @@ function exchangeWithXyn()
 //	don't like that this feels necessary, but this should clean up requests not being cleaned up properly even when they are successfully completed (leading to the merchant gettings stuck)
 function confirmDeliveries()
 {
-	if (deliveryRequests.length === 0 && deliveryShipments.length === 0)
+	if (DeliveryRequests.length === 0 && DeliveryShipments.length === 0)
 	{
 		return true;
 	}
 
-	for (let r of deliveryRequests)
+	for (let r of DeliveryRequests)
 	{
 		send_cm(r.sender, { message: "confirmDelivery" });
 	}
 
-	for (let r of deliveryShipments)
+	for (let r of DeliveryShipments)
 	{
-		if (!deliveryRequests.find((x) => { if (x.sender === r.name) return x; }))
+		if (!DeliveryRequests.find((x) => { if (x.sender === r.name) return x; }))
 		{
 			send_cm(r.sender, { message: "confirmDelivery" });
 		}

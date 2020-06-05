@@ -739,7 +739,7 @@ function approachTarget(target, onComplete)
 
 function autoAttack(target)
 {
-	if (character.name === PriestName && healMode)
+	if (character.name === PriestName && HealingMode)
 	{
 		return;
 	}
