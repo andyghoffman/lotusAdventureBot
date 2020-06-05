@@ -630,15 +630,16 @@ function buyFromPonty()
 	{
 		for (let pontyItem of data)
 		{
+			let buy = false;
+
 			if (pontyItem.p)
 			{
-				show_json("Found shiny ponty item : " + G.items[pontyItem.name].name);
+				writeToLog("Found shiny ponty item : " + G.items[pontyItem.name].name);
+				buy = true;
 			}
 
 			if (itemsToBuy.includes(pontyItem.name))
 			{
-				let buy = false;
-
 				if (ItemsToUpgrade.includes(pontyItem.name) || ItemsToCompound.includes(pontyItem.name))
 				{
 					if (ItemsToUpgrade.includes(pontyItem.name) && (pontyItem.level <= UpgradeLevelToStop))
@@ -657,7 +658,7 @@ function buyFromPonty()
 
 				if (buy)
 				{
-					log("Buying " + G.items[pontyItem.name].name + " from Ponty!");
+					writeToLog("Buying " + G.items[pontyItem.name].name + " from Ponty!");
 					parent.socket.emit("sbuy", { "rid": pontyItem.rid })
 				}
 			}
@@ -753,7 +754,7 @@ function exchangeWithXyn()
 			if (item && G.items[item.name].type === itemType)
 			{
 				writeToLog("Exchanging " + item.name + " with Xyn.. ");
-				exchangeItems("exchange", item.name, 1, () => { exchangeWithXyn(); });
+				exchangeItems("exchange", item.name, 1);
 				return;
 			}
 		}

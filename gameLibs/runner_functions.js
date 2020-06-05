@@ -308,15 +308,17 @@ function get_targeted_monster()
 	return null;
 }
 
-function change_target(target,public)
+function change_target(target)
 {
 	parent.ctarget=target;
-	if(!public) //no need to send the target on default for CODE, some people are using change_target 5-6 times in an interval
-	{
-		// user change_target(target,true) from now on to send the target to the server explicitly [23/10/16]
-		if(target) parent.last_id_sent=target.id;
-		else parent.last_id_sent='';
-	}
+	parent.send_target_logic();
+}
+
+function change_target_privately(target)
+{
+	parent.ctarget=target;
+	if(target) parent.last_id_sent=target.id; // Marks the id as sent, so it doesn't actually get sent
+	else parent.last_id_sent='';
 	parent.send_target_logic();
 }
 

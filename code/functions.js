@@ -18,7 +18,7 @@ function on_cm(sender, data)
 
 		if (target)
 		{
-			change_target(target, true);
+			change_target(target);
 		}
 		else
 		{
@@ -665,7 +665,7 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 		if (leader && leader.target != null)
 		{
 			target = leader.targetId;
-			change_target(target, true);
+			change_target(target);
 			return target;
 		}
 	}
@@ -679,7 +679,7 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 
 			if (target)
 			{
-				change_target(target, true);
+				change_target(target);
 				return target;
 			}
 		}
@@ -696,7 +696,7 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 
 	if (target)
 	{
-		change_target(target, true);
+		change_target(target);
 		return target;
 	}
 	else
@@ -1106,7 +1106,7 @@ function depositInventoryAtBank()
 		return;
 	}
 
-	log("Depositing inventory at bank...");
+	writeToLog("Depositing inventory at bank...");
 	Banking = true;
 
 	smart_move("bank", () =>
@@ -1150,7 +1150,7 @@ function storeInventoryInBankVault(bankVaultId, storeCompounds = false)
 				continue;
 			}
 
-			log("Stashing " + G.items[item.name].name);
+			writeToLog("Stashing " + G.items[item.name].name);
 			bank_store(i, bankVaultId);
 		}
 	}
