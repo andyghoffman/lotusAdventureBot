@@ -22,7 +22,7 @@ let AloneChecking = false;
 let FarmingModeActive = false;
 let ReadyChecking = false;
 let Traveling = false;
-let ReturningToTown = false;
+let GoingBackToTown = false;
 let Banking = false;
 let NoElixirs = false;
 let IsStuck = false;
@@ -51,6 +51,12 @@ function main()
 		return;
 	}
 
+	let target = get_targeted_monster();
+	target = dropInvalidTarget(target);
+
+	loot();
+	usePotions(HealthPotThreshold, ManaPotThreshold);
+	
 	//  don't walk with merchant stand, don't idle without it
 	if (character.name === MerchantName)
 	{
@@ -59,16 +65,13 @@ function main()
 	//  prioritize priest functions before anything else (because heal shares a cooldown with autoattack)
 	else if (character.name === PriestName)
 	{
-		priestAuto(get_targeted_monster());
+		priestAuto(target);
 	}
 	//  make sure you attack even if you are moving (normal routine is not called while moving)
 	else if (get_targeted_monster())
 	{
-		autoAttack(get_targeted_monster());
+		autoAttack(target);
 	}
-
-	loot();
-	usePotions(HealthPotThreshold, ManaPotThreshold);
 
 	if (AutoPlay)
 	{
@@ -76,7 +79,7 @@ function main()
 	}
 
 	//  finish what you are doing before checking past here
-	if (is_moving(character) || smart.moving || ReturningToTown || character.q.upgrade || character.q.compound)
+	if (is_moving(character) || smart.moving || GoingBackToTown || character.q.upgrade || character.q.compound)
 	{
 		return;
 	}
@@ -111,14 +114,13 @@ function main()
 	}
 
 	//  look for a target
-	let target = get_targeted_monster();
 	if (!target)
 	{
 		target = lookForSpecialTargets();
 
 		if (!target)
 		{
-			let canPullNew = character.name === PartyLeader;
+			let canPullNew = character.name === PartyLeader || PullIndescritely;
 			target = getTargetMonster(FarmMonsterName, canPullNew);
 		}
 	}

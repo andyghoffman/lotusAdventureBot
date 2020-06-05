@@ -16,12 +16,12 @@ const XynTypes = ["gem", "box"]; //  item types to be exchanged with Xyn
 //////
 
 ///     farming settings        ///
-///     farmMode:
-///     name = travel to any spawn of the farmMonster, will change if there is more than 1. ideal if only one spawn location
-///     coords = travel to farmMap and farmCoords
-///     number = travel to the spawn # of farmMonsterSpawnNumber
-///
-///     specialMonsters are prioritized if they are present
+//     farmMode:
+//     name = travel to any spawn of the farmMonster, will change if there is more than 1. ideal if only one spawn location
+//     coords = travel to farmMap and farmCoords
+//     number = travel to the spawn # of farmMonsterSpawnNumber
+//     specialMonsters are prioritized if they are present
+///     
 const FullAuto = true;  //  if true will automatically start farming on connect & startup. set false to have player control on startup
 const FarmMode = "name";
 const FarmMonsterName = "crabx";
@@ -30,7 +30,11 @@ const FarmMonsterSpawnNumber = 5;
 const FarmRadius = 200;
 const FarmCoords = { x: 1202, y: -782 };    //  only used if farmMode is 'coords'
 const SpecialMonsters = [/* "snowman", */"phoenix", "goldenbat"];  //  priority targets
-const DontKite = ["phoenix", "bat", "goldenbat"];   //  any monsters to not try to kite
+const DontKite = ["phoenix", "bat", "goldenbat"];   //  any monsters to never kite
+//////
+
+///     combat behaviour settings       ///
+const PullIndescritely = true;  //  if false, party members will wait for the party leader to pick a target before attacking
 //////
 
 ///     party/character settings      ///

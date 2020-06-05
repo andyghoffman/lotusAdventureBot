@@ -211,7 +211,7 @@ function checkIfReady()
 
 function sendReadyCheck()
 {
-	if (readyChecking)
+	if (ReadyChecking)
 	{
 		return;
 	}
@@ -272,7 +272,7 @@ function sendReadyCheck()
 
 	setTimeout(() =>
 	{
-		readyChecking = false;
+		ReadyChecking = false;
 	}, 30000);
 }
 
@@ -364,19 +364,19 @@ function stuckCheck(originalPosition)
 {
 	IsStuck = distance(originalPosition, { x: character.real_x, y: character.real_y }) < 2;
 
-	if (isStuck)
+	if (IsStuck)
 	{
 		stop();
 		writeToLog(character.name + " is stuck!");
 		setTimeout(() =>
 		{
-			if (!isStuck)
+			if (!IsStuck)
 			{
 				return;
 			}
 
 			writeToLog(character.name + " is still stuck and returning to town.");
-			isStuck = false;
+			IsStuck = false;
 			stopFarmMode();
 			goBackToTown();
 
@@ -538,7 +538,7 @@ function checkPotionInventory()
 				log(character.name + " has no potions, is returning to town.");
 				FarmingModeActive = false;
 
-				if (!ReturningToTown && !Traveling)
+				if (!GoingBackToTown && !Traveling)
 				{
 					Traveling = true;
 					goBackToTown();
@@ -549,7 +549,7 @@ function checkPotionInventory()
 						buy_with_gold(Potions[0], healthPotsNeeded);
 						buy_with_gold(Potions[1], manaPotsNeeded);
 
-						traveling = false;
+						Traveling = false;
 					}, 10000);
 				}
 			}
@@ -651,11 +651,7 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 	//	party leader checks for nearest monster to itself that is targeting party leader
 	if (character.name === PartyLeader)
 	{
-		target = get_nearest_monster
-			({
-				type: farmTarget,
-				target: character.name
-			});
+		target = get_nearest_monster({type: farmTarget, target: character.name});
 
 		if (target)
 		{
@@ -690,20 +686,12 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 	});
 
 	//	target nearest monster that is targeting you
-	target = get_nearest_monster
-		({
-			type: farmTarget,
-			target: character.name
-		});
+	target = get_nearest_monster({type: farmTarget, target: character.name});
 
 	//	target nearest monster that has no target
 	if (!target && canPullNewMonsters)
 	{
-		target = get_nearest_monster
-			({
-				type: farmTarget,
-				no_target: true
-			});
+		target = get_nearest_monster({type: farmTarget, no_target: true});
 	}
 
 	if (target)
@@ -814,7 +802,7 @@ function travelToFarmSpot()
 
 function goBackToTown(delay)
 {
-	if (returningToTown)
+	if (GoingBackToTown)
 	{
 		return;
 	}
@@ -823,13 +811,13 @@ function goBackToTown(delay)
 
 	log(character.name + " returning to town.");
 
-	ReturningToTown = true;
+	GoingBackToTown = true;
 
 	use("use_town");
 
 	setTimeout(function ()
 	{
-		goTo(MerchantStrandMap, MerchantStandCoords, () => { returningToTown = false });
+		goTo(MerchantStrandMap, MerchantStandCoords, () => { GoingBackToTown = false });
 	}, 5000);
 }
 
@@ -920,12 +908,12 @@ function aloneCheck(msToWait = 30000)
 		{
 			if (character.name !== PartyLeader && parent.entities[PartyLeader])
 			{
-				aloneChecking = false;
+				AloneChecking = false;
 				followLeader();
 				return false;
 			}
 
-			if (!isInTown() && !partyPresent() && aloneChecking)
+			if (!isInTown() && !partyPresent() && AloneChecking)
 			{
 				writeToLog(character.name + " is lost & returning to town.");
 
@@ -933,21 +921,14 @@ function aloneCheck(msToWait = 30000)
 				goBackToTown();
 			}
 
-			aloneChecking = false;
+			AloneChecking = false;
 
 		}, msToWait);
 
 		return true;
 	}
 
-	if (!partyPresent() || AloneChecking)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return !partyPresent() || AloneChecking;
 }
 
 function letsGo()
@@ -1141,13 +1122,13 @@ function depositInventoryAtBank()
 			{
 				storeCompounds = (getEmptyInventorySlotCount() < 8);
 				storeInventoryInBankVault(1, storeCompounds);
-				banking = false;
+				Banking = false;
 
 			}, 1000);
 		}
 		else
 		{
-			banking = false;
+			Banking = false;
 		}
 	});
 }

@@ -23,7 +23,6 @@ function merchantAuto(target)
 	//	keep magic luck on yourself
 	if (!checkMluck(character) && !is_on_cooldown("mluck"))
 	{
-		log("mlucking self");
 		use_skill("mluck", character);
 		reduce_cooldown("mluck", character.ping);
 	}
@@ -55,7 +54,7 @@ function merchantAuto(target)
 					reduce_cooldown("mluck", character.ping);
 				}
 			}
-			else if (DeliveryMode && !ReturningToTown && DeliveryRequests.length > 0)
+			else if (DeliveryMode && !GoingBackToTown && DeliveryRequests.length > 0)
 			{
 				log("Moving closer to recipient.");
 				approachTarget(friendlyTarget);
@@ -234,7 +233,7 @@ function merchant_on_cm(sender, data)
 
 function merchant_on_magiport(name)
 {
-	if (!DeliveryMode || (ReturningToTown || Banking || ExchangeMode))
+	if (!DeliveryMode || (GoingBackToTown || Banking || ExchangeMode))
 	{
 		return;
 	}
@@ -246,7 +245,7 @@ function merchant_on_magiport(name)
 //	returns true if the merchant is occupied with a task
 function isBusy()
 {
-	return ReturningToTown || DeliveryMode || Banking || ExchangeMode || character.q.upgrade || character.q.compound;
+	return GoingBackToTown || DeliveryMode || Banking || ExchangeMode || character.q.upgrade || character.q.compound;
 }
 
 //	returns true if mluck is present & from your own merchant. target should be a player object, not a name
@@ -577,7 +576,7 @@ function deliverPotions(shipment)
 
 function enableVendorMode()
 {
-	if (ReturningToTown || DeliveryMode || Banking)
+	if (GoingBackToTown || DeliveryMode || Banking)
 	{
 		return;
 	}
@@ -610,7 +609,7 @@ function disableVendorMode()
 
 function standCheck()
 {
-	if (is_moving(character) || smart.moving || ReturningToTown)
+	if (is_moving(character) || smart.moving || GoingBackToTown)
 	{
 		if (character.stand)
 		{
