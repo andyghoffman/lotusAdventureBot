@@ -108,7 +108,7 @@ function on_cm(sender, data)
 	{
 		AutoPlay = data.auto;
 
-		if (!autoPlay)
+		if (!AutoPlay)
 		{
 			FarmingModeActive = false;
 			stop();
