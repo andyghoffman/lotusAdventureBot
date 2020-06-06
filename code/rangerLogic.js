@@ -19,7 +19,7 @@ function rangerAuto(target)
 
 function useHuntersMark(target)
 {
-	if (character.mp < G.skills.huntersmark.mp || is_on_cooldown("huntersmark") || !is_in_range(target, "huntersmark") || !validTargetForSkill(target) || target.s.huntersmark)
+	if (character.mp < G.skills.huntersmark.mp || is_on_cooldown("huntersmark") || !is_in_range(target, "huntersmark") || !validTargetForSkill(target) || target.s.huntersmark || !target)
 	{
 		return;
 	}
@@ -30,7 +30,7 @@ function useHuntersMark(target)
 
 function useSuperShot(target)
 {
-	if (character.mp < G.skills.supershot.mp || is_on_cooldown("supershot") || !is_in_range(target, "supershot"))
+	if (character.mp < G.skills.supershot.mp || is_on_cooldown("supershot") || !is_in_range(target, "supershot") || !target)
 	{
 		return; 
 	}
@@ -42,24 +42,28 @@ function useSuperShot(target)
 //	use 3shot
 function tripleShot(target)
 {
-	if (is_on_cooldown("attack") || !UseThreeShot)
+	if (is_on_cooldown("attack") || !UseThreeShot || !target)
 	{
 		return;
 	}
 
-	let count = 1;
+	let targets = [target];
 	for (let e in parent.entities)
 	{
 		let t = parent.entities[e];
-		if(target.mtype === t.mtype && is_in_range(t, "attack"))
+		if(target.mtype === t.mtype && is_in_range(t, "3shot"))
 		{
-			count++;
+			targets.push(t);
+		}
+		else if(AvoidMonsters.includes(t.mtype) && is_in_range(t, "3shot"))
+		{
+			return;
 		}
 	}
 
-	if(count >= 3)
+	if(targets.length >= 3)
 	{
-		use_skill("3shot", target);
+		use_skill("3shot", targets);
 		reduce_cooldown("3shot", character.ping);		
 	}
 }
@@ -80,7 +84,7 @@ function poisonArrowSpam(target)
 		return;
 	}
 
-	for (let e in parent.entities)
+	for (let e of parent.entities)
 	{
 		let target = parent.entities[e];
 

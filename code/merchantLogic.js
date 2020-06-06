@@ -29,10 +29,10 @@ function merchantAuto(target)
 		reduce_cooldown("mluck", character.ping);
 	}
 
-	for (let other in parent.entities)
+	for(let p in parent.entities)
 	{
-		let isPartyMember = parent.party_list.includes(other);
-		let friendlyTarget = parent.entities[other];
+		let isPartyMember = parent.party_list.includes(p);
+		let friendlyTarget = parent.entities[p];
 
 		if (!friendlyTarget.player || friendlyTarget.npc)
 		{

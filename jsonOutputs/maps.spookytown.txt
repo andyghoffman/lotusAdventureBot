@@ -1,0 +1,178 @@
+show_json(G.maps["spookytown"])
+{
+	"npcs": [
+		{
+			"position": [
+				300,
+				-700
+			],
+			"boundary": [
+				281,
+				-836,
+				508,
+				-570
+			],
+			"id": "citizen15"
+		},
+		{
+			"position": [
+				0,
+				0
+			],
+			"boundary": [
+				-283,
+				-222,
+				289,
+				234
+			],
+			"id": "citizen14"
+		}
+	],
+	"drop_norm": 4000,
+	"quirks": [
+		[
+			-63,
+			-44,
+			30,
+			24,
+			"invisible_statue"
+		]
+	],
+	"name": "Spooky Town",
+	"key": "jayson_holloweenmap2",
+	"doors": [
+		[
+			34,
+			1449,
+			80,
+			30,
+			"halloween",
+			2,
+			1
+		],
+		[
+			240,
+			-181,
+			48,
+			32,
+			"level2",
+			5,
+			2
+		]
+	],
+	"spawns": [
+		[
+			0,
+			0
+		],
+		[
+			32,
+			1404,
+			3
+		],
+		[
+			192,
+			-194,
+			1
+		]
+	],
+	"ref": {
+		"poof": {
+			"x": -63,
+			"y": -44,
+			"map": "spookytown",
+			"in": "spookytown"
+		},
+		"citizen15": {
+			"x": 300,
+			"y": -700,
+			"map": "spookytown",
+			"in": "spookytown",
+			"id": "citizen15"
+		},
+		"citizen14": {
+			"x": 0,
+			"y": 0,
+			"map": "spookytown",
+			"in": "spookytown",
+			"id": "citizen14"
+		}
+	},
+	"monsters": [
+		{
+			"count": 9,
+			"boundary": [
+				31,
+				-1571,
+				480,
+				-1293
+			],
+			"type": "mummy",
+			"rage": [
+				-124,
+				-1631,
+				614,
+				-1130
+			]
+		},
+		{
+			"count": 5,
+			"boundary": [
+				286,
+				-842,
+				544,
+				-562
+			],
+			"type": "booboo",
+			"rage": [
+				286,
+				-842,
+				544,
+				-562
+			]
+		},
+		{
+			"count": 4,
+			"boundary": [
+				501,
+				61,
+				852,
+				197
+			],
+			"type": "stoneworm"
+		},
+		{
+			"count": 4,
+			"boundary": [
+				773,
+				-198,
+				1216,
+				-68
+			],
+			"type": "stoneworm"
+		},
+		{
+			"count": 1,
+			"boundary": [
+				524,
+				860,
+				748,
+				1129
+			],
+			"type": "mrgreen",
+			"special": true
+		},
+		{
+			"count": 1,
+			"boundary": [
+				-970,
+				-413,
+				-597,
+				-189
+			],
+			"type": "jr"
+		}
+	],
+	"items": {},
+	"merchants": []
+}

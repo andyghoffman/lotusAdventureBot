@@ -45,11 +45,15 @@ function castReflection()
 
 	let reflectionTarget = parent.entities[defaultReflectionTarget];
 
-	parent.party_list.forEach(function (partyPlayer)
+	parent.party_list.forEach((partyPlayer)=>
 	{
 		let partyMember = parent.entities[partyPlayer];
-
-		if (partyMember && partyMember.name !== character.name && partyMember.hp < partyMember.max_hp * 0.75)
+		if(partyPlayer === character.name)
+		{
+			partyMember = character;
+		}
+		
+		if (partyMember && partyMember.hp < partyMember.max_hp * 0.75)
 		{
 			reflectionTarget = partyMember;
 		}

@@ -1,0 +1,137 @@
+show_json(G.maps.desertland)
+{
+	"freeze_multiplier": 0.25,
+	"npcs": [
+		{
+			"position": [
+				-14,
+				-477
+			],
+			"id": "transporter"
+		},
+		{
+			"position": [
+				316,
+				-270
+			],
+			"id": "locksmith"
+		}
+	],
+	"name": "Desertland",
+	"key": "jayson_desertlandW",
+	"doors": [
+		[
+			600,
+			-2383,
+			40,
+			40,
+			"level2s",
+			1,
+			2
+		]
+	],
+	"spawns": [
+		[
+			0,
+			0
+		],
+		[
+			10,
+			-386
+		],
+		[
+			601,
+			-2365
+		]
+	],
+	"drop_norm": 1000,
+	"burn_multiplier": 2,
+	"monsters": [
+		{
+			"count": 4,
+			"boundary": [
+				-1013,
+				-472,
+				-575,
+				-130
+			],
+			"type": "plantoid"
+		},
+		{
+			"count": 4,
+			"boundary": [
+				-1013,
+				-624,
+				-762,
+				-137
+			],
+			"type": "plantoid"
+		},
+		{
+			"count": 8,
+			"boundary": [
+				-992,
+				-58,
+				-666,
+				328
+			],
+			"type": "porcupine",
+			"grow": true
+		},
+		{
+			"count": 3,
+			"boundary": [
+				-757,
+				-2034,
+				-70,
+				-1888
+			],
+			"type": "ent"
+		},
+		{
+			"count": 4,
+			"boundary": [
+				91,
+				-952,
+				353,
+				-702
+			],
+			"type": "fireroamer"
+		},
+		{
+			"count": 2,
+			"boundary": [
+				161,
+				-868,
+				453,
+				-697
+			],
+			"type": "fireroamer"
+		}
+	],
+	"items": {},
+	"merchants": [],
+	"ref": {
+		"transporter": {
+			"x": -14,
+			"y": -477,
+			"map": "desertland",
+			"in": "desertland",
+			"id": "transporter"
+		},
+		"locksmith": {
+			"x": 316,
+			"y": -270,
+			"map": "desertland",
+			"in": "desertland",
+			"id": "locksmith"
+		}
+	},
+	"transporter": {
+		"x": 0,
+		"y": 0,
+		"in": "desertland",
+		"map": "desertland",
+		"id": "transporter"
+	}
+}

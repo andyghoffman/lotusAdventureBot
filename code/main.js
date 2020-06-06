@@ -29,11 +29,11 @@ let IsStuck = false;
 let WhosReady = {leader: false, merchant: false, codeBotOne: false, codeBotTwo: false};
 const SentRequests = [];
 
+onStart();
 setInterval(main, 250);
 setInterval(lateUpdate, 5000);
 
 //  called on initialization
-onStart();
 function onStart()
 {
 	if (character.name === MerchantName)
@@ -59,34 +59,19 @@ function main()
 		let canPullNew = character.name === PartyLeader || PullIndescritely;
 		target = getTargetMonster(FarmMonsterName, canPullNew);
 	}
+	
+	target = dropInvalidTarget(target);
 
 	loot();
 	usePotions();
 	
-	if(!Traveling)
-	{
-		classRoutine(target);	
-	}
-
 	if (AutoPlay)
 	{
 		tidyInventory();
 	}
-	
-	if (is_moving(character) || smart.moving || GoingBackToTown || character.q.upgrade || character.q.compound || character.name === MerchantName)
-	{
-		return;
-	}
-
-	//  autofollow leader when not auto-farming
-	if (character.name !== PartyLeader && !FarmingModeActive && parent.entities[PartyLeader])
-	{
-		followLeader();
-		return;
-	}
 
 	//  make sure party is together
-	if (!AutoPlay || !readyToGo() || !FarmingModeActive || !partyPresent())
+	if (!Traveling && character.name !== MerchantName && (!AutoPlay || !readyToGo() || !FarmingModeActive || !partyPresent()))
 	{
 		//  party leader will only aloneCheck if autoplay is active, other characters will tether to leader regardless of autoplay
 		if ((character.name !== PartyLeader) || (character.name === PartyLeader && AutoPlay))
@@ -97,17 +82,24 @@ function main()
 		return;
 	}
 	
+	if((AutoPlay && !Traveling && !GoingBackToTown) || character.name === MerchantName)
+	{
+		classRoutine(target);	
+	}
+	else if(character.name === PriestName)
+	{
+		autoHeal();
+	}
+
+	if (is_moving(character) || smart.moving || GoingBackToTown || Traveling || character.q.upgrade || character.q.compound || character.name === MerchantName)
+	{
+		return;
+	}
+	
 	if (!Traveling && !target)
 	{
-		if (character.name !== PartyLeader && parent.entities[PartyLeader] && distance(character, parent.entities[PartyLeader]) < 400 && character.map === FarmMap)
-		{
-			followLeader();
-		}
-		else
-		{
-			log(character.name + " going to farm map... ");
-			travelToFarmSpot();
-		}
+		log(character.name + " going to farm map... ");
+		travelToFarmSpot();
 	}
 
 	//  keep personal space

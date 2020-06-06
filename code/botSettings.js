@@ -23,21 +23,22 @@ const XynTypes = ["gem", "box"]; //  item types to be exchanged with Xyn
 //     specialMonsters are prioritized if they are present
 ///     
 const FullAuto = true;  //  if true will automatically start farming on connect & startup. set false to have player control on startup
-const FarmMode = "name";
-const FarmMonsterName = "arcticbee";
-const FarmMap = "winterland";
-const FarmMonsterSpawnNumber = 10;
-const FarmRadius = 100;
+const FarmMode = "number";
+const FarmMonsterName = "porcupine";
+const FarmMap = "desertland";
+const FarmMonsterSpawnNumber = 8;
+const FarmRadius = 200;
 const FarmCoords = { x: 1202, y: -782 };    //  only used if farmMode is 'coords'
 const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];  //  priority targets
-const DontKite = ["phoenix", "bat", "goldenbat"];   //  any monsters to never kite
+const DontKite = ["phoenix"];   //  any monsters to never kite
+const AvoidMonsters = ["plantoid"];
 //////
 
 ///     combat behaviour settings       ///
-const PullIndescritely = true;  //  if false, party members will wait for the party leader to pick a target before attacking
+const PullIndescritely = true  //  if false, party members will wait for the party leader to pick a target before attacking
 const UseThreeShot = true;
-const UseAbsorbSins = false;
-const UseReflection = false;
+const UseAbsorbSins = true;
+const UseReflection = true;
 //////
 
 ///     party/character settings      ///

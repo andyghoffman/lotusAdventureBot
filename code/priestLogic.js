@@ -60,10 +60,10 @@ function autoHeal()
 {
 	let damagedPartyMembers = 0;
 
-	parent.party_list.forEach((partyMemberName)=>
+	for(let p of parent.party_list)
 	{
-		let partyMember = parent.entities[partyMemberName];
-		if (partyMemberName === character.name)
+		let partyMember = parent.entities[p];
+		if (p === character.name)
 		{
 			partyMember = character;
 		}
@@ -86,7 +86,7 @@ function autoHeal()
 				reduce_cooldown("heal", character.ping);
 			}
 		}
-	});
+	}
 
 	if (damagedPartyMembers === 0 && !is_on_cooldown("attack"))
 	{

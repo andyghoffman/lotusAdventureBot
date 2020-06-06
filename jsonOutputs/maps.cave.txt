@@ -1,0 +1,124 @@
+show_json(G.maps["cave"])
+{
+	"npcs": [],
+	"drop_norm": 4500,
+	"quirks": [
+		[
+			-192,
+			-1309,
+			48,
+			64,
+			"log",
+			"Is this a gateway?"
+		]
+	],
+	"name": "Cave of Darkness",
+	"key": "jayson_cave02",
+	"doors": [
+		[
+			0,
+			33,
+			36,
+			20,
+			"main",
+			4,
+			0
+		],
+		[
+			1880,
+			-1086,
+			32,
+			32,
+			"level1",
+			3,
+			1
+		]
+	],
+	"spawns": [
+		[
+			0,
+			0,
+			3
+		],
+		[
+			1877,
+			-1078
+		]
+	],
+	"monsters": [
+		{
+			"count": 6,
+			"boundary": [
+				-396,
+				-594,
+				8,
+				-328
+			],
+			"type": "bat"
+		},
+		{
+			"count": 7,
+			"boundary": [
+				182,
+				-1282,
+				465,
+				-932
+			],
+			"type": "bat"
+		},
+		{
+			"count": 8,
+			"boundary": [
+				1018,
+				-940,
+				1385,
+				-624
+			],
+			"type": "bat"
+		},
+		{
+			"count": 5,
+			"boundary": [
+				1066,
+				-132,
+				1420,
+				78
+			],
+			"type": "bat"
+		},
+		{
+			"count": 2,
+			"boundary": [
+				964,
+				11,
+				1252,
+				107
+			],
+			"type": "bat"
+		},
+		{
+			"boundaries": [
+				[
+					"cave",
+					-367,
+					-1296,
+					-14,
+					-1057
+				],
+				[
+					"cave",
+					1068,
+					-123,
+					1420,
+					78
+				]
+			],
+			"count": 1,
+			"type": "mvampire",
+			"stype": "randomrespawn"
+		}
+	],
+	"items": {},
+	"merchants": [],
+	"ref": {}
+}

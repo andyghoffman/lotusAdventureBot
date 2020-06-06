@@ -1,0 +1,327 @@
+show_json(G.maps["halloween"])
+{
+	"npcs": [
+		{
+			"position": [
+				201,
+				-180
+			],
+			"name": "Fancy Pots",
+			"id": "fancypots"
+		},
+		{
+			"position": [
+				-97,
+				-330
+			],
+			"name": "Transporter",
+			"id": "transporter"
+		},
+		{
+			"position": [
+				858,
+				-160
+			],
+			"id": "witch"
+		},
+		{
+			"position": [
+				201,
+				-160
+			],
+			"id": "citizen11"
+		},
+		{
+			"position": [
+				201,
+				-160
+			],
+			"id": "citizen12"
+		},
+		{
+			"position": [
+				201,
+				-160
+			],
+			"id": "citizen13"
+		}
+	],
+	"drop_norm": 4000,
+	"quirks": [
+		[
+			-228,
+			-178,
+			32,
+			40,
+			"log",
+			"Locked but there are noises coming from inside"
+		],
+		[
+			331,
+			-210,
+			32,
+			40,
+			"log",
+			"Locked"
+		],
+		[
+			128,
+			-251,
+			20,
+			16,
+			"sign",
+			"Beware! Don't fall down!"
+		]
+	],
+	"name": "Spooky Forest",
+	"key": "jayson_SpookyForestV2.2",
+	"doors": [
+		[
+			784,
+			-1085,
+			80,
+			40,
+			"spookytown",
+			1,
+			2
+		],
+		[
+			-1071,
+			-1496,
+			40,
+			40,
+			"level1",
+			2,
+			3
+		],
+		[
+			1212,
+			150,
+			200,
+			36,
+			"main",
+			15,
+			4
+		]
+	],
+	"spawns": [
+		[
+			0,
+			0
+		],
+		[
+			-38,
+			-283,
+			2
+		],
+		[
+			784,
+			-1060
+		],
+		[
+			-1071,
+			-1485
+		],
+		[
+			1212,
+			101,
+			3
+		]
+	],
+	"monsters": [
+		{
+			"count": 2,
+			"boundary": [
+				-654,
+				-384,
+				-525,
+				-287
+			],
+			"type": "osnake"
+		},
+		{
+			"count": 4,
+			"boundary": [
+				-620,
+				-986,
+				-356,
+				-431
+			],
+			"type": "osnake"
+		},
+		{
+			"count": 9,
+			"boundary": [
+				-720,
+				-820,
+				-418,
+				-203
+			],
+			"type": "snake",
+			"grow": true
+		},
+		{
+			"count": 1,
+			"boundary": [
+				-720,
+				-820,
+				-418,
+				-203
+			],
+			"type": "greenjr"
+		},
+		{
+			"count": 8,
+			"boundary": [
+				-166,
+				453,
+				182,
+				808
+			],
+			"type": "minimush",
+			"grow": true
+		},
+		{
+			"count": 1,
+			"boundary": [
+				-671,
+				571,
+				-300,
+				800
+			],
+			"type": "mrpumpkin",
+			"special": true
+		},
+		{
+			"count": 6,
+			"boundary": [
+				-671,
+				571,
+				-300,
+				800
+			],
+			"type": "xscorpion"
+		},
+		{
+			"count": 6,
+			"boundary": [
+				141,
+				-792,
+				552,
+				-702
+			],
+			"type": "snake",
+			"grow": true
+		},
+		{
+			"count": 2,
+			"boundary": [
+				141,
+				-792,
+				552,
+				-702
+			],
+			"type": "osnake"
+		},
+		{
+			"count": 5,
+			"boundary": [
+				284,
+				-1351,
+				446,
+				-1189
+			],
+			"type": "ghost"
+		},
+		{
+			"count": 5,
+			"boundary": [
+				54,
+				-1277,
+				237,
+				-1078
+			],
+			"type": "ghost"
+		},
+		{
+			"count": 1,
+			"boundary": [
+				-664,
+				-1808,
+				-147,
+				-1477
+			],
+			"type": "fvampire"
+		},
+		{
+			"count": 9,
+			"boundary": [
+				-664,
+				-1808,
+				-147,
+				-1477
+			],
+			"type": "ghost"
+		}
+	],
+	"items": {
+		"hpot0": [
+			{
+				"x": 201,
+				"y": -180,
+				"map": "halloween",
+				"in": "halloween",
+				"id": "fancypots"
+			}
+		],
+		"mpot0": [
+			null
+		],
+		"hpot1": [
+			null
+		],
+		"mpot1": [
+			null
+		]
+	},
+	"merchants": [
+		null
+	],
+	"ref": {
+		"transporter": {
+			"x": -97,
+			"y": -330,
+			"map": "halloween",
+			"in": "halloween",
+			"id": "transporter"
+		},
+		"witch": {
+			"x": 858,
+			"y": -160,
+			"map": "halloween",
+			"in": "halloween",
+			"id": "witch"
+		},
+		"citizen11": {
+			"x": 201,
+			"y": -160,
+			"map": "halloween",
+			"in": "halloween",
+			"id": "citizen11"
+		},
+		"citizen12": {
+			"x": 201,
+			"y": -160,
+			"map": "halloween",
+			"in": "halloween",
+			"id": "citizen12"
+		},
+		"citizen13": {
+			"x": 201,
+			"y": -160,
+			"map": "halloween",
+			"in": "halloween",
+			"id": "citizen13"
+		}
+	}
+}

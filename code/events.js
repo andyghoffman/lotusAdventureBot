@@ -25,7 +25,7 @@ game.on("hit", (data) =>
 //	On Death Event
 game.on("death", (data) =>
 {
-	if (character.name === data)
+	if (character.name === data.id)
 	{
 		townParty();
 		writeToLog(data.id + " died!");

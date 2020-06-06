@@ -12,124 +12,106 @@ function on_cm(sender, data)
 		return;
 	}
 
-	if (data.message === "target")
+	switch (data.message)
 	{
-		let target = get_entity(data.targetId);
-
-		if (target)
-		{
-			change_target(target);
-		}
-		else
-		{
-			log(character.name + " recieved a target from " + sender + " but could not find it.");
-			let senderPlayer = parent.entities[sender];
-			if (senderPlayer)
+		case "target":
+			let target = get_entity(data.targetId);
+			if (target)
 			{
-				smart_move({ x: senderPlayer.x, y: senderPlayer.y });
-			}
-		}
-
-		return;
-	}
-	else if (data.message === "readyCheck")
-	{
-		log(character.name + " recieved readyCheck from " + sender);
-		stopFarmMode();
-
-		let ready = false;
-
-		if (character.name === MerchantName)
-		{
-			ready = parent.party_list.includes(PartyLeader);
-		}
-		else
-		{
-			ready = checkIfReady();
-		}
-
-		send_cm(sender, { message: "readyReply", isReady: ready });
-
-		return;
-	}
-	else if (data.message === "readyReply")
-	{
-		let response = character.name + " recieved readyReply from " + sender + ". " + sender + " is " + (data.isReady ? "ready!" : "not ready. ")
-		log(response);
-
-		if (sender === PartyLeader)
-		{
-			WhosReady.leader = data.isReady;
-		}
-		else if (sender === MerchantName)
-		{
-			WhosReady.merchant = data.isReady;
-		}
-		else if (PartyList.includes(sender))
-		{
-			if (!WhosReady.codeBotOne && !WhosReady.codeBotTwo)
-			{
-				WhosReady.codeBotOne = data.isReady;
-			}
-			else if (WhosReady.codeBotOne && !WhosReady.codeBotTwo)
-			{
-				WhosReady.codeBotTwo = data.isReady;
-			}
-		}
-
-		if (readyToGo())
-		{
-			for (let p of PartyList)
-			{
-				if (p !== character.name)
+				if(get_targeted_monster().id !== data.targetId)
 				{
-					send_cm(p, { message: "partyReady" });
+					change_target(target);
+					stop();
+					approachTarget(target);
+				}
+			} else
+			{
+				log(character.name + " recieved a target from " + sender + " but could not find it.");
+				let senderPlayer = parent.entities[sender];
+				if (senderPlayer)
+				{
+					smart_move({x: senderPlayer.x, y: senderPlayer.y});
 				}
 			}
-		}
-
-		return;
-	}
-	else if (data.message === "partyReady")
-	{
-		log(character.name + " readyCheck approved!");
-		WhosReady = { leader: true, merchant: true, codeBotOne: true, codeBotTwo: true };
-		return;
-	}
-	else if (data.message === "letsGo")
-	{
-		log(character.name + " recieved Let's Go from " + sender);
-		FarmingModeActive = true;
-		AutoPlay = true;
-
-		return;
-	}
-	else if (data.message === "autoToggle")
-	{
-		AutoPlay = data.auto;
-
-		if (!AutoPlay)
-		{
-			FarmingModeActive = false;
-			stop();
-		}
-
-		log("autoPlay: " + AutoPlay);
-		return;
-	}
-	else if (data.message === "town")
-	{
-		AutoPlay = false;
-		FarmingModeActive = false;
-		goBackToTown();
-		return;
-	}
-	else if (data.message === "noelixirs")
-	{
-		NoElixirs = true;
-		SentRequests.splice(SentRequests.indexOf(SentRequests.find((x) => { if (x.request === "elixir") return x; }), 1));
-		log("Continuing without elixir.");
-		return;
+			return;
+		case "readyCheck":
+			log(character.name + " recieved readyCheck from " + sender);
+			stopFarmMode();
+			let ready = false;
+			if (character.name === MerchantName)
+			{
+				ready = parent.party_list.includes(PartyLeader);
+			} else
+			{
+				ready = checkIfReady();
+			}
+			send_cm(sender, {message: "readyReply", isReady: ready});
+			return;
+		case "partyReady":
+			log(character.name + " readyCheck approved!");
+			WhosReady = {leader: true, merchant: true, codeBotOne: true, codeBotTwo: true};
+			return;
+		case "letsGo":
+			log(character.name + " recieved Let's Go from " + sender);
+			FarmingModeActive = true;
+			AutoPlay = true;
+			return;
+		case "autoToggle":
+			AutoPlay = data.auto;
+			if (!AutoPlay)
+			{
+				FarmingModeActive = false;
+				stop();
+			}
+			log("autoPlay: " + AutoPlay);
+			return;
+		case "town":
+			goBackToTown();
+			return;
+		case "noelixirs":
+			NoElixirs = true;
+			SentRequests.splice(SentRequests.indexOf(SentRequests.find((x) =>
+			{
+				if (x.request === "elixir") return x;
+			}), 1));
+			log("Continuing without elixir.");
+			return;
+		case "readyReply":
+			let response = character.name + " recieved readyReply from " + sender + ". " + sender + " is " + (data.isReady ? "ready!" : "not ready. ")
+			log(response);
+			if (sender === PartyLeader)
+			{
+				WhosReady.leader = data.isReady;
+			} else if (sender === MerchantName)
+			{
+				WhosReady.merchant = data.isReady;
+			} else if (PartyList.includes(sender))
+			{
+				if (!WhosReady.codeBotOne && !WhosReady.codeBotTwo)
+				{
+					WhosReady.codeBotOne = data.isReady;
+				} else if (WhosReady.codeBotOne && !WhosReady.codeBotTwo)
+				{
+					WhosReady.codeBotTwo = data.isReady;
+				}
+			}
+			if (readyToGo())
+			{
+				for (let p of PartyList)
+				{
+					if (p !== character.name)
+					{
+						send_cm(p, {message: "partyReady"});
+					}
+				}
+			}
+			return;
+		case "confirmDelivery":
+			if (SentRequests.length === 0 || !SentRequests.find((x) => { if (x.name === sender) return x;}))
+			{
+				send_cm(sender, {message: "deliveryConfirmation", confirm: true});
+			}
+			return;
 	}
 
 	if (character.ctype === "merchant")
@@ -147,15 +129,6 @@ function on_cm(sender, data)
 	else if (character.ctpye === "ranger")
 	{
 		ranger_on_cm(sender, data);
-	}
-
-	//	this should remain the last check
-	if (data.message === "confirmDelivery")
-	{
-		if (SentRequests.length === 0 || !SentRequests.find((x) => { if (x.name === sender) return x; }))
-		{
-			send_cm(sender, { message: "deliveryConfirmation", confirm: true });
-		}
 	}
 }
 
@@ -287,20 +260,16 @@ function personalSpace()
 	if (is_moving(character) || smart.moving)
 	{
 		IsStuck = false;
-		return;
 	}
 
-	let target = get_nearest_monster
-		({
-			target: character.name
-		});
+	let target = get_nearest_monster({target: character.name});
 
 	if (!target)
 	{
 		target = get_nearest_monster();
 	}
 
-	if (DontKite.includes(target.mtype))
+	if (target && DontKite.includes(target.mtype))
 	{
 		return;
 	}
@@ -377,7 +346,6 @@ function stuckCheck(originalPosition)
 
 			writeToLog(character.name + " is still stuck and returning to town.");
 			IsStuck = false;
-			stopFarmMode();
 			goBackToTown();
 
 		}, 30000);
@@ -396,9 +364,16 @@ function partyPresent()
 		return false;
 	}
 
-	return !!((character.name === PartyLeader || parent.entities[PartyLeader]) &&
-		(character.name === PartyList[1] || parent.entities[PartyList[1]]) &&
-		(character.name === PartyList[2] || parent.entities[PartyList[2]]));
+	let count = 0;
+	for(let p of PartyList)
+	{
+		if ( (p === character.name || p === MerchantName) || (parent.entities[p] && distance(character, parent.entities[p]) < 200) )
+		{
+			count++;
+		}
+	}
+	
+	return count === PartyList.length;
 }
 
 function requestMluck()
@@ -631,19 +606,19 @@ function followLeader()
 
 function broadCastTarget(broadCastTarget)
 {
-	parent.party_list.forEach(function (partyPlayer)
+	for(let p of parent.party_list)
 	{
-		if (partyPlayer !== character.name)
+		if (p !== character.name)
 		{
-			let partyMember = parent.entities[partyPlayer];
+			let partyMember = parent.entities[p];
 
-			if (partyMember && partyMember.name !== MerchantName && partyMember.name !== broadCastTarget.name)
+			if (partyMember && partyMember.name !== MerchantName && partyMember.name !== character.name)
 			{
 				log(character.name + " broadcasting target " + broadCastTarget.name + " to " + partyMember.name);
 				send_cm(partyMember.name, { message: "target", targetId: broadCastTarget.id });
 			}
 		}
-	});
+	}
 }
 
 function getTargetMonster(farmTarget, canPullNewMonsters = true)
@@ -679,7 +654,7 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 	}
 
 	//	target a monster that is targeting another party member
-	parent.party_list.forEach(p =>
+	for (let p of parent.party_list)
 	{
 		if (p !== character.name)
 		{
@@ -691,7 +666,7 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 				return target;
 			}
 		}
-	});
+	}
 
 	//	target nearest monster that is targeting you
 	target = get_nearest_monster({type: farmTarget, target: character.name});
@@ -720,7 +695,7 @@ function approachTarget(target, onComplete)
 		return;
 	}
 
-	if (!onComplete)
+	if (!onComplete || distance(character, target) < 100)
 	{
 		move(
 			character.x + (target.x - character.x) * 0.3,
@@ -729,13 +704,19 @@ function approachTarget(target, onComplete)
 	}
 	else
 	{
-		smart_move({ x: character.x + (target.x - character.x) * 0.3, y: character.y + (target.y - character.y) * 0.3 }, () => { onComplete(); });
+		smart_move({ x: character.x + (target.x - character.x) * 0.3, y: character.y + (target.y - character.y) * 0.3 }, () => 
+		{ 
+			if(onComplete)
+			{
+				onComplete();
+			} 
+		});
 	}
 }
 
 function autoAttack(target)
 {
-	if (character.name === PriestName && HealingMode)
+	if (!target || (character.name === PriestName && HealingMode))
 	{
 		return;
 	}
@@ -786,7 +767,6 @@ function goTo(mapName = "main", coords = { x: 0, y: 0 }, oncomplete = null)
 
 function travelToFarmSpot()
 {
-	// @ts-ignore
 	if (FarmMode === "coords")
 	{
 		goTo(FarmMap, FarmCoords);
@@ -821,6 +801,7 @@ function goBackToTown(delay)
 
 	GoingBackToTown = true;
 	Traveling = false;
+	stopFarmMode();
 
 	use("use_town");
 
@@ -899,7 +880,7 @@ function aloneCheck(msToWait = 30000)
 {
 	if (is_moving(character) || smart.moving)
 	{
-		return false;
+		return;
 	}
 
 	if (!partyPresent() && !AloneChecking)
@@ -907,7 +888,7 @@ function aloneCheck(msToWait = 30000)
 		if (character.name !== PartyLeader && parent.entities[PartyLeader])
 		{
 			followLeader();
-			return false;
+			return;
 		}
 
 		AloneChecking = true;
@@ -915,26 +896,24 @@ function aloneCheck(msToWait = 30000)
 
 		setTimeout(() =>
 		{
+			AloneChecking = false;
+			
 			if (character.name !== PartyLeader && parent.entities[PartyLeader])
 			{
-				AloneChecking = false;
 				followLeader();
-				return false;
+				return;
 			}
 
-			if (!isInTown() && !partyPresent() && AloneChecking)
+			if (!Traveling && !isInTown() && !partyPresent())
 			{
-				writeToLog(character.name + " is lost & returning to town.");
-
-				stopFarmMode();
-				goBackToTown();
+				writeToLog(character.name + " is lost & asking the party to return to town.");
+				townParty();
+				return;
 			}
-
-			AloneChecking = false;
 
 		}, msToWait);
 
-		return true;
+		return;
 	}
 
 	return !partyPresent() || AloneChecking;
@@ -983,7 +962,7 @@ function togglePartyAuto(forceState = null)
 
 	if (character.name === PartyLeader)
 	{
-		for (let p in PartyList)
+		for (let p of PartyList)
 		{
 			if (p !== character.name)
 			{
@@ -1000,12 +979,12 @@ function townParty()
 {
 	log("Returning party to town.");
 
-	togglePartyAuto(false);
+	//togglePartyAuto(false);
 	goBackToTown();
 
 	for (let p of PartyList)
 	{
-		if (character.name !== p && character.name !== MerchantName)
+		if (character.name !== p)
 		{
 			send_cm(p, { message: "town" });
 		}
@@ -1035,8 +1014,11 @@ function stopCharacters()
 		stop_character(p);
 	}
 
-	stopFarmMode();
+	stop();
+	GoingBackToTown = false;
+	Traveling = false;
 	AutoPlay = false;
+	stopFarmMode();
 
 	log("Characters stopped!");
 }
@@ -1177,7 +1159,13 @@ function lookForSpecialTargets()
 		let target = getTargetMonster(SpecialMonsters[i]);
 		if (target && SpecialMonsters.includes(target.mtype))
 		{
-			broadCastTarget(target);
+			if(get_targeted_monster() !== target)
+			{
+				stop();
+				approachTarget(target);
+				broadCastTarget(target);	
+			}
+			
 			return target;
 		}
 	}
@@ -1281,7 +1269,7 @@ function dropInvalidTarget(target)
 	{
 		target = null;
 	}
-
+	
 	return target;
 }
 
@@ -1339,19 +1327,29 @@ function reloadCharacter(name)
 	} 
 	else
 	{
-		const rid = "ichar" + name;//.toLowerCase();
-		if (parent.document.getElementById(rid).contentWindow.code_active)
+		command_character(name, ()=>
 		{
-			parent.document.getElementById(rid).contentWindow.stop_runner();
-			parent.document.getElementById(rid).contentWindow.start_runner();
-		}
+			say("/pure_eval setTimeout(function(){parent.start_runner()}, 500)");
+			parent.stop_runner();
+		});
+		// const rid = "ichar" + name.toLowerCase();
+		// if (parent.document.getElementById(rid).contentWindow.code_active)
+		// {
+		// 	parent.document.getElementById(rid).contentWindow.stop_runner();
+		// 	parent.document.getElementById(rid).contentWindow.start_runner();
+		// }
 	}
 }
 
 function reloadCharacters()
 {
-	for(let p in PartyList)
+	for(let p of PartyList)
 	{
-		reloadCharacter(p);
+		if(p !== character.name)
+		{
+			reloadCharacter(p);			
+		}
 	}
+	
+	reloadCharacter(character.name);
 }
