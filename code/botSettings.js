@@ -58,7 +58,6 @@ const MaxLeaderDistance = 60;
 const LowInventoryThreshold = 14;
 const VeryLowInventoryThreshold = 7;
 const MonsterHealthThreshold = 0.5;
-const HealthPotThreshold = 0.98, ManaPotThreshold = 0.95;
 const ItemsToHoldOnTo = [];
 const MerchantItems = ["stand0", "scroll0", "scroll1", "cscroll0", "cscroll1", "seashell", "leather", "ascale", "cscale", "bfur", "pleather"];
 const Potions = ["hpot1", "mpot1"];

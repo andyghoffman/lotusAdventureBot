@@ -55,7 +55,7 @@ function main()
 	target = dropInvalidTarget(target);
 
 	loot();
-	usePotions(HealthPotThreshold, ManaPotThreshold);
+	usePotions();
 	
 	//  don't walk with merchant stand, don't idle without it
 	if (character.name === MerchantName)
