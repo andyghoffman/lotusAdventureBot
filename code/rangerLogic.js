@@ -19,22 +19,18 @@ function rangerAuto(target)
 
 function useHuntersMark(target)
 {
-	if (character.mp < G.skills.huntersmark.mp || is_on_cooldown("huntersmark"))
+	if (character.mp < G.skills.huntersmark.mp || is_on_cooldown("huntersmark") || !is_in_range(target, "huntersmark") || !validTargetForSkill(target) || target.s.huntersmark)
 	{
 		return;
 	}
 
-	//	shoot current target
-	if (is_in_range(target, "huntersmark") && !target.s.huntersmark && validTargetForSkill(target))
-	{
-		use_skill("huntersmark", target);
-		reduce_cooldown("huntersmark", character.ping);
-	}
+	use_skill("huntersmark", target);
+	reduce_cooldown("huntersmark", character.ping);
 }
 
 function useSuperShot(target)
 {
-	if (character.mp < G.skills.supershot.mp || is_on_cooldown("supershot") || !is_in_range("supershot", target) || !validTargetForSkill(target))
+	if (character.mp < G.skills.supershot.mp || is_on_cooldown("supershot") || !is_in_range(target, "supershot"))
 	{
 		return; 
 	}

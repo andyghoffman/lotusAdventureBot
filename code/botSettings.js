@@ -24,12 +24,12 @@ const XynTypes = ["gem", "box"]; //  item types to be exchanged with Xyn
 ///     
 const FullAuto = true;  //  if true will automatically start farming on connect & startup. set false to have player control on startup
 const FarmMode = "name";
-const FarmMonsterName = "croc";
-const FarmMap = "main";
-const FarmMonsterSpawnNumber = 6;
+const FarmMonsterName = "arcticbee";
+const FarmMap = "winterland";
+const FarmMonsterSpawnNumber = 10;
 const FarmRadius = 100;
 const FarmCoords = { x: 1202, y: -782 };    //  only used if farmMode is 'coords'
-const SpecialMonsters = [/* "snowman", */"phoenix", "goldenbat"];  //  priority targets
+const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];  //  priority targets
 const DontKite = ["phoenix", "bat", "goldenbat"];   //  any monsters to never kite
 //////
 

@@ -19,11 +19,11 @@ function castEnergize()
 
 	let energizeTarget = parent.entities[defaultEnergizeTarget];
 
-	parent.party_list.forEach(function (partyPlayer)
+	parent.party_list.forEach((partyPlayer)=>
 	{
 		let partyMember = parent.entities[partyPlayer];
 
-		if (partyMember && partyMember.name !== character.name && partyMember.mp < partyMember.max_mp * 0.75)
+		if (partyMember && partyMember.name !== character.name && partyMember.mp < partyMember.max_mp * 0.5)
 		{
 			energizeTarget = partyMember;
 		}

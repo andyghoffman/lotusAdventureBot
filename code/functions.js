@@ -979,7 +979,7 @@ function togglePartyAuto(forceState = null)
 		{
 			if (p !== character.name)
 			{
-				send_cm(character.name, { message: "autoToggle", auto: AutoPlay });
+				send_cm(p, { message: "autoToggle", auto: AutoPlay });
 				log("sending autoPlayToggle to " + character.name);
 			}
 		}
@@ -1319,4 +1319,31 @@ function isInFarmSpawnBounds(coords)
 	center.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
 
 	return distance(coords, center) < FarmRadius;
+}
+
+// Reload code on character (yoinked from discord)
+function reloadCharacter(name)
+{
+	if (name === character.name)
+	{
+		say("/pure_eval setTimeout(function(){parent.start_runner()}, 500)");
+		parent.stop_runner();
+	} 
+	else
+	{
+		const rid = "ichar" + name;//.toLowerCase();
+		if (parent.document.getElementById(rid).contentWindow.code_active)
+		{
+			parent.document.getElementById(rid).contentWindow.stop_runner();
+			parent.document.getElementById(rid).contentWindow.start_runner();
+		}
+	}
+}
+
+function reloadCharacters()
+{
+	for(let p in PartyList)
+	{
+		reloadCharacter(p);
+	}
 }

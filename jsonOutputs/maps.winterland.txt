@@ -1,0 +1,314 @@
+show_json(G.maps.winterland)
+{
+	"freeze_multiplier": 2,
+	"npcs": [
+		{
+			"position": [
+				144,
+				-47
+			],
+			"id": "leathermerchant"
+		},
+		{
+			"position": [
+				-73,
+				-393
+			],
+			"id": "transporter"
+		},
+		{
+			"position": [
+				1065,
+				-2015
+			],
+			"id": "guard"
+		},
+		{
+			"position": [
+				-15,
+				5
+			],
+			"id": "citizen7"
+		},
+		{
+			"position": [
+				-15,
+				5
+			],
+			"id": "citizen8"
+		},
+		{
+			"position": [
+				-15,
+				5
+			],
+			"id": "citizen9"
+		},
+		{
+			"position": [
+				-15,
+				5
+			],
+			"id": "citizen10"
+		}
+	],
+	"quirks": [
+		[
+			-247,
+			-73,
+			20,
+			16,
+			"sign",
+			"The Wanderers' Inn"
+		],
+		[
+			202,
+			-56,
+			20,
+			16,
+			"sign",
+			"Leather Shop. If I'm not outside, check inside!"
+		],
+		[
+			65,
+			-1601,
+			20,
+			16,
+			"sign",
+			"Dangers Ahead. Beware!"
+		],
+		[
+			465,
+			-2296,
+			20,
+			16,
+			"note",
+			"Stompy and his companions defeated me many times. However, I've discovered that If I stay just around the corner they can't even reach me! HAHA!"
+		],
+		[
+			-230,
+			95,
+			20,
+			16,
+			"log",
+			"Old Man's House"
+		],
+		[
+			168,
+			-83,
+			32,
+			40,
+			"log",
+			"Locked"
+		],
+		[
+			138,
+			223,
+			32,
+			40,
+			"log",
+			"Locked. This is probably where the guards stay"
+		],
+		[
+			413,
+			-3080,
+			24,
+			30,
+			"log",
+			"Can't reach. This might be Stompy's lair"
+		]
+	],
+	"name": "Winterland",
+	"key": "jayson_IceLandPrototype",
+	"doors": [
+		[
+			-280,
+			-132,
+			32,
+			40,
+			"winter_inn",
+			0,
+			2
+		],
+		[
+			602,
+			-1289,
+			24,
+			30,
+			"winter_cave",
+			0,
+			3
+		],
+		[
+			-864,
+			-1570,
+			24,
+			24,
+			"level2n",
+			2,
+			4
+		]
+	],
+	"spawns": [
+		[
+			0,
+			0
+		],
+		[
+			-8,
+			-337,
+			3
+		],
+		[
+			-280,
+			-123
+		],
+		[
+			600,
+			-1275
+		],
+		[
+			-864,
+			-1614,
+			3
+		]
+	],
+	"drop_norm": 3000,
+	"burn_multiplier": 0.25,
+	"monsters": [
+		{
+			"count": 1,
+			"boundary": [
+				30,
+				-2954,
+				836,
+				-2536
+			],
+			"type": "stompy"
+		},
+		{
+			"count": 7,
+			"boundary": [
+				30,
+				-2954,
+				836,
+				-2536
+			],
+			"type": "wolf"
+		},
+		{
+			"count": 10,
+			"boundary": [
+				682,
+				-967,
+				1482,
+				-779
+			],
+			"type": "arcticbee",
+			"grow": true
+		},
+		{
+			"count": 4,
+			"boundary": [
+				-367,
+				-2234,
+				29,
+				-1819
+			],
+			"type": "wolfie"
+		},
+		{
+			"count": 3,
+			"boundary": [
+				236,
+				-2232,
+				460,
+				-1847
+			],
+			"type": "wolfie"
+		},
+		{
+			"count": 8,
+			"boundary": [
+				-173,
+				-1488,
+				212,
+				-730
+			],
+			"type": "boar"
+		},
+		{
+			"count": 5,
+			"boundary": [
+				550,
+				-240,
+				1097,
+				149
+			],
+			"type": "iceroamer"
+		},
+		{
+			"count": 4,
+			"boundary": [
+				1335,
+				-71,
+				1689,
+				278
+			],
+			"type": "iceroamer"
+		}
+	],
+	"items": {},
+	"merchants": [],
+	"ref": {
+		"leathermerchant": {
+			"x": 144,
+			"y": -47,
+			"map": "winterland",
+			"in": "winterland",
+			"id": "leathermerchant"
+		},
+		"transporter": {
+			"x": -73,
+			"y": -393,
+			"map": "winterland",
+			"in": "winterland",
+			"id": "transporter"
+		},
+		"guard": {
+			"x": 1065,
+			"y": -2015,
+			"map": "winterland",
+			"in": "winterland",
+			"id": "guard"
+		},
+		"citizen7": {
+			"x": -15,
+			"y": 5,
+			"map": "winterland",
+			"in": "winterland",
+			"id": "citizen7"
+		},
+		"citizen8": {
+			"x": -15,
+			"y": 5,
+			"map": "winterland",
+			"in": "winterland",
+			"id": "citizen8"
+		},
+		"citizen9": {
+			"x": -15,
+			"y": 5,
+			"map": "winterland",
+			"in": "winterland",
+			"id": "citizen9"
+		},
+		"citizen10": {
+			"x": -15,
+			"y": 5,
+			"map": "winterland",
+			"in": "winterland",
+			"id": "citizen10"
+		}
+	}
+}

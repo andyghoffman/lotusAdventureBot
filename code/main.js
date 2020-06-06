@@ -9,10 +9,10 @@ load_code("events");
 
 map_key("1", "snippet", "initParty()");
 map_key("2", "snippet", "townParty()");
-map_key("3", "snippet", "stopCharacters()");
+map_key("3", "snippet", "reloadCharacters()");
 map_key("4", "snippet", "transferAllToMerchant()");
 map_key("5", "snippet", "togglePartyAuto()");
-map_key("6", "snippet", "toggleCraftingMode()");
+map_key("6", "snippet", "stopCharacters()");
 map_key("7", "snippet", "depositInventoryAtBank()");
 map_key("8", "snippet", "xpReport()");
 
