@@ -473,10 +473,15 @@ function checkSentRequests()
 
 function usePotions()
 {
+	if(character.rip)
+	{
+		return;
+	}
+	
 	let hPotRecovery = 500;//G.items[Potions[0]].gives.hp;
 	let mPotRecovery = 500;//G.items[Potions[1]].gives.mp;
 	
-	if (!character.rip && (character.hp <= (character.max_hp  - hPotRecovery) || character.mp <= (character.max_mp - mPotRecovery)))
+	if ((character.hp <= (character.max_hp  - hPotRecovery) || character.mp <= (character.max_mp - mPotRecovery)))
 	{
 		use_hp_or_mp();
 	}

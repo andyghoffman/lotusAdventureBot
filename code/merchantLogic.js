@@ -20,6 +20,8 @@ function merchantOnStart()
 
 function merchantAuto(target)
 {
+	standCheck();
+	
 	//	keep magic luck on yourself
 	if (!checkMluck(character) && !is_on_cooldown("mluck"))
 	{

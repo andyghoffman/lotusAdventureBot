@@ -51,88 +51,53 @@ function main()
 		return;
 	}
 
-	let target = get_targeted_monster();
-	target = dropInvalidTarget(target);
+	let target = lookForSpecialTargets();
+	
+	//  look for a target
+	if (!target)
+	{
+		let canPullNew = character.name === PartyLeader || PullIndescritely;
+		target = getTargetMonster(FarmMonsterName, canPullNew);
+	}
 
 	loot();
 	usePotions();
 	
-	//  don't walk with merchant stand, don't idle without it
-	if (character.name === MerchantName)
+	if(!Traveling)
 	{
-		standCheck();
-	}
-	//  prioritize priest functions before anything else (because heal shares a cooldown with autoattack)
-	else if (character.name === PriestName)
-	{
-		priestAuto(target);
-	}
-	//  make sure you attack even if you are moving (normal routine is not called while moving)
-	else if (get_targeted_monster())
-	{
-		autoAttack(target);
+		classRoutine(target);	
 	}
 
 	if (AutoPlay)
 	{
 		tidyInventory();
 	}
-
-	//  finish what you are doing before checking past here
-	if (is_moving(character) || smart.moving || GoingBackToTown || character.q.upgrade || character.q.compound)
+	
+	if (is_moving(character) || smart.moving || GoingBackToTown || character.q.upgrade || character.q.compound || character.name === MerchantName)
 	{
 		return;
 	}
 
-	//  merchant standard routine
-	if (character.name === MerchantName)
+	//  autofollow leader when not auto-farming
+	if (character.name !== PartyLeader && !FarmingModeActive && parent.entities[PartyLeader])
 	{
-		merchantAuto();
+		followLeader();
 		return;
 	}
-	//  standard routine for party group
-	else
+
+	//  make sure party is together
+	if (!AutoPlay || !readyToGo() || !FarmingModeActive || !partyPresent())
 	{
-		//  autofollow leader when not auto-farming
-		if (character.name !== PartyLeader && !FarmingModeActive && parent.entities[PartyLeader])
+		//  party leader will only aloneCheck if autoplay is active, other characters will tether to leader regardless of autoplay
+		if ((character.name !== PartyLeader) || (character.name === PartyLeader && AutoPlay))
 		{
-			followLeader();
-			return;
+			aloneCheck();
 		}
 
-		//  make sure party is together
-		if (!AutoPlay || !readyToGo() || !FarmingModeActive || !partyPresent())
-		{
-			//  party leader will only aloneCheck if autoplay is active, other characters will tether to leader regardless of autoplay
-			if ((character.name !== PartyLeader) || (character.name === PartyLeader && AutoPlay))
-			{
-				aloneCheck();
-			}
-
-			return;
-		}
+		return;
 	}
-
-	//  look for a target
-	if (!target)
-	{
-		target = lookForSpecialTargets();
-
-		if (!target)
-		{
-			let canPullNew = character.name === PartyLeader || PullIndescritely;
-			target = getTargetMonster(FarmMonsterName, canPullNew);
-		}
-	}
-
-	//  if the monster is targeting another player, drop the target unless it's a special monster
-	target = dropInvalidTarget(target);
-
-	if (target)
-	{
-		classRoutine(target);
-	}
-	else if (!Traveling)
+	
+	if (!Traveling && !target)
 	{
 		if (character.name !== PartyLeader && parent.entities[PartyLeader] && distance(character, parent.entities[PartyLeader]) < 400 && character.map === FarmMap)
 		{

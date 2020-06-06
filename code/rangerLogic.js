@@ -42,13 +42,26 @@ function useSuperShot(target)
 //	use 3shot
 function tripleShot(target)
 {
-	if (is_on_cooldown("3shot") || !UseThreeShot)
+	if (is_on_cooldown("attack") || !UseThreeShot)
 	{
 		return;
 	}
 
-	use_skill("3shot", target);
-	reduce_cooldown("3shot", character.ping);
+	let count = 1;
+	for (let e in parent.entities)
+	{
+		let t = parent.entities[e];
+		if(target.mtype === t.mtype && is_in_range(t, "attack"))
+		{
+			count++;
+		}
+	}
+
+	if(count >= 3)
+	{
+		use_skill("3shot", target);
+		reduce_cooldown("3shot", character.ping);		
+	}
 }
 
 //	poison consumable probably not worth it
