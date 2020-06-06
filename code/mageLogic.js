@@ -38,7 +38,7 @@ function castEnergize()
 
 function castReflection()
 {
-	if (is_on_cooldown("reflection"))
+	if (is_on_cooldown("reflection") || !UseReflection)
 	{
 		return;
 	}

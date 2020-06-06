@@ -4,7 +4,10 @@
 //	Level Up Event
 game.on("level_up", (data) =>
 {
-	writeToLog(data.name + " is now level " + data.level + "!");
+	if(character.name === data.name)
+	{
+		writeToLog(data.name + " is now level " + data.level + "!");		
+	}
 });
 
 //	Action Event (character is the source of the action)
@@ -25,14 +28,14 @@ game.on("death", (data) =>
 	if (character.name === data)
 	{
 		townParty();
-		writeToLog(data.id + " died");
+		writeToLog(data.id + " died!");
 	}
 });
 
 //	Server shutdown Event
 game.on("shutdown", (data) =>
 {
-	writeToLog("Server shutting down");
+	writeToLog("Server shutting down!");
 });
 
 //	API Response

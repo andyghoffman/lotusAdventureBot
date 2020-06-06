@@ -1,0 +1,960 @@
+show_json(G.skills)
+{
+	"revive": {
+		"target": true,
+		"range": 240,
+		"cooldown": 200,
+		"consume": "essenceoflife",
+		"name": "Revive!",
+		"skin": "skill_revive",
+		"explanation": "1) Heal a fellow adventurer to full hp. 2) Revive using an essence of life.",
+		"type": "skill",
+		"class": [
+			"priest"
+		],
+		"mp": 500
+	},
+	"mentalburst": {
+		"explanation": "Channel your mental abilities for a magical blow. If the target is defeated, the damage dealt is converted to mana.",
+		"cooldown": 900,
+		"damage_type": "magical",
+		"skin": "skill_mentalburst",
+		"class": [
+			"rogue"
+		],
+		"target": true,
+		"requirements": {
+			"int": 64
+		},
+		"name": "Mental Burst",
+		"range_multiplier": 1.2,
+		"damage_multiplier": 0.6,
+		"range_bonus": 32,
+		"warning": "Highly unbalanced skill, could get nerfed or modified",
+		"mp": 180,
+		"type": "skill"
+	},
+	"move_down": {
+		"ui": false,
+		"explanation": "Moves the character downwards",
+		"type": "utility",
+		"name": "Move Down",
+		"skin": "down"
+	},
+	"burst": {
+		"target": true,
+		"cooldown": 6000,
+		"ratio": 0.555,
+		"name": "Mana Burst",
+		"skin": "skill_burst",
+		"explanation": "Converts your entire mana pool to pure damage. Deals 0.555 pure damage for each MP.",
+		"type": "skill",
+		"class": [
+			"mage"
+		],
+		"damage_type": "pure",
+		"mp": 0
+	},
+	"use_town": {
+		"explanation": "Teleports you to the center of the map.",
+		"cooldown": 0,
+		"type": "ability",
+		"name": "Town",
+		"skin": "use_town"
+	},
+	"toggle_inventory": {
+		"ui": false,
+		"explanation": "Toggles the inventory",
+		"type": "utility",
+		"name": "Toggle Inventory",
+		"skin": "inventory"
+	},
+	"toggle_stats": {
+		"ui": false,
+		"explanation": "Toggles the character sheet",
+		"type": "utility",
+		"name": "Toggle Stats",
+		"skin": "stats"
+	},
+	"agitate": {
+		"range": 320,
+		"cooldown": 2200,
+		"name": "Agitate",
+		"skin": "skill_agitate",
+		"explanation": "Taunts all nearby monsters.",
+		"level": 68,
+		"type": "skill",
+		"class": [
+			"warrior"
+		],
+		"mp": 420
+	},
+	"blink": {
+		"name": "Blink",
+		"explanation": "Teleport to a nearby location.",
+		"cooldown": 1200,
+		"mp": 1600,
+		"skin": "skill_blink",
+		"type": "skill",
+		"class": [
+			"mage"
+		]
+	},
+	"poisonarrow": {
+		"target": true,
+		"cooldown": 300,
+		"consume": "poison",
+		"name": "Poison Arrow",
+		"skin": "skill_poisonarrow",
+		"explanation": "Fire a single low damage but poison coated arrow at your opponent.",
+		"type": "skill",
+		"class": [
+			"ranger"
+		],
+		"mp": 360,
+		"damage": 200
+	},
+	"mluck": {
+		"explanation": "Buff a target to increase their luck. 2% chance for you to receive a duplicate of their looted items!",
+		"cooldown": 100,
+		"skin": "buff_luck",
+		"class": [
+			"merchant"
+		],
+		"condition": "mluck",
+		"name": "Merchant's Luck",
+		"target": true,
+		"level": 40,
+		"range": 320,
+		"mp": 10,
+		"type": "skill"
+	},
+	"warcry": {
+		"explanation": "Motivate your allies to fight!",
+		"cooldown": 60000,
+		"skin": "skill_warcry",
+		"duration": 8000,
+		"class": [
+			"warrior"
+		],
+		"condition": "warcry",
+		"name": "War Cry",
+		"level": 70,
+		"range": 600,
+		"mp": 320,
+		"type": "skill"
+	},
+	"regen_hp": {
+		"name": "Regenerate HP",
+		"type": "ability",
+		"explanation": "Regenerate 50 HP without using potions.",
+		"share": "use_hp",
+		"skin": "regen_hp",
+		"cooldown_multiplier": 2.5
+	},
+	"mcourage": {
+		"cooldown": 2000,
+		"name": "Merchant's Courage",
+		"skin": "skill_mcourage",
+		"explanation": "When you sense danger, you know what to do...",
+		"level": 70,
+		"type": "skill",
+		"class": [
+			"merchant"
+		],
+		"condition": "mcourage",
+		"mp": 2400
+	},
+	"stack": {
+		"name": "Stacked Damage",
+		"max": 2000,
+		"explanation": "Slowly learning the ways of your opponent each rogue attack deals one more damage.",
+		"skin": "skill_stack",
+		"type": "passive",
+		"class": [
+			"rogue"
+		]
+	},
+	"tangle": {
+		"explanation": "Communicates through spores to activate dormant plants underneath. Slows down opponents significantly.",
+		"type": "monster",
+		"name": "Tangle",
+		"condition": "tangled"
+	},
+	"sheal": {
+		"cooldown": 6000,
+		"levels": [
+			[
+				0,
+				500
+			],
+			[
+				60,
+				600
+			],
+			[
+				72,
+				720
+			],
+			[
+				80,
+				800
+			]
+		],
+		"name": "Heal",
+		"skin": "skill_sheal",
+		"action": "heal",
+		"output": 400,
+		"explanation": "Heal yourself",
+		"type": "skill",
+		"class": [
+			"paladin"
+		],
+		"mp": 20
+	},
+	"gm": {
+		"explanation": "Jump, Jail, Mute, Use Any Skill",
+		"type": "gm",
+		"name": "GM Abilities",
+		"skin": "gm"
+	},
+	"move_up": {
+		"ui": false,
+		"explanation": "Moves the character upwards",
+		"type": "utility",
+		"name": "Move Up",
+		"skin": "up"
+	},
+	"regen_mp": {
+		"name": "Regenerate MP",
+		"type": "ability",
+		"explanation": "Regenerate 100 MP without using potions.",
+		"share": "use_mp",
+		"skin": "regen_mp",
+		"cooldown_multiplier": 2.5
+	},
+	"darkblessing": {
+		"explanation": "Increases damage by 25% for the duration.",
+		"cooldown": 60000,
+		"skin": "skill_dbuff",
+		"duration": 8000,
+		"class": [
+			"priest"
+		],
+		"condition": "darkblessing",
+		"name": "Dark Blessing",
+		"level": 70,
+		"range": 600,
+		"mp": 900,
+		"type": "skill"
+	},
+	"5shot": {
+		"explanation": "Hits 5 targets at once! Deals 0.5X damage to each target.",
+		"share": "attack",
+		"skin": "skill_5shot",
+		"targets": true,
+		"name": "5-Shot",
+		"level": 75,
+		"type": "skill",
+		"damage_multiplier": 0.5,
+		"class": [
+			"ranger"
+		],
+		"mp": 420,
+		"cooldown_multiplier": 1
+	},
+	"use_hp": {
+		"explanation": "Uses an HP potion from your inventory. If there are multiple potions, the last one is used. If there are no potions, your character regenerates a small amount of HP with a high cooldown.",
+		"cooldown": 2000,
+		"type": "ability",
+		"name": "Use HP Potion",
+		"skin": "use_hp"
+	},
+	"curse": {
+		"cooldown": 5000,
+		"target": true,
+		"name": "Curse",
+		"skin": "skill_curse",
+		"duration": 5000,
+		"explanation": "Cursed opponents receive 20% more damage, deal 20% less damage and they slow down by 20.",
+		"type": "skill",
+		"class": [
+			"priest"
+		],
+		"mp": 400
+	},
+	"toggle_character": {
+		"ui": false,
+		"explanation": "Toggles the character focus",
+		"type": "utility",
+		"name": "Toggle Character",
+		"skin": "character"
+	},
+	"move_left": {
+		"ui": false,
+		"explanation": "Moves the character leftwards",
+		"type": "utility",
+		"name": "Move Left",
+		"skin": "left"
+	},
+	"piercingshot": {
+		"explanation": "Fire heavy, armor piercing arrows at your opponent. They deal 75% of the damage but pierce through 500 armor.",
+		"share": "attack",
+		"skin": "skill_piercingshot",
+		"class": [
+			"ranger"
+		],
+		"target": true,
+		"name": "Piercing Shot",
+		"level": 72,
+		"type": "skill",
+		"apiercing": 500,
+		"damage_multiplier": 0.75,
+		"mp": 64,
+		"cooldown_multiplier": 1
+	},
+	"travel": {
+		"explanation": "Where would you like to visit?",
+		"type": "ability",
+		"name": "Travel!",
+		"skin": "travel"
+	},
+	"phaseout": {
+		"consume": "shadowstone",
+		"explanation": "Absorb a shadow stone to phase yourself out from this universe.",
+		"cooldown": 4000,
+		"skin": "skill_phaseout",
+		"duration": 5000,
+		"class": [
+			"priest"
+		],
+		"condition": "phasedout",
+		"name": "Phase Out",
+		"level": 64,
+		"mp": 200,
+		"type": "skill"
+	},
+	"interact": {
+		"ui": false,
+		"explanation": "Interact with the nearest game entity, a door, doorway, or NPC.",
+		"type": "utility",
+		"name": "Interact",
+		"skin": "interact"
+	},
+	"alchemy": {
+		"explanation": "Dangerous skill, use with caution! Converts your firstfound item into pure gold!",
+		"output": 0.8,
+		"levels": [
+			[
+				40,
+				0.8
+			],
+			[
+				50,
+				0.86
+			],
+			[
+				60,
+				0.92
+			],
+			[
+				70,
+				1
+			],
+			[
+				80,
+				1.1
+			],
+			[
+				90,
+				1.16
+			],
+			[
+				100,
+				1.2
+			]
+		],
+		"skin": "skill_alchemy",
+		"class": [
+			"mage"
+		],
+		"party": true,
+		"name": "Alchemy",
+		"level": 40,
+		"cooldown": 8000,
+		"mp": 347,
+		"action": "rate",
+		"variance": 0.2,
+		"type": "skill"
+	},
+	"toggle_run_code": {
+		"ui": false,
+		"name": "Engage/Disengage Code",
+		"skin": "run_code"
+	},
+	"throw": {
+		"code": "range=character.level+200",
+		"nprop": [
+			"attack",
+			"armor"
+		],
+		"explanation": "Terrified? Just throw whatever you can find at your opponent!",
+		"cooldown": 400,
+		"skin": "skill_throw",
+		"class": [
+			"merchant"
+		],
+		"name": "Throw Stuff",
+		"level": 60,
+		"positive": [
+			"essenceoflife"
+		],
+		"negative": [
+			"essenceoffire"
+		],
+		"range": 200,
+		"mp": 200,
+		"type": "skill"
+	},
+	"supershot": {
+		"cooldown": 30000,
+		"target": true,
+		"name": "Supershot",
+		"skin": "skill_supershot",
+		"explanation": "Deals 1.5X instant damage from an incredible distance.",
+		"range_multiplier": 3,
+		"type": "skill",
+		"class": [
+			"ranger"
+		],
+		"damage_multiplier": 1.5,
+		"mp": 400
+	},
+	"charge": {
+		"cooldown": 40000,
+		"name": "Charge",
+		"skin": "skill_charge",
+		"duration": 3200,
+		"explanation": "Gain 30 Speed for a short duration.",
+		"type": "skill",
+		"class": [
+			"warrior"
+		],
+		"mp": 0
+	},
+	"partyheal": {
+		"explanation": "Heals all the party members.",
+		"cooldown": 200,
+		"skin": "skill_pheal",
+		"class": [
+			"priest"
+		],
+		"name": "Party Heal",
+		"output": 400,
+		"levels": [
+			[
+				0,
+				500
+			],
+			[
+				60,
+				600
+			],
+			[
+				72,
+				720
+			],
+			[
+				80,
+				800
+			]
+		],
+		"mp": 400,
+		"action": "heal",
+		"party": true,
+		"type": "skill"
+	},
+	"esc": {
+		"ui": false,
+		"explanation": "Calls the esc_pressed() function inside the game. Major functionality.",
+		"type": "utility",
+		"name": "ESC",
+		"skin": "esc"
+	},
+	"3shot": {
+		"explanation": "Hits 3 targets at once! Deals 0.7X damage to each target.",
+		"share": "attack",
+		"skin": "skill_3shot",
+		"targets": true,
+		"name": "3-Shot",
+		"level": 60,
+		"type": "skill",
+		"damage_multiplier": 0.7,
+		"class": [
+			"ranger"
+		],
+		"mp": 300,
+		"cooldown_multiplier": 1
+	},
+	"cburst": {
+		"cooldown": 240,
+		"ratio": 0.5,
+		"name": "Controlled Mana Burst",
+		"skin": "skill_cburst",
+		"list": true,
+		"explanation": "A skill for experienced mages. Allows you to control and channel your most powerful ability.",
+		"level": 75,
+		"type": "skill",
+		"class": [
+			"mage"
+		],
+		"mp": 80
+	},
+	"quickpunch": {
+		"explanation": "Use your agility to quickly punch your opponent between your devastating attacks!",
+		"cooldown": 250,
+		"skin": "skill_quickpunch",
+		"class": [
+			"rogue"
+		],
+		"name": "Quick Punch",
+		"target": true,
+		"wtype": "fist",
+		"range_multiplier": 1,
+		"damage_multiplier": 0.25,
+		"mp": 240,
+		"type": "skill"
+	},
+	"absorb": {
+		"range": 240,
+		"cooldown": 400,
+		"target": true,
+		"name": "Absorb Sins",
+		"skin": "skill_absorbsins",
+		"explanation": "Pulls all targets from a friendly character.",
+		"level": 55,
+		"type": "skill",
+		"class": [
+			"priest"
+		],
+		"mp": 200
+	},
+	"attack": {
+		"target": true,
+		"explanation": "Attack the target",
+		"type": "ability",
+		"name": "Attack",
+		"skin": "attack"
+	},
+	"heal": {
+		"name": "Heal",
+		"skin": "heal",
+		"cooldown_multiplier": 1,
+		"explanation": "Heal the target",
+		"share": "attack",
+		"type": "ability",
+		"class": [
+			"priest"
+		],
+		"target": true
+	},
+	"entangle": {
+		"consume": "essenceofnature",
+		"explanation": "Unleash the contained powers of nature to hinder an opponent.",
+		"cooldown": 40000,
+		"skin": "skill_entangle",
+		"duration": 5000,
+		"class": [
+			"mage"
+		],
+		"condition": "tangled",
+		"target": true,
+		"name": "Entangle",
+		"level": 72,
+		"range": 480,
+		"mp": 360,
+		"type": "skill",
+		"monsters": true
+	},
+	"rspeed": {
+		"explanation": "Buff a target to increase their speed.",
+		"cooldown": 100,
+		"skin": "buff_speed",
+		"class": [
+			"rogue"
+		],
+		"condition": "rspeed",
+		"name": "Rogue Swiftness",
+		"target": true,
+		"level": 40,
+		"range": 320,
+		"mp": 320,
+		"type": "skill"
+	},
+	"power": {
+		"slot": [
+			[
+				"gloves",
+				"powerglove"
+			]
+		],
+		"cooldown": 500,
+		"name": "Power",
+		"skin": "powerglove",
+		"explanation": "Unleash the power",
+		"type": "skill",
+		"condition": "power",
+		"mp": 320
+	},
+	"track": {
+		"range": 1440,
+		"cooldown": 1600,
+		"name": "Track",
+		"skin": "skill_track",
+		"explanation": "Use your fine-tuned senses to detect others.",
+		"type": "skill",
+		"class": [
+			"ranger"
+		],
+		"mp": 80
+	},
+	"taunt": {
+		"range": 200,
+		"cooldown": 3000,
+		"target": true,
+		"name": "Taunt",
+		"skin": "skill_taunt",
+		"explanation": "Taunts an enemy. Steals aggro from friendly targets.",
+		"type": "skill",
+		"class": [
+			"warrior"
+		],
+		"mp": 40
+	},
+	"stomp": {
+		"explanation": "Use your basher to Stomp the ground to Stun enemies nearby!",
+		"cooldown": 24000,
+		"skin": "skill_stomp",
+		"duration": 3200,
+		"class": [
+			"warrior"
+		],
+		"name": "Stomp",
+		"level": 52,
+		"wtype": "basher",
+		"range": 400,
+		"mp": 120,
+		"type": "skill"
+	},
+	"toggle_code": {
+		"ui": false,
+		"name": "Toggle Code",
+		"skin": "code"
+	},
+	"stop": {
+		"explanation": "Stops your character. Cancels all channeling abilities and active skills.",
+		"cooldown": 0,
+		"type": "ability",
+		"name": "Stop",
+		"skin": "stop_g"
+	},
+	"cleave": {
+		"cooldown": 1200,
+		"range": 160,
+		"explanation": "Swing your axe in a flurry to damage all enemies nearby!",
+		"name": "Cleave",
+		"skin": "skill_cleave",
+		"wtype": "axe",
+		"level": 52,
+		"type": "skill",
+		"class": [
+			"warrior"
+		],
+		"mp": 720
+	},
+	"warp": {
+		"slot": [
+			[
+				"chest",
+				"warpvest"
+			]
+		],
+		"name": "Warp",
+		"explanation": "Warp space to jump into any location",
+		"cooldown": 200,
+		"mp": 40,
+		"skin": "warpvest",
+		"type": "skill"
+	},
+	"portal": {
+		"explanation": "Open a portal to different maps and instances",
+		"type": "monster",
+		"name": "Portal"
+	},
+	"move_right": {
+		"ui": false,
+		"explanation": "Moves the character rightwards",
+		"type": "utility",
+		"name": "Move Right",
+		"skin": "right"
+	},
+	"open_snippet": {
+		"ui": false,
+		"explanation": "Open the Code Snippet interface",
+		"type": "utility",
+		"name": "Open Snippet",
+		"skin": "snippet"
+	},
+	"multi_burn": {
+		"ui": true,
+		"explanation": "Hurl a fireball at everyone who dared attack him and burn them!",
+		"type": "monster",
+		"name": "Multi Burn",
+		"skin": "essenceoffire"
+	},
+	"xpower": {
+		"slot": [
+			[
+				"gloves",
+				"goldenpowerglove"
+			]
+		],
+		"cooldown": 500,
+		"name": "Power",
+		"skin": "goldenpowerglove",
+		"explanation": "Unleash the power",
+		"type": "skill",
+		"condition": "xpower",
+		"mp": 320
+	},
+	"mshield": {
+		"name": "Mana Shield",
+		"explanation": "Create a magical shield around yourself to absorb damage",
+		"cooldown": 0,
+		"mp": 0,
+		"skin": "skill_mshield",
+		"type": "skill",
+		"class": [
+			"paladin"
+		]
+	},
+	"invis": {
+		"name": "Assassin's Smoke",
+		"explanation": "Disappear into the shadows. Deal 1.25X damage when you sneak up on an enemy. Cooldown starts when you re-appear.",
+		"skin": "skill_invis",
+		"type": "skill",
+		"class": [
+			"rogue"
+		],
+		"reuse_cooldown": 12000
+	},
+	"stone": {
+		"explanation": "Looking into his eye for too long turns you to stone!",
+		"type": "monster",
+		"name": "Stone",
+		"condition": "stoned"
+	},
+	"reflection": {
+		"explanation": "Erects a magical shield around the target to grant them +20% Reflection for the duration.",
+		"cooldown": 30000,
+		"skin": "buff_reflection",
+		"class": [
+			"mage"
+		],
+		"condition": "reflection",
+		"name": "Reflective Shield",
+		"target": true,
+		"level": 60,
+		"range": 320,
+		"mp": 540,
+		"type": "skill"
+	},
+	"shadowstrike": {
+		"range": 360,
+		"cooldown": 1200,
+		"consume": "shadowstone",
+		"name": "Shadow Strike",
+		"skin": "skill_shadowstrike",
+		"explanation": "Use a shadow stone to strike a random enemy in a parallel universe!",
+		"level": 70,
+		"type": "skill",
+		"class": [
+			"rogue"
+		],
+		"mp": 320
+	},
+	"energize": {
+		"range": 320,
+		"cooldown": 4000,
+		"name": "Energize",
+		"skin": "skill_energize",
+		"explanation": "Transfers mana to a target. As a side effect the target gains high attack speed for a short duration.",
+		"level": 20,
+		"type": "skill",
+		"class": [
+			"mage"
+		],
+		"condition": "energized",
+		"target": true
+	},
+	"light": {
+		"name": "Light",
+		"explanation": "Reveals invisible entities nearby and prevents them from going invisible again for 12 seconds.",
+		"cooldown": 0,
+		"mp": 2000,
+		"skin": "skill_light",
+		"type": "skill",
+		"class": [
+			"mage"
+		]
+	},
+	"pure_eval": {
+		"code": true,
+		"name": "Pure Eval",
+		"explanation": "[Advanced] Maps a code snippet to be run directly inside the game, rather than using CODE. (Not to be confused with the text command, /eval, which evals inside the Code iframe)",
+		"skins": [
+			"run_eval0",
+			"run_eval1",
+			"run_eval2"
+		],
+		"skin": "run_eval0",
+		"type": "utility"
+	},
+	"snippet": {
+		"code": true,
+		"name": "Snippet",
+		"explanation": "Maps a code snippet to a keypress.",
+		"skins": [
+			"run_snippet0",
+			"run_snippet1",
+			"run_snippet2"
+		],
+		"skin": "run_snippet1",
+		"type": "utility"
+	},
+	"self_healing": {
+		"explanation": "Periodical self healing",
+		"type": "monster",
+		"name": "Healing"
+	},
+	"4fingers": {
+		"explanation": "Use the ancient arts to send the target to a deep meditation state. Just several taps to key chakra points does the job!",
+		"cooldown": 40000,
+		"skin": "skill_4fingers",
+		"duration": 5000,
+		"class": [
+			"ranger"
+		],
+		"condition": "fingered",
+		"target": true,
+		"name": "4 Finger Technique",
+		"level": 64,
+		"range": 120,
+		"mp": 260,
+		"type": "skill",
+		"monsters": false
+	},
+	"use_mp": {
+		"explanation": "Uses an MP potion from your inventory. If there are multiple potions, the last one is used. If there are no potions, your character regenerates a small amount of MP with a high cooldown.",
+		"cooldown": 2000,
+		"type": "ability",
+		"name": "Use MP Potion",
+		"skin": "use_mp"
+	},
+	"quickstab": {
+		"explanation": "Use your agility to quickly stab your opponent between your devastating attacks!",
+		"share": "quickpunch",
+		"cooldown": 250,
+		"skin": "skill_quickstab",
+		"class": [
+			"rogue"
+		],
+		"target": true,
+		"name": "Quick Stab",
+		"wtype": "dagger",
+		"range_multiplier": 1,
+		"damage_multiplier": 0.36,
+		"mp": 320,
+		"type": "skill"
+	},
+	"magiport": {
+		"cooldown": 0,
+		"name": "Magiport",
+		"skin": "skill_teleport",
+		"explanation": "Pull someone to your location using the magical paths that surround our world.",
+		"complementary": "Unless the target doesn't have a T2+ helmet, high intelligence, or a low level, it can't resist being magiported. (Reverted [03/07/18])",
+		"type": "skill",
+		"class": [
+			"mage"
+		],
+		"mp": 900
+	},
+	"pcoat": {
+		"cooldown": 50000,
+		"consume": "poison",
+		"name": "A Poisonous Touch",
+		"skin": "skill_pcoat",
+		"duration": 7000,
+		"explanation": "Coat your blade with a poison sack. Poison everyone you damage before the venom dissipates.",
+		"type": "skill",
+		"class": [
+			"rogue"
+		],
+		"mp": 600
+	},
+	"charm": {
+		"slot": [
+			[
+				"orb",
+				"charmer"
+			]
+		],
+		"name": "Charm",
+		"explanation": "Charm a monster [%]",
+		"cooldown": 60000,
+		"mp": 40,
+		"skin": "charmer",
+		"type": "skill"
+	},
+	"hardshell": {
+		"cooldown": 16000,
+		"name": "Hard Shell",
+		"skin": "skill_hardshell",
+		"duration": 8000,
+		"explanation": "Use everything at your disposal to protect yourself from physical attacks for a short duration.",
+		"level": 60,
+		"type": "skill",
+		"class": [
+			"warrior"
+		],
+		"condition": "hardshell",
+		"mp": 480
+	},
+	"scare": {
+		"slot": [
+			[
+				"orb",
+				"jacko"
+			]
+		],
+		"name": "Scare",
+		"explanation": "Activate your Jack-o Lantern to scare away monsters targeting you!",
+		"cooldown": 5000,
+		"mp": 50,
+		"skin": "skill_scare",
+		"type": "skill"
+	},
+	"huntersmark": {
+		"cooldown": 10000,
+		"target": true,
+		"name": "Hunter's Mark",
+		"skin": "skill_huntersmark",
+		"duration": 10000,
+		"explanation": "Mark an opponent for death, prevent them from stealthing away and increase damage done by 10%",
+		"type": "skill",
+		"class": [
+			"ranger"
+		],
+		"mp": 240
+	}
+}

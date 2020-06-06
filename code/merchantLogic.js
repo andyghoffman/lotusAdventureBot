@@ -122,7 +122,7 @@ function merchantLateUpdate()
 		}
 	}
 
-	if (!isBusy())
+	if (!isBusy() && AutoPlay)
 	{
 		if (isInTown() && !VendorMode)
 		{

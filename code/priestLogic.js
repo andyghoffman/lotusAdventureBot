@@ -18,7 +18,7 @@ function priestAuto(target)
 
 function tauntOffPartyMembers(target)
 {
-	if (character.mp < G.skills.absorb.mp || !target)
+	if (character.mp < G.skills.absorb.mp || !target || !UseAbsorbSins)
 	{
 		return;
 	}

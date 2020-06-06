@@ -165,7 +165,7 @@ function lateUpdate()
 
 	checkSentRequests();
 
-	if (character.name === PartyLeader && !partyPresent() && AutoPlay)
+	if (character.name === PartyLeader && AutoPlay && !partyPresent())
 	{
 		initParty();
 	}

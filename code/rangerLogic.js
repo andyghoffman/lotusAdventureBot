@@ -46,7 +46,7 @@ function useSuperShot(target)
 //	use 3shot
 function tripleShot(target)
 {
-	if (is_on_cooldown("3shot"))
+	if (is_on_cooldown("3shot") || !UseThreeShot)
 	{
 		return;
 	}

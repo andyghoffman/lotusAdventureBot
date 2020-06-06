@@ -114,7 +114,7 @@ function on_cm(sender, data)
 			stop();
 		}
 
-		log("autoPlay: " + autoPlay);
+		log("autoPlay: " + AutoPlay);
 		return;
 	}
 	else if (data.message === "town")
@@ -756,22 +756,22 @@ function goTo(mapName = "main", coords = { x: 0, y: 0 }, oncomplete = null)
 	{
 		if (oncomplete != null)
 		{
-			smart_move(mapName, () => { oncomplete(); traveling = false; });
+			smart_move(mapName, () => { oncomplete(); Traveling = false; });
 		}
 		else
 		{
-			smart_move(mapName, () => { traveling = false; });
+			smart_move(mapName, () => { Traveling = false; });
 		}
 	}
 	else
 	{
 		if (oncomplete != null)
 		{
-			smart_move(coords, () => { oncomplete(); traveling = false; });
+			smart_move(coords, () => { oncomplete(); Traveling = false; });
 		}
 		else
 		{
-			smart_move(coords, () => { traveling = false; });
+			smart_move(coords, () => { Traveling = false; });
 		}
 	}
 }
@@ -786,7 +786,7 @@ function travelToFarmSpot()
 	else if (FarmMode === "name")
 	{
 		Traveling = true;
-		smart_move(FarmMonsterName, () => { traveling = false; });
+		smart_move(FarmMonsterName, () => { Traveling = false; });
 	}
 	else if (FarmMode === "number")
 	{
@@ -812,6 +812,7 @@ function goBackToTown(delay)
 	log(character.name + " returning to town.");
 
 	GoingBackToTown = true;
+	Traveling = false;
 
 	use("use_town");
 
