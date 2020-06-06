@@ -77,6 +77,12 @@ function merchantAuto(target)
 
 function merchantLateUpdate()
 {
+	if (character.rip || character.q.upgrade || character.q.compound)
+	{
+		return;
+	}
+
+	checkSentRequests();
 	checkRequests();
 	confirmDeliveries();
 

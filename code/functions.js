@@ -1322,16 +1322,13 @@ function reloadCharacter(name)
 {
 	if (name === character.name)
 	{
-		say("/pure_eval setTimeout(function(){parent.start_runner()}, 500)");
+		say("/pure_eval setTimeout(()=>{parent.start_runner()}, 500)");
 		parent.stop_runner();
 	} 
 	else
 	{
-		command_character(name, ()=>
-		{
-			say("/pure_eval setTimeout(function(){parent.start_runner()}, 500)");
-			parent.stop_runner();
-		});
+		command_character(name, "say(\"/pure_eval setTimeout(()=>{parent.start_runner()}, 500)\")");
+		command_character(name, "say(\"/pure_eval parent.stop_runner();\")");
 		// const rid = "ichar" + name.toLowerCase();
 		// if (parent.document.getElementById(rid).contentWindow.code_active)
 		// {

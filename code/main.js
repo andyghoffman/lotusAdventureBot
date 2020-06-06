@@ -30,15 +30,20 @@ let WhosReady = {leader: false, merchant: false, codeBotOne: false, codeBotTwo: 
 const SentRequests = [];
 
 onStart();
-setInterval(main, 250);
-setInterval(lateUpdate, 5000);
 
-//  called on initialization
+//  called once on initialization
 function onStart()
 {
 	if (character.name === MerchantName)
 	{
 		merchantOnStart();
+		setInterval(main, 250);
+		setInterval(merchantLateUpdate, 5000);
+	}
+	else if(PartyList.includes(character.name))
+	{
+		setInterval(main, 250);
+		setInterval(lateUpdate, 5000);
 	}
 }
 
@@ -125,13 +130,6 @@ function lateUpdate()
 	if (character.name === PartyLeader && AutoPlay && !partyPresent())
 	{
 		initParty();
-	}
-
-	//  merchant has it's own lateUpdate
-	if (character.name === MerchantName)
-	{
-		merchantLateUpdate();
-		return;
 	}
 
 	//  don't do anything past here if autoPlay is off
