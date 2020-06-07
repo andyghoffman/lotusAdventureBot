@@ -29,9 +29,15 @@ const FarmMap = "desertland";
 const FarmMonsterSpawnNumber = 8;
 const FarmRadius = 200;
 const FarmCoords = { x: 1202, y: -782 };    //  only used if farmMode is 'coords'
-const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];  //  priority targets
-const DontKite = ["phoenix"];   //  any monsters to never kite
-const AvoidMonsters = ["plantoid"];
+const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];
+//  solo character settings (only used if solo character is set up)
+const SoloCharacterActive = true;
+const SoloCharFarmMode = "number";
+const SoloCharFarmMonsterName = "snake";
+const SoloCharFarmMap = "main";
+const SoloCharFarmMonsterSpawnNumber = 6;
+const SoloFarmRadius = 75;
+const SoloSpecialMonsters = ["osnake"];
 //////
 
 ///     combat behaviour settings       ///
@@ -39,6 +45,8 @@ const PullIndescritely = true  //  if false, party members will wait for the par
 const UseThreeShot = true;
 const UseAbsorbSins = true;
 const UseReflection = true;
+const DontKite = ["phoenix"];   //  any monsters to never kite
+const AvoidMonsters = ["plantoid"];
 //////
 
 ///     party/character settings      ///
@@ -47,8 +55,9 @@ const MageName = "LotusMage";
 const RangerName = "LotusRanger", RangerTwoName = "RangerLotus";
 const PriestName = "LotusPriest";
 const PartyLeader = MageName;
-const PartyList = [MerchantName, MageName, RangerName, RangerTwoName];
-const WhiteList = [];
+const PartyList = [MerchantName, MageName, RangerName];
+const SoloCharacter = RangerTwoName;
+
 const MerchantStrandMap = "main";
 const MerchantStandCoords = { x: -118, y: 11 };
 const HealthPotsToHave = 1000;
@@ -59,9 +68,10 @@ const MaxLeaderDistance = 60;
 const LowInventoryThreshold = 14;
 const VeryLowInventoryThreshold = 7;
 const MonsterHealthThreshold = 0.5;
-const ItemsToHoldOnTo = [];
 const MerchantItems = ["stand0", "scroll0", "scroll1", "cscroll0", "cscroll1", "seashell", "leather", "ascale", "cscale", "bfur", "pleather"];
 const Potions = ["hpot1", "mpot1"];
+const ItemsToHoldOnTo = [];
+const WhiteList = [];
 //////
 
 Potions.forEach(x => { ItemsToHoldOnTo.push(x) });
@@ -71,5 +81,9 @@ BasicItemsToCraft.forEach(x => { ItemsToUpgrade.push(x) });
 ItemsToUpgrade.forEach(x => { BuyFromPonty.push(x) });
 ItemsToCompound.forEach(x => { BuyFromPonty.push(x) });
 PartyList.forEach(x => { WhiteList.push(x) });
+if(SoloCharacterActive)
+{
+	WhiteList.push(SoloCharacter);
+}
 
 //autoreload

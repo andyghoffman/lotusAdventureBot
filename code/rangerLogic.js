@@ -42,7 +42,7 @@ function useSuperShot(target)
 //	use 3shot
 function tripleShot(target)
 {
-	if (is_on_cooldown("attack") || !UseThreeShot || !target)
+	if (is_on_cooldown("attack") || !UseThreeShot || !target || character.level < 60)
 	{
 		return;
 	}

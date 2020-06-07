@@ -39,18 +39,23 @@ function onStart()
 	if (character.name === MerchantName)
 	{
 		merchantOnStart();
-		setInterval(main, 250);
+		setInterval(partyMainInterval, 250);
 		setInterval(merchantLateUpdate, 5000);
 	}
 	else if(PartyList.includes(character.name))
 	{
-		setInterval(main, 250);
+		setInterval(partyMainInterval, 250);
 		setInterval(lateUpdate, 5000);
+	}
+	else if(character.name === SoloCharacter)
+	{
+		setInterval(soloMainInterval, 250);
+		setInterval(lateUpdate, 5000);	
 	}
 }
 
 //  called every 250ms
-function main()
+function partyMainInterval()
 {
 	if (character.rip)
 	{
@@ -61,7 +66,7 @@ function main()
 	let target = lookForSpecialTargets();
 	
 	//  look for a target
-	if (!target)
+	if (FarmingModeActive && !target && !Traveling)
 	{
 		let canPullNew = character.name === PartyLeader || PullIndescritely;
 		target = getTargetMonster(FarmMonsterName, canPullNew);
@@ -85,8 +90,6 @@ function main()
 		{
 			aloneCheck();
 		}
-
-		return;
 	}
 	
 	if((AutoPlay && !Traveling && !GoingBackToTown) || character.name === MerchantName)
@@ -98,7 +101,7 @@ function main()
 		autoHeal();
 	}
 
-	if (is_moving(character) || smart.moving || GoingBackToTown || Traveling || character.q.upgrade || character.q.compound || character.name === MerchantName)
+	if (is_moving(character) || smart.moving || GoingBackToTown || Traveling || character.q.upgrade || character.q.compound || character.name === MerchantName || !FarmingModeActive)
 	{
 		return;
 	}
@@ -106,16 +109,77 @@ function main()
 	if (!Traveling && !target)
 	{
 		log(character.name + " going to farm map... ");
-		travelToFarmSpot();
+		travelToFarmSpot(FarmMode, FarmMonsterName, FarmMap, FarmMonsterSpawnNumber);
 	}
 
 	//  keep personal space
-	personalSpace();
+	if(!Traveling && FarmingModeActive)
+	{
+		personalSpace();		
+	}
 
 	//  if leader is too far away approach him
-	if (character.name !== PartyLeader)
+	if (character.name !== PartyLeader && !Traveling)
 	{
 		followLeader();
+	}
+}
+
+function soloMainInterval()
+{
+	if (character.rip)
+	{
+		setTimeout(respawn, 15000);
+		return;
+	}
+
+	let target = lookForSpecialTargets();
+
+	//  look for a target
+	if (!target && FarmingModeActive && !Traveling)
+	{
+		target = getTargetMonster(SoloCharFarmMonsterName);
+	}
+
+	target = dropInvalidTarget(target);
+
+	loot();
+	usePotions();
+
+	if (AutoPlay)
+	{
+		tidyInventory();
+	}
+
+	if (AutoPlay && !Traveling && !GoingBackToTown)
+	{
+		classRoutine(target);
+	} 
+	else if (character.name === PriestName)
+	{
+		autoHeal();
+	}
+
+	if (is_moving(character) || smart.moving || GoingBackToTown || Traveling || character.q.upgrade || character.q.compound)
+	{
+		return;
+	}
+	
+	if (!Traveling && !FarmingModeActive)
+	{
+		FarmingModeActive = true;
+	}
+
+	if (!Traveling && !target)
+	{
+		log(character.name + " going to farm map... ");
+		travelToFarmSpot(SoloCharFarmMode, SoloCharFarmMonsterName, SoloCharFarmMap, SoloCharFarmMonsterSpawnNumber);
+	}
+
+	//  keep personal space
+	if(!Traveling && FarmingModeActive)
+	{
+		personalSpace();		
 	}
 }
 
@@ -155,13 +219,13 @@ function lateUpdate()
 	checkIfReady();
 
 	//  party leader keeps things in check
-	if (character.name === PartyLeader)
+	if (character.name === PartyLeader && !FarmingModeActive)
 	{
-		if (readyToGo() && partyPresent() && !FarmingModeActive)
+		if (readyToGo() && partyPresent())
 		{
 			letsGo();
 		}
-		else if (partyPresent() && !FarmingModeActive)
+		else if (partyPresent())
 		{
 			sendReadyCheck();
 		}

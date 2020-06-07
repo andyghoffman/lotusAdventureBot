@@ -31,7 +31,7 @@ function merchantAuto(target)
 
 	for(let p in parent.entities)
 	{
-		let isPartyMember = parent.party_list.includes(p);
+		let isPartyMember = WhiteList.includes(p);
 		let friendlyTarget = parent.entities[p];
 
 		if (!friendlyTarget.player || friendlyTarget.npc)
@@ -39,7 +39,7 @@ function merchantAuto(target)
 			continue;
 		}
 
-		if (isPartyMember)
+		if (isPartyMember && friendlyTarget)
 		{
 			if (distance(friendlyTarget, character) < 200)
 			{
@@ -56,7 +56,7 @@ function merchantAuto(target)
 					reduce_cooldown("mluck", character.ping);
 				}
 			}
-			else if (DeliveryMode && !GoingBackToTown && DeliveryRequests.length > 0)
+			else if (DeliveryMode && !GoingBackToTown && DeliveryRequests.length > 0 && friendlyTarget.name === DeliveryRequests[0].sender)
 			{
 				log("Moving closer to recipient.");
 				approachTarget(friendlyTarget);
@@ -145,103 +145,123 @@ function merchantLateUpdate()
 
 function merchant_on_cm(sender, data)
 {
-	if (data.message === "buyPots")
+	switch (data.message)
 	{
-		if (DeliveryRequests.find((x) => { if (x.request === "potions" && x.sender === sender) return x; }))
-		{
-			log("Already have potion request from " + sender);
+		case "buyPots":
+			if (DeliveryRequests.find((x) =>
+			{
+				if (x.request === "potions" && x.sender === sender) return x;
+			}))
+			{
+				log("Already have potion request from " + sender);
+				return;
+			}
+
+			log("Recieved potion request from " + sender);
+			DeliveryRequests.push({
+				request: "potions",
+				sender: sender,
+				shipment: null,
+				hPots: data.hPots,
+				mPots: data.mPots
+			});
 			return;
-		}
-
-		log("Recieved potion request from " + sender);
-		DeliveryRequests.push({ request: "potions", sender: sender, shipment: null, hPots: data.hPots, mPots: data.mPots });
-	}
-	else if (data.message === "elixir")
-	{
-		if (DeliveryRequests.find((x) => { if (x.request === "elixir" && x.sender === sender) return x; }))
-		{
-			log("Already have elixir request from " + sender);
+		case "elixir":
+			if (DeliveryRequests.find((x) => { if (x.request === "elixir" && x.sender === sender) return x; }))
+			{
+				log("Already have elixir request from " + sender);
+				return;
+			}
+			log("Recieved elixir request from " + sender);
+			let elixir = getElixirInventorySlot(data.type);
+			if (elixir)
+			{
+				let shipmentItem = character.items[elixir];
+				DeliveryRequests.push({
+					request: "elixir",
+					sender: sender,
+					shipment: shipmentItem.name,
+					type: data.type
+				});
+				DeliveryShipments.push({name: sender, elixir: shipmentItem.name, type: data.type});
+			} else
+			{
+				log("Don't have any " + data.type + " elixirs.");
+				send_cm(sender, {message: "noelixirs"});
+			}
 			return;
-		}
-
-		log("Recieved elixir request from " + sender);
-
-		let elixir = getElixirInventorySlot(data.type);
-
-		if (elixir)
-		{
-			let shipmentItem = character.items[elixir];
-			DeliveryRequests.push({ request: "elixir", sender: sender, shipment: shipmentItem.name, type: data.type });
-			DeliveryShipments.push({ name: sender, elixir: shipmentItem.name, type: data.type });
-		}
-		else
-		{
-			log("Don't have any " + data.type + " elixirs.");
-			send_cm(sender, { message: "noelixirs" });
-		}
-	}
-	else if (data.message === "mluck")
-	{
-		if (DeliveryRequests.find((x) => { if (x.request == "mluck") return x; }))
-		{
-			log("Already have mluck request.");
+		case "mluck":
+			if (DeliveryRequests.find((x) => { if (x.request == "mluck") return x;}))
+			{
+				log("Already have mluck request.");
+				return;
+			}
+			log("Recieved mluck request from " + sender);
+			DeliveryRequests.push({request: "mluck", sender: sender});
 			return;
-		}
-
-		log("Recieved mluck request from " + sender);
-		DeliveryRequests.push({ request: "mluck", sender: sender });
-	}
-	else if (data.message === "thanks")
-	{
-		log("Successful delivery confirmation from " + sender);
-
-		if (data.request === "mluck")
-		{
+		case "thanks":
+			log("Successful delivery confirmation from " + sender);
+			if (data.request === "mluck")
+			{
+				for (let i = DeliveryRequests.length - 1; i >= 0; i--)
+				{
+					if (DeliveryRequests[i].request === "mluck")
+					{
+						DeliveryRequests.splice(i, 1);
+					}
+				}
+			} else
+			{
+				DeliveryRequests.splice(DeliveryRequests.indexOf(x => x.sender === sender && x.request === data.request), 1);
+			}
+			return;
+		case "deliveryConfirmation":
+			if (!data.confirm)
+			{
+				return;
+			}
 			for (let i = DeliveryRequests.length - 1; i >= 0; i--)
 			{
-				if (DeliveryRequests[i].request === "mluck")
+				if (DeliveryRequests[i].sender === sender)
 				{
+					log("Cleaning up delivery list...");
 					DeliveryRequests.splice(i, 1);
 				}
 			}
-		}
-		else
-		{
-			DeliveryRequests.splice(DeliveryRequests.indexOf(x => x.sender === sender && x.request === data.request), 1);
-		}
-	}
-
-	//	this should remain the last check
-	if (data.message === "deliveryConfirmation")
-	{
-		if (!data.confirm)
-		{
-			return;
-		}
-
-		for (let i = DeliveryRequests.length - 1; i >= 0; i--)
-		{
-			if (DeliveryRequests[i].sender === sender)
+			for (let i = DeliveryShipments.length - 1; i >= 0; i--)
 			{
-				log("Cleaning up delivery list...");
-				DeliveryRequests.splice(i, 1);
+				if (DeliveryShipments[i].name === sender)
+				{
+					log("Cleaning up delivery list...");
+					DeliveryShipments.splice(i, 1);
+				}
 			}
-		}
-
-		for (let i = DeliveryShipments.length - 1; i >= 0; i--)
-		{
-			if (DeliveryShipments[i].name === sender)
+			break;
+		case "magiportRequestResponse":
+			if (data.available)
 			{
-				log("Cleaning up delivery list...");
-				DeliveryShipments.splice(i, 1);
+				requestMagiPort();
 			}
-		}
+			else if(!Traveling)
+			{
+				if(character.map === data.map)
+				{
+					goTo(data.map, data.coords);
+				}
+				else
+				{
+					goTo(data.map, {x:0,y:0},()=>
+					{
+						goTo(data.map, data.coords);
+					});
+				}
+			}
 	}
 }
 
 function merchant_on_magiport(name)
 {
-	if (!DeliveryMode || (GoingBackToTown || Banking || ExchangeMode))
+	if (!DeliveryMode)
 	{
 		return;
 	}
@@ -287,7 +307,11 @@ function checkRequests()
 	if (DeliveryRequests.length > 0)
 	{
 		DeliveryMode = true;
-		disableVendorMode();
+		
+		if(VendorMode)
+		{
+			disableVendorMode();			
+		}
 
 		for (let i = 0; i < DeliveryRequests.length; i++)
 		{
@@ -295,6 +319,7 @@ function checkRequests()
 			if (DeliveryRequests[i].request === "potions" && !DeliveryRequests[i].shipment)
 			{
 				buyPotionsFor(DeliveryRequests[i].sender, DeliveryRequests[i].hPots, DeliveryRequests[i].mPots);
+				return;
 			}
 			//	deliver to recipient
 			else if (DeliveryRequests[i].shipment || DeliveryRequests[i].request === "mluck")
@@ -306,8 +331,11 @@ function checkRequests()
 				}
 				else
 				{
-					requestMagiPort();
+					send_cm(DeliveryRequests[i].sender, {message:"magiport?"});
+					//requestMagiPort();
 				}
+				
+				return;;
 			}
 		}
 	}

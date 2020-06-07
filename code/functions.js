@@ -60,7 +60,7 @@ function on_cm(sender, data)
 			AutoPlay = data.auto;
 			if (!AutoPlay)
 			{
-				FarmingModeActive = false;
+				stopFarmMode();
 				stop();
 			}
 			log("autoPlay: " + AutoPlay);
@@ -87,14 +87,22 @@ function on_cm(sender, data)
 				WhosReady.merchant = data.isReady;
 			} else if (PartyList.includes(sender))
 			{
-				if (!WhosReady.codeBotOne && !WhosReady.codeBotTwo)
+				if (!WhosReady.codeBotOne)
 				{
 					WhosReady.codeBotOne = data.isReady;
-				} else if (WhosReady.codeBotOne && !WhosReady.codeBotTwo)
+				} 
+				else if (WhosReady.codeBotOne && !WhosReady.codeBotTwo)
 				{
 					WhosReady.codeBotTwo = data.isReady;
 				}
 			}
+			
+			//  if there isn't a second code bot for the party (because its split farming solo)
+			if(SoloCharacterActive)
+			{
+				WhosReady.codeBotTwo = true;
+			}
+			
 			if (readyToGo())
 			{
 				ReadyChecking = false;
@@ -113,6 +121,15 @@ function on_cm(sender, data)
 			{
 				send_cm(sender, {message: "deliveryConfirmation", confirm: true});
 			}
+			return;
+		case "magiport?":
+			let magiPortAvailable = false;
+			if(character.name === MageName || (parent.entities[MageName] && distance(character, parent.entities[MageName]) < 100))
+			{
+				magiPortAvailable = true;
+			}
+			let coords = {x:character.x, y:character.y};
+			send_cm(sender, {message:"magiportRequestResponse", available:magiPortAvailable, map:character.map, coords:coords});
 			return;
 	}
 
@@ -305,10 +322,9 @@ function personalSpace()
 
 		if (!isInFarmSpawnBounds(adjustment))
 		{
-			adjustment = { x: character.x - right, y: character.y - up };
+			smart_move(getFarmSpotCoords());
 		}
-
-		if (character.name !== PartyLeader)
+		else if (character.name !== PartyLeader && character.name !== SoloCharacter)
 		{
 			let leader = parent.entities[PartyLeader];
 
@@ -316,23 +332,23 @@ function personalSpace()
 			if (leader && distance(adjustment, leader) < MaxLeaderDistance)
 			{
 				smart_move(adjustment, () => { stuckCheck(currentPos); });
-				return;
 			}
 			else if (leader)
 			{
 				followLeader();
-				return;
 			}
 		}
-
-		smart_move(adjustment, () => { stuckCheck(currentPos); });
+		else
+		{
+			smart_move(adjustment, () => { stuckCheck(currentPos); });
+		}
 	}
 }
 
 //	used with personalSpace to get out of corners and walls
 function stuckCheck(originalPosition)
 {
-	IsStuck = distance(originalPosition, { x: character.real_x, y: character.real_y }) < 2;
+	IsStuck = distance(originalPosition, { x: character.real_x, y: character.real_y }) < 1;
 
 	if (IsStuck)
 	{
@@ -520,7 +536,7 @@ function checkPotionInventory()
 			if (hPotions === 0 || mPotions === 0)
 			{
 				log(character.name + " has no potions, is returning to town.");
-				FarmingModeActive = false;
+				stopFarmMode();
 
 				if (!GoingBackToTown && !Traveling)
 				{
@@ -627,13 +643,13 @@ function getTargetMonster(farmTarget, canPullNewMonsters = true)
 	let target = get_targeted_monster();
 
 	//	if you already have a target, keep it
-	if (target)
+	if (target && target.mtype === farmTarget)
 	{
 		return target;
 	}
 
 	//	party leader checks for nearest monster to itself that is targeting party leader
-	if (character.name === PartyLeader)
+	if (character.name === PartyLeader || character.name === SoloCharacter)
 	{
 		target = get_nearest_monster({type: farmTarget, target: character.name});
 
@@ -766,26 +782,26 @@ function goTo(mapName = "main", coords = { x: 0, y: 0 }, oncomplete = null)
 	}
 }
 
-function travelToFarmSpot()
+function travelToFarmSpot(mode, monsterName, map, number, coords = {x:0,y:0})
 {
-	if (FarmMode === "coords")
+	Traveling = true;
+	
+	if (mode === "coords")
 	{
-		goTo(FarmMap, FarmCoords);
+		goTo(map, coords);
 	}
-	else if (FarmMode === "name")
+	else if (mode === "name")
 	{
-		Traveling = true;
-		smart_move(FarmMonsterName, () => { Traveling = false; });
+		smart_move(monsterName, () => { Traveling = false; });
 	}
-	else if (FarmMode === "number")
+	else if (mode === "number")
 	{
-		let coords = { x: 0, y: 0 };
-		let monster = G.maps[FarmMap].monsters.find((x) => { if (x.type == FarmMonsterName && x.count == FarmMonsterSpawnNumber) return x; });
+		let monster = G.maps[map].monsters.find((x) => { if (x.type === monsterName && x.count === number) return x; });
 
 		coords.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
 		coords.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
 
-		goTo(FarmMap, coords);
+		goTo(map, coords);
 	}
 }
 
@@ -841,7 +857,7 @@ function tidyInventory()
 		}
 	}
 
-	if (lastEmptySlot > 0)
+	if (lastEmptySlot > 0 && slotToMove >= 0)
 	{
 		swap(slotToMove, lastEmptySlot);
 	}
@@ -957,7 +973,7 @@ function togglePartyAuto(forceState = null)
 
 	if (!AutoPlay)
 	{
-		FarmingModeActive = false;
+		stopFarmMode();
 		stop();
 	}
 
@@ -1026,6 +1042,7 @@ function stopCharacters()
 
 function stopFarmMode()
 {
+	log(character.name + " stopping farm mode.");
 	stop();
 	FarmingModeActive = false;
 	WhosReady = { leader: false, merchant: false, codeBotOne: false, codeBotTwo: false };
@@ -1155,10 +1172,16 @@ function isItemOnCraftList(itemName)
 
 function lookForSpecialTargets()
 {
-	for (let i = 0; i < SpecialMonsters.length; i++)
+	let listToUse = SpecialMonsters;
+	if(character.name === SoloCharacter)
 	{
-		let target = getTargetMonster(SpecialMonsters[i]);
-		if (target && SpecialMonsters.includes(target.mtype))
+		listToUse = SoloSpecialMonsters;
+	}
+	
+	for(let special of listToUse)
+	{
+		let target = getTargetMonster(special);
+		if (target && special.includes(target.mtype))
 		{
 			if(get_targeted_monster() !== target)
 			{
@@ -1309,33 +1332,49 @@ function xpReport()
 
 function isInFarmSpawnBounds(coords)
 {
-	let monster = G.maps[FarmMap].monsters.find((x) => { if (x.type === FarmMonsterName && x.count === FarmMonsterSpawnNumber) return x; });
-
-	let center = { x: 0, y: 0 };
-	center.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
-	center.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
-
-	return distance(coords, center) < FarmRadius;
+	let center = getFarmSpotCoords();
+	
+	if(character.name === SoloCharacter)
+	{
+		return distance(coords, center) < SoloFarmRadius;
+	}
+	else
+	{
+		return distance(coords, center) < FarmRadius;		
+	}
 }
 
-// Reload code on character (yoinked from discord)
+function getFarmSpotCoords()
+{
+	let center = {x: 0, y: 0};
+	
+	if (character.name === SoloCharacter)
+	{
+		let monster = G.maps[SoloCharFarmMap].monsters.find((x) =>
+		{
+			if (x.type === SoloCharFarmMonsterName && x.count === SoloCharFarmMonsterSpawnNumber) return x;
+		});
+
+		center.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
+		center.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
+	} 
+	else
+	{
+		let monster = G.maps[FarmMap].monsters.find((x) =>
+		{
+			if (x.type === FarmMonsterName && x.count === FarmMonsterSpawnNumber) return x;
+		});
+
+		center.x = monster.boundary[0] + ((monster.boundary[2] - monster.boundary[0]) / 2);
+		center.y = monster.boundary[1] + ((monster.boundary[3] - monster.boundary[1]) / 2);
+	}
+
+	return center;
+}
+
+// Reload code on character
 function reloadCharacter(name)
 {
-	// if (name === character.name)
-	// {
-	// 	say("/pure_eval setTimeout(function(){parent.start_runner()}, 500)");
-	// 	parent.stop_runner();
-	// } 
-	// else
-	// {
-	// 	const rid = "ichar" + name.toLowerCase();
-	// 	if (parent.document.getElementById(rid).contentWindow.code_active)
-	// 	{
-	// 		parent.document.getElementById(rid).contentWindow.stop_runner();
-	// 		parent.document.getElementById(rid).contentWindow.start_runner();
-	// 	}
-	// }
-	
 	if (name === character.name)
 	{
 		say("/pure_eval setTimeout(()=>{parent.start_runner()}, 500)");
