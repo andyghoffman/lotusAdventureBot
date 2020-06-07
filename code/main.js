@@ -34,6 +34,8 @@ onStart();
 //  called once on initialization
 function onStart()
 {
+	log(character.name + " loaded!");
+	
 	if (character.name === MerchantName)
 	{
 		merchantOnStart();

@@ -97,6 +97,8 @@ function on_cm(sender, data)
 			}
 			if (readyToGo())
 			{
+				ReadyChecking = false;
+				
 				for (let p of PartyList)
 				{
 					if (p !== character.name)
@@ -190,9 +192,8 @@ function sendReadyCheck()
 	}
 
 	stopFarmMode();
-	ReadyChecking = true;
-
 	let ready = checkIfReady();
+	ReadyChecking = true;
 
 	if (character.name === PartyLeader)
 	{
@@ -246,7 +247,7 @@ function sendReadyCheck()
 	setTimeout(() =>
 	{
 		ReadyChecking = false;
-	}, 30000);
+	}, 10000);
 }
 
 function readyToGo()
@@ -1320,6 +1321,21 @@ function isInFarmSpawnBounds(coords)
 // Reload code on character (yoinked from discord)
 function reloadCharacter(name)
 {
+	// if (name === character.name)
+	// {
+	// 	say("/pure_eval setTimeout(function(){parent.start_runner()}, 500)");
+	// 	parent.stop_runner();
+	// } 
+	// else
+	// {
+	// 	const rid = "ichar" + name.toLowerCase();
+	// 	if (parent.document.getElementById(rid).contentWindow.code_active)
+	// 	{
+	// 		parent.document.getElementById(rid).contentWindow.stop_runner();
+	// 		parent.document.getElementById(rid).contentWindow.start_runner();
+	// 	}
+	// }
+	
 	if (name === character.name)
 	{
 		say("/pure_eval setTimeout(()=>{parent.start_runner()}, 500)");
@@ -1327,26 +1343,24 @@ function reloadCharacter(name)
 	} 
 	else
 	{
-		command_character(name, "say(\"/pure_eval setTimeout(()=>{parent.start_runner()}, 500)\")");
-		command_character(name, "say(\"/pure_eval parent.stop_runner();\")");
-		// const rid = "ichar" + name.toLowerCase();
-		// if (parent.document.getElementById(rid).contentWindow.code_active)
-		// {
-		// 	parent.document.getElementById(rid).contentWindow.stop_runner();
-		// 	parent.document.getElementById(rid).contentWindow.start_runner();
-		// }
+		command_character(name, "say(\"/pure_eval setTimeout(()=>{start_runner()}, 500)\")");
+		command_character(name, "say(\"/pure_eval stop_runner();\")");
 	}
 }
 
 function reloadCharacters()
 {
-	for(let p of PartyList)
+	for(let i = 0; i < PartyList.length; i++)
 	{
-		if(p !== character.name)
+		let name = PartyList[i];
+		if (name !== character.name && get_active_characters()[name])
 		{
-			reloadCharacter(p);			
-		}
+			reloadCharacter(name);
+		}	
 	}
-	
-	reloadCharacter(character.name);
+
+	setTimeout(() =>
+	{
+		reloadCharacter(character.name);
+	}, 1000);
 }
