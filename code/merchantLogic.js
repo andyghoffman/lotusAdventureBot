@@ -41,7 +41,7 @@ function merchantAuto(target)
 
 		if (isPartyMember && friendlyTarget)
 		{
-			if (distance(friendlyTarget, character) < 200)
+			if (distance(friendlyTarget, character) < 100)
 			{
 				let shipment = getShipmentFor(friendlyTarget.name);
 
@@ -56,10 +56,10 @@ function merchantAuto(target)
 					reduce_cooldown("mluck", character.ping);
 				}
 			}
-			else if (DeliveryMode && !GoingBackToTown && DeliveryRequests.length > 0 && friendlyTarget.name === DeliveryRequests[0].sender)
+			else if (DeliveryMode && !smart.moving && !GoingBackToTown && DeliveryRequests.length > 0 && friendlyTarget.name === DeliveryRequests[0].sender)
 			{
 				log("Moving closer to recipient.");
-				approachTarget(friendlyTarget);
+				smart_move({x:friendlyTarget.x, y:friendlyTarget.y});
 			}
 		}
 		else if (friendlyTarget)

@@ -5,7 +5,7 @@ const BasicItemsToCraft = [];   //  keep buying and upgrading these
 const UpgradeLevelToStop = 7;
 const UpgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
 const CompoundLevelToStop = 2;
-const ItemsToUpgrade = ["wattire", "wgloves", "wbreeches", "wshoes", "wcap", "shield", "quiver", "pants", "gloves", "shoes"];
+const ItemsToUpgrade = ["bow","hbow","wattire", "wgloves", "wbreeches", "wshoes", "wcap", "shield", "quiver", "pants", "gloves", "shoes"];
 const ItemsToCompound = ["intring", "strring", "dexring", "ringsj", "intearring", "dexearring", "dexamulet", "intamulet", "orbofint", "orbofdex", "dexbelt", "intbelt", "wbook0", "strearring"];
 const VendorTrash = ["ringsj", "cclaw", "hpamulet", "hpbelt", "vitring", "vitearring", "vitscroll", "cshell"];
 const BuyFromPonty = ["ascale","cscale","pleather","bfur","seashell", "leather", "firestaff", "suckerpunch", "t2dexamulet", "t2intamulet", "rabbitsfoot", "ringofluck", "cape", "ecape", "angelwings", "bcape", "orbg", "hbow", "t2bow", "seashell"];
@@ -24,20 +24,20 @@ const XynTypes = ["gem", "box"]; //  item types to be exchanged with Xyn
 ///     
 const FullAuto = true;  //  if true will automatically start farming on connect & startup. set false to have player control on startup
 const FarmMode = "number";
-const FarmMonsterName = "porcupine";
-const FarmMap = "desertland";
-const FarmMonsterSpawnNumber = 8;
-const FarmRadius = 200;
+const FarmMonsterName = "armadillo";
+const FarmMap = "main";
+const FarmMonsterSpawnNumber = 6;
+const FarmRadius = 100;
 const FarmCoords = { x: 1202, y: -782 };    //  only used if farmMode is 'coords'
 const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];
 //  solo character settings (only used if solo character is set up)
 const SoloCharacterActive = true;
 const SoloCharFarmMode = "number";
-const SoloCharFarmMonsterName = "snake";
+const SoloCharFarmMonsterName = "croc";
 const SoloCharFarmMap = "main";
 const SoloCharFarmMonsterSpawnNumber = 6;
 const SoloFarmRadius = 75;
-const SoloSpecialMonsters = ["osnake"];
+const SoloSpecialMonsters = ["phoenix"];
 //////
 
 ///     combat behaviour settings       ///
@@ -45,7 +45,7 @@ const PullIndescritely = true  //  if false, party members will wait for the par
 const UseThreeShot = true;
 const UseAbsorbSins = true;
 const UseReflection = true;
-const DontKite = ["phoenix"];   //  any monsters to never kite
+const DontKite = [];   //  any monsters to never kite
 const AvoidMonsters = ["plantoid"];
 //////
 
@@ -55,7 +55,7 @@ const MageName = "LotusMage";
 const RangerName = "LotusRanger", RangerTwoName = "RangerLotus";
 const PriestName = "LotusPriest";
 const PartyLeader = MageName;
-const PartyList = [MerchantName, MageName, RangerName];
+const PartyList = [MageName, RangerName];
 const SoloCharacter = RangerTwoName;
 
 const MerchantStrandMap = "main";
@@ -71,7 +71,7 @@ const MonsterHealthThreshold = 0.5;
 const MerchantItems = ["stand0", "scroll0", "scroll1", "cscroll0", "cscroll1", "seashell", "leather", "ascale", "cscale", "bfur", "pleather"];
 const Potions = ["hpot1", "mpot1"];
 const ItemsToHoldOnTo = [];
-const WhiteList = [];
+const WhiteList = [MerchantName];
 //////
 
 Potions.forEach(x => { ItemsToHoldOnTo.push(x) });

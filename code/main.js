@@ -136,7 +136,7 @@ function soloMainInterval()
 	let target = lookForSpecialTargets();
 
 	//  look for a target
-	if (!target && FarmingModeActive && !Traveling)
+	if (FarmingModeActive && !target && !Traveling)
 	{
 		target = getTargetMonster(SoloCharFarmMonsterName);
 	}

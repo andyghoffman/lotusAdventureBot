@@ -22,7 +22,6 @@ function on_cm(sender, data)
 				{
 					change_target(target);
 					stop();
-					approachTarget(target);
 				}
 			} else
 			{
@@ -79,13 +78,15 @@ function on_cm(sender, data)
 		case "readyReply":
 			let response = character.name + " recieved readyReply from " + sender + ". " + sender + " is " + (data.isReady ? "ready!" : "not ready. ")
 			log(response);
+			if (sender === MerchantName || !PartyList.includes(MerchantName))
+			{
+				WhosReady.merchant = true;
+			}
 			if (sender === PartyLeader)
 			{
 				WhosReady.leader = data.isReady;
-			} else if (sender === MerchantName)
-			{
-				WhosReady.merchant = data.isReady;
-			} else if (PartyList.includes(sender))
+			}
+			else if (PartyList.includes(sender))
 			{
 				if (!WhosReady.codeBotOne)
 				{
@@ -631,8 +632,11 @@ function broadCastTarget(broadCastTarget)
 
 			if (partyMember && partyMember.name !== MerchantName && partyMember.name !== character.name)
 			{
-				log(character.name + " broadcasting target " + broadCastTarget.name + " to " + partyMember.name);
-				send_cm(partyMember.name, { message: "target", targetId: broadCastTarget.id });
+				if(!partyMember.target || partyMember.target !== broadCastTarget)
+				{
+					log(character.name + " broadcasting target " + broadCastTarget.name + " to " + partyMember.name);
+					send_cm(partyMember.name, {message: "target", targetId: broadCastTarget.id});			
+				}
 			}
 		}
 	}
@@ -1183,13 +1187,9 @@ function lookForSpecialTargets()
 		let target = getTargetMonster(special);
 		if (target && special.includes(target.mtype))
 		{
-			if(get_targeted_monster() !== target)
-			{
-				stop();
-				approachTarget(target);
-				broadCastTarget(target);	
-			}
-			
+			stop();
+			broadCastTarget(target);
+
 			return target;
 		}
 	}
