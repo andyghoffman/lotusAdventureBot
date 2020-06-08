@@ -70,7 +70,7 @@ const VeryLowInventoryThreshold = 7;
 const MonsterHealthThreshold = 0.5;
 const MerchantItems = ["stand0", "scroll0", "scroll1", "cscroll0", "cscroll1", "seashell", "leather", "ascale", "cscale", "bfur", "pleather"];
 const Potions = ["hpot1", "mpot1"];
-const ItemsToHoldOnTo = [];
+const ItemsToHoldOnTo = ["tracker"];
 const WhiteList = [MerchantName];
 //////
 

@@ -63,7 +63,12 @@ function partyMainInterval()
 		return;
 	}
 
-	let target = lookForSpecialTargets();
+	let target = get_targeted_monster();
+
+	if ((!target || !SpecialMonsters.includes(target.mtype)) && (FarmingModeActive && !Traveling))
+	{
+		target = lookForSpecialTargets();
+	}
 	
 	//  look for a target
 	if (FarmingModeActive && !target && !Traveling)
@@ -133,9 +138,13 @@ function soloMainInterval()
 		return;
 	}
 
-	let target = lookForSpecialTargets();
+	let target = get_targeted_monster();
 
-	//  look for a target
+	if ((!target || !SoloSpecialMonsters.includes(target.mtype)) && (FarmingModeActive && !Traveling))
+	{
+		target = lookForSpecialTargets();	
+	}
+	
 	if (FarmingModeActive && !target && !Traveling)
 	{
 		target = getTargetMonster(SoloCharFarmMonsterName);

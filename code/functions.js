@@ -23,7 +23,8 @@ function on_cm(sender, data)
 					change_target(target);
 					stop();
 				}
-			} else
+			} 
+			else
 			{
 				log(character.name + " recieved a target from " + sender + " but could not find it.");
 				let senderPlayer = parent.entities[sender];
@@ -40,7 +41,8 @@ function on_cm(sender, data)
 			if (character.name === MerchantName)
 			{
 				ready = parent.party_list.includes(PartyLeader);
-			} else
+			} 
+			else
 			{
 				ready = checkIfReady();
 			}
@@ -69,10 +71,7 @@ function on_cm(sender, data)
 			return;
 		case "noelixirs":
 			NoElixirs = true;
-			SentRequests.splice(SentRequests.indexOf(SentRequests.find((x) =>
-			{
-				if (x.request === "elixir") return x;
-			}), 1));
+			SentRequests.splice(SentRequests.indexOf(SentRequests.find((x) => { if (x.request === "elixir") return x; }), 1));
 			log("Continuing without elixir.");
 			return;
 		case "readyReply":

@@ -465,7 +465,8 @@ function buyBasicItems()
 {
 	for (let i = 0; i < BasicItemsToCraft.length; i++) 
 	{
-		if (!G.items[BasicItemsToCraft[i]]) {
+		if (!G.items[BasicItemsToCraft[i]]) 
+		{
 			log(BasicItemsToCraft[i] + " is not a valid item name!");
 			return;
 		}
