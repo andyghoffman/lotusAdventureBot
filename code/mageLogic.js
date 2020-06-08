@@ -73,4 +73,15 @@ function mage_on_cm(name, data)
 		log("Recieved MagiPort request from " + name);
 		use_skill("magiport", name);
 	}
+	
+	// if(data.message === "mageRequested")
+	// {
+	// 	if(data.map === character.map)
+	// 	{
+	// 		let sender = get_player(name);
+	// 		if(sender && distance())
+	// 		log("Mage blinking to " + name);
+	// 		use_skill("blink", data.coords);
+	// 	}
+	// }
 }

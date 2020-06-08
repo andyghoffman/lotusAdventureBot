@@ -1,14 +1,14 @@
 ///     crafting settings       ///
 const CraftingEnabled = true;
 const MinimumGold = 5000000;    //  merchant won't go below this amount of gold in wallet
-const BasicItemsToCraft = ["bow", "bow", "bow", "bow", "bow", "bow", "bow", "bow", "bow", "bow"];   //  keep buying and upgrading these
+const BasicItemsToCraft = [];   //  keep buying and upgrading these
 const UpgradeLevelToStop = 8;
 const UpgradeLevelToUseTierTwoScroll = 6; //  override to use a mid-tier scroll at a lower level than necessary (for increased success chance)
 const CompoundLevelToStop = 2;
 const CompoundLevelToUseTierTwoScroll = 1;
 const ItemsToUpgrade = ["bow","hbow","wattire", "wgloves", "wbreeches", "wshoes", "wcap", "shield", "quiver", "pants", "gloves", "shoes","helmet"];
 const ItemsToCompound = ["intring", "strring", "dexring", "ringsj", "intearring", "dexearring", "dexamulet", "intamulet", "orbofint", "orbofdex", "dexbelt", "intbelt", "wbook0", "strearring"];
-const VendorTrash = ["ringsj", "cclaw", "hpamulet", "hpbelt", "vitring", "vitearring", "vitscroll", "cshell"];
+const VendorTrash = ["sstinger","ringsj", "cclaw", "hpamulet", "hpbelt", "vitring", "vitearring", "vitscroll", "cshell"];
 const BuyFromPonty = ["ascale","cscale","pleather","bfur","seashell", "leather", "firestaff", "suckerpunch", "t2dexamulet", "t2intamulet", "rabbitsfoot", "ringofluck", "cape", "ecape", "angelwings", "bcape", "orbg", "hbow", "t2bow", "seashell"];
 const PontyExclude = ["ringsj"];    //  any craft-items you don't want to buy from ponty
 const Elixirs = ["elixirint0", "elixirint1", "elixirint2", "elixirdex0", "elixirdex1", "elixirdex2"];
@@ -25,7 +25,7 @@ const XynTypes = ["gem", "box"]; //  item types to be exchanged with Xyn
 ///     
 const FullAuto = true;  //  if true will automatically start farming on connect & startup. set false to have player control on startup
 const FarmMode = "number";
-const FarmMonsterName = "armadillo";
+const FarmMonsterName = "croc";
 const FarmMap = "main";
 const FarmMonsterSpawnNumber = 6;
 const FarmRadius = 100;
@@ -34,10 +34,10 @@ const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];
 //  solo character settings (only used if solo character is set up)
 const SoloCharacterActive = true;
 const SoloCharFarmMode = "number";
-const SoloCharFarmMonsterName = "croc";
+const SoloCharFarmMonsterName = "scorpion";
 const SoloCharFarmMap = "main";
 const SoloCharFarmMonsterSpawnNumber = 6;
-const SoloFarmRadius = 75;
+const SoloFarmRadius = 125;
 const SoloSpecialMonsters = ["phoenix"];
 //////
 

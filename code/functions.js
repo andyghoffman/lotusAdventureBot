@@ -1175,6 +1175,13 @@ function isItemOnCraftList(itemName)
 
 function lookForSpecialTargets()
 {
+	//  if something is hitting you kill it first
+	let target = get_nearest_monster({target: character.name});
+	if (target)
+	{
+		return target;
+	}
+	
 	let listToUse = SpecialMonsters;
 	if(character.name === SoloCharacter)
 	{
@@ -1183,11 +1190,16 @@ function lookForSpecialTargets()
 	
 	for(let special of listToUse)
 	{
-		let target = getTargetMonster(special);
+		target = getTargetMonster(special);
 		if (target && special.includes(target.mtype))
 		{
 			stop();
 			broadCastTarget(target);
+			
+			// if(character.name === SoloCharacter)
+			// {
+			// 	requestMage();
+			// }
 
 			return target;
 		}
@@ -1401,4 +1413,9 @@ function reloadCharacters()
 	{
 		reloadCharacter(character.name);
 	}, 1000);
+}
+
+function requestMage()
+{
+	send_cm(MageName, {message:"mageRequested", map:character.map, coords:{x:character.x, y:character.y}});
 }
