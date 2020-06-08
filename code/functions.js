@@ -322,7 +322,7 @@ function personalSpace()
 
 		if (!isInFarmSpawnBounds(adjustment))
 		{
-			smart_move(getFarmSpotCoords());
+			approachTarget(getFarmSpotCoords());
 		}
 		else if (character.name !== PartyLeader && character.name !== SoloCharacter)
 		{

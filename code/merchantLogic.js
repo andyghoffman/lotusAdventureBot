@@ -444,7 +444,14 @@ function craftCompound(levelToUse)
 		return false;
 	}
 
+	let item = triple[0];
+	
 	let scroll = "cscroll0";
+	if (item.level >= CompoundLevelToUseTierTwoScroll || item.level >= G.items[foundItem].grades[0])
+	{
+		scroll = "cscroll1";
+	}
+	
 	let scrollToUse = locate_item(scroll);
 
 	if (scrollToUse > -1)
