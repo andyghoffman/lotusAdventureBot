@@ -47,21 +47,21 @@ function tripleShot(target)
 		return;
 	}
 
-	let targets = [target];
+	let targets = [];
 	for (let e in parent.entities)
 	{
 		let t = parent.entities[e];
-		if(target.mtype === t.mtype && is_in_range(t, "3shot"))
+		if(target.mtype === t.mtype && is_in_range(t, "attack"))
 		{
 			targets.push(t);
 		}
-		else if(AvoidMonsters.includes(t.mtype) && is_in_range(t, "3shot"))
+		else if(AvoidMonsters.includes(t.mtype) && is_in_range(t, "attack"))
 		{
 			return;
 		}
 	}
 
-	if(targets.length >= 3)
+	if(targets.length >= 2)
 	{
 		use_skill("3shot", targets);
 		reduce_cooldown("3shot", character.ping);		

@@ -765,7 +765,7 @@ function goTo(mapName = "main", coords = { x: 0, y: 0 }, oncomplete = null)
 	{
 		if (oncomplete != null)
 		{
-			smart_move(mapName, () => { oncomplete(); Traveling = false; });
+			smart_move(mapName, () => { Traveling = false; oncomplete(); });
 		}
 		else
 		{
@@ -776,7 +776,7 @@ function goTo(mapName = "main", coords = { x: 0, y: 0 }, oncomplete = null)
 	{
 		if (oncomplete != null)
 		{
-			smart_move(coords, () => { oncomplete(); Traveling = false; });
+			smart_move(coords, () => { Traveling = false; oncomplete(); });
 		}
 		else
 		{

@@ -59,7 +59,7 @@ function merchantAuto(target)
 			else if (DeliveryMode && !smart.moving && !GoingBackToTown && DeliveryRequests.length > 0 && friendlyTarget.name === DeliveryRequests[0].sender)
 			{
 				log("Moving closer to recipient.");
-				smart_move({x:friendlyTarget.x, y:friendlyTarget.y});
+				//smart_move({x:friendlyTarget.x, y:friendlyTarget.y});
 			}
 		}
 		else if (friendlyTarget)
@@ -244,17 +244,7 @@ function merchant_on_cm(sender, data)
 			}
 			else if(!Traveling)
 			{
-				if(character.map === data.map)
-				{
-					goTo(data.map, data.coords);
-				}
-				else
-				{
-					goTo(data.map, {x:0,y:0},()=>
-					{
-						goTo(data.map, data.coords);
-					});
-				}
+				goTo(data.map, data.coords);
 			}
 	}
 }
@@ -327,7 +317,7 @@ function checkRequests()
 				let recipient = parent.entities[DeliveryRequests[i].sender];
 				if (recipient)
 				{
-					approachTarget(recipient);
+					//approachTarget(recipient);
 				}
 				else
 				{
@@ -335,7 +325,7 @@ function checkRequests()
 					//requestMagiPort();
 				}
 				
-				return;;
+				return;
 			}
 		}
 	}
