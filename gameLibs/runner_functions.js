@@ -33,6 +33,7 @@ game={
 	html:!parent.no_html, // if game.html is false, this character is loaded in [CODE] mode
 };
 character.bot=parent.is_bot;
+character.cli=parent.is_cli;
 
 //#NOTE: Most new features are experimental - for #feedback + suggestions: https://discord.gg/X4MpntA [05/01/18]
 
@@ -1472,9 +1473,31 @@ function start_pathfinding()
 	smart.start_x=character.real_x;
 	smart.start_y=character.real_y;
 	queue=[],visited={},start=0,best=null;
-	qpush({x:character.real_x,y:character.real_y,map:character.map,i:-1});
-	game_log("Searching for a path...","#89D4A2");
-	bfs();
+	if(character.cli)
+	{
+		parent.CLI_OUT.push({"type":"smart_move",G:G,start_x:smart.start_x,start_y:smart.start_y,start_map:character.map,x:smart.x,y:smart.y,map:smart.map});
+	}
+	else
+	{
+		qpush({x:character.real_x,y:character.real_y,map:character.map,i:-1});
+		game_log("Searching for a path...","#89D4A2");
+		bfs();
+	}
+}
+
+function cli_smart_move_result(data)
+{
+	if(data.found)
+	{
+		smart.found=true;
+		smart.plot=data.plot;
+	}
+	else
+	{
+		game_log("CLI: Path not found!","#CF575F");
+		smart.moving=false;
+		smart.on_done(false,"failed");
+	}
 }
 
 function continue_pathfinding()
@@ -1489,12 +1512,13 @@ function smart_move_logic()
 	{
 		start_pathfinding();
 	}
+	else if(!smart.found && character.cli) { /* Just wait */ }
 	else if(!smart.found)
 	{
 		if(Math.random()<0.1)
 		{
 			move(character.real_x+Math.random()*0.0002-0.0001,character.real_y+Math.random()*0.0002-0.0001);
-			parent.d_text(shuffle(["Hmm","...","???","Definitely left","No right!","Is it?","I can do this!","I think ...","What If","Should be","I'm Sure","Nope","Wait a min!","Oh my"])[0],character,{color:shuffle(["#68B3D1","#d06f99","#6ED5A3","#D2CF5A"])[0]});
+			parent.d_text(shuffle(["Hmm","...","???","Definitely left","No right!","Is it?","I can do this!","I think ...","What If","Should be","I'm Sure","Nope","Wait a min!","Oh my"])[0],character,{color:shuffle(["#68B3D1","#D06F99","#6ED5A3","#D2CF5A"])[0]});
 		}
 		continue_pathfinding();
 	}

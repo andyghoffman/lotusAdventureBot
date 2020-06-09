@@ -11,7 +11,7 @@ const ItemsToCompound = ["intring", "strring", "dexring", "ringsj", "intearring"
 const VendorTrash = ["sstinger","ringsj", "cclaw", "hpamulet", "hpbelt", "vitring", "vitearring", "vitscroll", "cshell"];
 const BuyFromPonty = ["ascale","cscale","pleather","bfur","seashell", "leather", "firestaff", "suckerpunch", "t2dexamulet", "t2intamulet", "rabbitsfoot", "ringofluck", "cape", "ecape", "angelwings", "bcape", "orbg", "hbow", "t2bow", "seashell"];
 const PontyExclude = ["ringsj"];    //  any craft-items you don't want to buy from ponty
-const Elixirs = ["elixirint0", "elixirint1", "elixirint2", "elixirdex0", "elixirdex1", "elixirdex2"];
+const Elixirs = ["elixirint0", "elixirdex0"];
 const Scrolls = ["scroll0", "scroll1", "cscroll0", "cscroll1"];
 const XynTypes = ["gem", "box"]; //  item types to be exchanged with Xyn
 //////
@@ -25,9 +25,9 @@ const XynTypes = ["gem", "box"]; //  item types to be exchanged with Xyn
 ///     
 const FullAuto = true;  //  if true will automatically start farming on connect & startup. set false to have player control on startup
 const FarmMode = "number";
-const FarmMonsterName = "porcupine";
-const FarmMap = "desertland";
-const FarmMonsterSpawnNumber = 8;
+const FarmMonsterName = "scorpion";
+const FarmMap = "main";
+const FarmMonsterSpawnNumber = 6;
 const FarmRadius = 125;
 const FarmCoords = { x: 1202, y: -782 };    //  only used if farmMode is 'coords'
 const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];
