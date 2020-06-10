@@ -1,35 +1,19 @@
 ﻿class BotCharacter
 {
-	Name = "";
-	AutoPlay = FullAuto;
-	CraftingOn = CraftingEnabled;
-	AloneChecking = false;
-	FarmingModeActive = false;
-	ReadyChecking = false;
-	Traveling = false;
-	GoingBackToTown = false;
-	Banking = false;
-	NoElixirs = false;
-	IsStuck = false;
-	WhosReady = {leader: false, merchant: false, codeBotOne: false, codeBotTwo: false};
-	SentRequests = [];
-	MainInterval;
-	LateInterval;
-	
-	constructor(name)
+	constructor(name, behaviour)
 	{
 		this.Name = name;
+		this.Behaviour = behaviour;
 	}
 	
-	startCharacter(mainInterval, lateInterval)
+	startCharacter()
 	{
-		this.MainInterval = setInterval(mainInterval, 250);
-		this.LateInterval = setInterval(lateInterval, 5000);
+		this.Behaviour.startBehaviour();
 	}
 	
 	stopCharacterProcess()
 	{
-		clearInterval(this.MainInterval);
-		clearInterval(this.LateInterval);
+		// clearInterval(this.MainInterval);
+		// clearInterval(this.LateInterval);
 	}
 }

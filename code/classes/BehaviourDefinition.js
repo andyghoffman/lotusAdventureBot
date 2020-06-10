@@ -1,22 +1,55 @@
 ﻿class BehaviourDefinition
 {
-	FarmSpawn = {map:"", name:"", number:0};
-	FarmMonsters = [];
-	FarmTetherRadius = 100;
-	SpecialMonsters = [];
-	AvoidMonsters = [];
-	
-	constructor(farmSpawn, farmMonsters, farmTetherRadius, specialMonsters, avoidMonsters)
+	constructor(name = "")
 	{
+		this.Name = name;
+		this.Intervals = {};
+		this.runningIntervals = [];
+	}
+
+	startBehaviour()
+	{
+		// for(let i in this.Intervals)
+		// {
+		// 	let intervalID = setInterval(i, this.Intervals[i]);
+		// 	this.runningIntervals.push(intervalID);
+		// }
+		
+		setInterval(this.mainInterval, 250);
+
+		// for(let interval in this.Intervals)
+		// {
+		// 	setInterval(interval, this.Intervals[interval]);
+		// }
 	}
 	
-	mainInterval()
+	stopBehaviour()
 	{
-		log("Undefined definition interval.");
+		for (let i of this.runningIntervals)
+		{
+			clearInterval(i);
+		}
+		
+		this.runningIntervals = [];
 	}
 	
-	lateInterval()
+	classRoutine(target)
 	{
-		log("Undefined definition late interval.");	
+		if (character.ctype === "merchant")
+		{
+			merchantAuto(target);
+		}
+		else if (character.ctype === "priest")
+		{
+			priestAuto(target);
+		}
+		else if (character.ctype === "mage")
+		{
+			mageAuto(target);
+		} 
+		else if (character.ctype === "ranger")
+		{
+			rangerAuto(target);
+		}
 	}
 }
