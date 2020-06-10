@@ -1,11 +1,63 @@
-function load_file(fileName)
+function todaysLogName()
 {
-    const fs = require('fs')
-    const data = fs.readFileSync(fileName, 'utf8')
-    return data;
+	let date = new Date();
+	let month = date.getMonth() + 1;
+	let day = date.getDate();
+	let year = date.getFullYear();
+
+	let name = "logs/" + month + "-" + day + "-" + year + ".txt";
+	return name;
 }
 
-var library = document.createElement("script");
-library.type = "text/javascript";
-library.text = load_file("C:/GitHub/lotusAdventureBot/code/logging.js");
-document.getElementsByTagName("head")[0].appendChild(library);
+function logForTodayExists()
+{
+	let fs = require('fs');
+	fs.readFile(todaysLogName(), (error, data) =>
+	{
+		if (error)
+		{
+			return false;
+		}
+	});
+
+	return true;
+}
+
+function createNewLogFile()
+{
+	let fs = require('fs');
+	let fileName = todaysLogName();
+	fs.writeFile(fileName, "", (error) =>
+	{
+		if (error)
+		{
+			log(error);
+		}
+
+		log("Created new log file at " + fileName);
+	});
+}
+
+function writeToLog(data)
+{
+	if (!logForTodayExists())
+	{
+		createNewLogFile();
+	}
+
+	let fs = require('fs');
+	let write = "[" + new Date().toLocaleTimeString() + "]: " + data + "\n";
+
+	fs.appendFile(todaysLogName(), write, (error) =>
+	{
+		if (error)
+		{
+			log(error);
+			throw error;
+		}
+		else
+		{
+			log(write);
+		}
+	});
+}
