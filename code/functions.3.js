@@ -886,7 +886,7 @@ function initParty()
 		}
 		else if (characterOffline(p))
 		{
-			start_character(p, 1);
+			start_character(p, "main");
 		}
 	}
 
