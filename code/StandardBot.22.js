@@ -1,7 +1,12 @@
 ﻿//load_file("C:/GitHub/lotusAdventureBot/code/StandardBot.22.js");
 
-let Settings = {};
+let Settings = 
+	{
+		
+	};
+
 let State = {};
+let Intervals = {};
 
 function startStandardBot(settings)
 {
@@ -15,9 +20,101 @@ function startStandardBot(settings)
 	setState("Idle");
 }
 
+function startCombatInterval()
+{
+	if(Intervals["Combat"])
+	{
+		log("Combat interval already started!");
+		return;
+	}
+	
+	log("Combat interval starting.");
+
+	Intervals["Combat"] = setInterval(() =>
+	{
+		let target = findTarget(Settings["FarmMonster"]);
+		
+		if(target)
+		{
+			autoAttack(target);
+		}
+		
+	}, 250);
+}
+
+function autoAttack(target)
+{
+	if (!is_in_range(target, "attack"))
+	{
+		approach(target);
+	}
+	else if (!is_on_cooldown("attack"))
+	{
+		reduce_cooldown("attack", character.ping);
+		attack(target).then((message) =>
+		{
+
+		}).catch((message) =>
+		{
+			log(character.name + " attack failed: " + message.reason);
+		});
+	}
+}
+
+function approach(target)
+{
+	let coords = {x:character.x, y:character.y};
+	let adjustment = {x:0, y:0};
+	
+	if(target.x && target.y)
+	{
+		adjustment.x = character.x + (target.x - character.x) * 0.3;
+		adjustment.y = character.y + (target.y - character.y) * 0.3;
+		
+		if(distance(character, adjustment) < 100)
+		{
+			move(adjustment);
+		}
+		else
+		{
+			smart_move(adjustment);
+		}
+	}
+}
+
+function findTarget(mtype)
+{
+	let target = get_targeted_monster();
+	
+	if(!target)
+	{
+		target = get_nearest_monster({type: mtype, target: character.name});
+	}
+	
+	if(!target)
+	{
+		for (let p of parent.party_list)
+		{
+			if (p !== character.name)
+			{
+				target = get_nearest_monster({target: p});
+				break;
+			}
+		}
+	}
+	
+	if(!target)
+	{
+		target = get_nearest_monster({type: mtype, no_target: true});
+	}
+	
+	return target;
+}
+
 function beginFarming()
 {
 	log("Traveling to farming location.");
+	setState("Traveling");
 	
 	let coords = {x: 0, y: 0};
 
@@ -28,8 +125,6 @@ function beginFarming()
 	
 	if(character.map !== Settings["FarmMap"])
 	{
-		setState("Traveling");
-
 		smart_move(Settings["FarmMap"], ()=>
 		{
 			smart_move(coords, () =>
@@ -50,6 +145,13 @@ function beginFarming()
 function onStateChanged(newState)
 {
 	log("State changed to: " + newState);
+	
+	switch (newState)
+	{
+		case "Farming":
+			startCombatInterval();
+			break;
+	}
 }
 
 function setState(state, isTrue=true)
