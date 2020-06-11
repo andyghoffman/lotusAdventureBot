@@ -39,7 +39,7 @@ function on_cm(sender, data)
 
 function sendCodeMessage(recipient, data)
 {
-	if (!data.message)
+	if (!data.message || recipient === character.name)
 	{
 		log(character.name + " tried to send unexpected cm format to " + recipient);
 		show_json(data);
@@ -61,7 +61,6 @@ function sendCodeMessage(recipient, data)
 function initBotComms()
 {
 	commsInterval = setInterval(commsLoop, 1000);
-	log("Comms loaded.");
 }
 
 function commsLoop()

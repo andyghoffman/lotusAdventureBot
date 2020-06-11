@@ -14,7 +14,6 @@ map_key("6", "snippet", "stopCharacters()");
 map_key("7", "snippet", "depositInventoryAtBank()");
 map_key("8", "snippet", "xpReport()");
 
-initBotComms();
 loadCharacter();
 
 function load_file(fileName)

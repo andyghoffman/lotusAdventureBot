@@ -11,4 +11,5 @@ function loadCharacter()
 	};
 	
 	startStandardBot(settings);
+	beginFarming();
 }
