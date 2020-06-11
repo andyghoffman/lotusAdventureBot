@@ -4,7 +4,7 @@ let Settings = {};
 let State = {};
 let Intervals = {};
 
-function startStandardBot(settings)
+function startBotCore(settings)
 {
 	game.on("stateChanged", onStateChanged);
 
@@ -58,10 +58,12 @@ function startCombatInterval()
 		
 		if(target)
 		{
-			if(!characterCombat(target))
+			if(characterCombat(target))
 			{
-				autoAttack(target);				
+				return;
 			}
+
+			autoAttack(target);
 		}
 		
 	}, 50);

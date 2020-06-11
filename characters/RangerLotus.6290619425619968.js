@@ -10,7 +10,7 @@ function loadCharacter()
 		"TetherRadius":100
 	};
 	
-	startStandardBot(settings);
+	startBotCore(settings);
 	beginFarming();
 }
 
