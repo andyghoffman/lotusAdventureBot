@@ -5,13 +5,13 @@
 function rangerAuto(target)
 {
 	//	cast hunters mark
-	useHuntersMark(target);
+	//useHuntersMark(target);
 
 	//	cast 3shot
 	tripleShot(target);
 	
 	//	cast super shot
-	useSuperShot(target);
+	//useSuperShot(target);
 
 	//	auto attack
 	autoAttack(target);

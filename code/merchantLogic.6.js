@@ -59,6 +59,7 @@ function merchantAuto(target)
 			else if (DeliveryMode && !smart.moving && !GoingBackToTown && DeliveryRequests.length > 0 && friendlyTarget.name === DeliveryRequests[0].sender)
 			{
 				log("Moving closer to recipient.");
+				approachTarget(friendlyTarget);
 				//smart_move({x:friendlyTarget.x, y:friendlyTarget.y});
 			}
 		}

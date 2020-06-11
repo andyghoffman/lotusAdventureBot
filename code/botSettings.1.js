@@ -34,10 +34,10 @@ const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];
 //  solo character settings (only used if solo character is set up)
 const SoloCharacterActive = true;
 const SoloCharFarmMode = "number";
-const SoloCharFarmMonsterName = "arcticbee";
-const SoloCharFarmMap = "winterland";
-const SoloCharFarmMonsterSpawnNumber = 10;
-const SoloFarmRadius = 125;
+const SoloCharFarmMonsterName = "armadillo";
+const SoloCharFarmMap = "main";
+const SoloCharFarmMonsterSpawnNumber = 6;
+const SoloFarmRadius = 100;
 const SoloSpecialMonsters = ["phoenix"];
 //////
 
@@ -86,5 +86,3 @@ if(SoloCharacterActive)
 {
 	WhiteList.push(SoloCharacter);
 }
-
-//autoreload
