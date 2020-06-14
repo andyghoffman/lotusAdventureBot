@@ -373,6 +373,12 @@ function craftUpgrade(targetUpgradeLevel)
 				scroll = "scroll1";
 			}
 
+			if ((item.level >= 7 && item.tier > 1) || (item.level >= 6 && item.tier >= 2))
+			{
+				buy_with_gold("scroll2");
+				scroll = "scroll2";
+			}
+			
 			let scrollToUse = locate_item(scroll);
 
 			if (scrollToUse > -1)

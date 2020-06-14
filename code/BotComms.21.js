@@ -2,7 +2,24 @@
 
 const SentMessages = {};
 const RecievedMessages = {};
+const WhiteList = [];
 let commsInterval;
+
+function initBotComms()
+{
+	parent.X.characters.forEach((x)=>
+	{
+		WhiteList.push(x.name);
+	});
+	
+	commsInterval = setInterval(commsLoop, 1000);
+}
+
+function commsLoop()
+{
+	checkSentMessages();
+	checkRecievedMessages();
+}
 
 function on_cm(sender, data)
 {
@@ -19,6 +36,8 @@ function on_cm(sender, data)
 		return;
 	}
 
+	game.trigger("codeMessage", {sender:sender, data:data});
+	
 	if (!RecievedMessages[sender])
 	{
 		RecievedMessages[sender] = [data];
@@ -31,13 +50,13 @@ function on_cm(sender, data)
 	switch (data.message)
 	{
 		default:
-			log(character.name + " recieved unexpected cm format from " + sender);
-			show_json(data);
+			// log(character.name + " recieved unexpected cm format from " + sender);
+			// show_json(data);
 			return;
 	}
 }
 
-function sendCodeMessage(recipient, data)
+function sendCodeMessage(recipient, data, storeMessage = true)
 {
 	if (!data.message || recipient === character.name)
 	{
@@ -47,6 +66,11 @@ function sendCodeMessage(recipient, data)
 	}
 	
 	send_cm(recipient, data);
+	
+	if(!storeMessage)
+	{
+		return;
+	}
 	
 	if(!SentMessages[recipient])
 	{
@@ -58,16 +82,38 @@ function sendCodeMessage(recipient, data)
 	}
 }
 
-function initBotComms()
+function checkIfMessageSent(recipient, message)
 {
-	commsInterval = setInterval(commsLoop, 1000);
+	if(SentMessages[recipient])
+	{
+		for (let data of SentMessages[recipient])
+		{
+			if (data.message === message)
+			{
+				return true;
+			}
+		}		
+	}
+	
+	return false;
 }
 
-function commsLoop()
+function checkIfMessageRecieved(message)
 {
-	checkSentMessages();
-	checkRecievedMessages();
+	for (let sender in RecievedMessages)
+	{
+		for (let data of sender)
+		{
+			if(data.message === message)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
+
 
 function checkSentMessages()
 {
@@ -89,4 +135,17 @@ function checkRecievedMessages()
 
 		}
 	}
+}
+
+function getOnlineCharacters()
+{
+	return parent.X.characters.filter((x) => { return x.online > 0; });
+}
+
+function getOnlineMerchant()
+{
+	return parent.X.characters.filter((x) =>
+	{
+		return x.type === "merchant" && x.online > 0;
+	})[0];
 }

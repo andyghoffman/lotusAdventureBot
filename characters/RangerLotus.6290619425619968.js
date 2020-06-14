@@ -5,8 +5,8 @@ function loadCharacter()
 	let settings = 
 	{
 		"FarmMap":"main",
-		"FarmMonster":"armadillo",
-		"FarmSpawn":6,
+		"FarmMonster":"crab",
+		"FarmSpawn":8,
 		"TetherRadius":100
 	};
 	
@@ -20,8 +20,11 @@ function characterCombat(target)
 	{
 		return true;
 	}
-	
-	if(useSuperShot(target))
+	else if(useSuperShot(target))
+	{
+		return true;
+	}
+	else if(useHuntersMark(target))
 	{
 		return true;
 	}
@@ -33,7 +36,7 @@ function useSuperShot(target)
 {
 	if (character.mp < G.skills.supershot.mp || is_on_cooldown("supershot") || !is_in_range(target, "supershot") || !target)
 	{
-		return;
+		return false;
 	}
 
 	use_skill("supershot", target);
@@ -71,4 +74,21 @@ function useThreeShot(target, avoidTargets = [])
 	}
 	
 	return false;
+}
+
+function useHuntersMark(target)
+{
+	if (character.mp < G.skills.huntersmark.mp || is_on_cooldown("huntersmark") || !is_in_range(target, "huntersmark") || target.s.huntersmark || !target)
+	{
+		return false;
+	}
+	
+	if(target.max_hp < 1500)
+	{
+		return  false;
+	}
+
+	use_skill("huntersmark", target);
+	reduce_cooldown("huntersmark", character.ping);
+	return true;
 }

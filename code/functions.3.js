@@ -533,7 +533,7 @@ function checkPotionInventory()
 			log(character.name + " waiting for potions, resending request... ");
 
 			//	try to fix the problem yourself if the merchant isn't responding
-			if (hPotions === 0 || mPotions === 0)
+			/*if (hPotions === 0 || mPotions === 0)
 			{
 				log(character.name + " has no potions, is returning to town.");
 				stopFarmMode();
@@ -552,7 +552,7 @@ function checkPotionInventory()
 						Traveling = false;
 					}, 10000);
 				}
-			}
+			}*/
 		}
 		else
 		{
@@ -1194,7 +1194,7 @@ function lookForSpecialTargets()
 		if (target && special.includes(target.mtype))
 		{
 			stop();
-			broadCastTarget(target);
+			//broadCastTarget(target);
 			
 			// if(character.name === SoloCharacter)
 			// {

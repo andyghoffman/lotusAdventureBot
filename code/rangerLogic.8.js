@@ -4,14 +4,23 @@
 
 function rangerAuto(target)
 {
-	//	cast hunters mark
-	//useHuntersMark(target);
-
+	if(!target)
+	{
+		return;
+	}
+	
 	//	cast 3shot
 	tripleShot(target);
+
 	
-	//	cast super shot
-	//useSuperShot(target);
+	if((!is_on_cooldown("attack") && target ) || SpecialMonsters.includes(target.mtype))
+	{
+		//	cast hunters mark
+		useHuntersMark(target);
+
+		//	cast super shot
+		useSuperShot(target);		
+	}
 
 	//	auto attack
 	autoAttack(target);

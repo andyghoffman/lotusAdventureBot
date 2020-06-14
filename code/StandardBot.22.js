@@ -1,12 +1,19 @@
 ﻿//load_file("C:/GitHub/lotusAdventureBot/code/StandardBot.22.js");
 
-let Settings = {};
+let Settings =
+	{
+		"PotionStock":1000,
+		"LowPotionThreshold":100,
+		"Wallet":250000,
+	};
 let State = {};
 let Intervals = {};
+let Flags = {};
 
 function startBotCore(settings)
 {
 	game.on("stateChanged", onStateChanged);
+	game.on("idle", onIdle);
 
 	initBotComms();
 	loadSettings(settings);
@@ -16,14 +23,151 @@ function startBotCore(settings)
 		loot();
 	}, 100);
 
-	Intervals["Potions"] = setInterval(() =>
+	Intervals["UsePotions"] = setInterval(() =>
 	{
 		usePotions();
 	}, 100);
 	
-	log(character.name + " standardBot loaded!");
+	Intervals["CheckPotions"] = setInterval(()=>
+	{
+		checkPotions();
+	}, 5000);
+	
+	Intervals["IdleCheck"] = setInterval(() =>
+	{
+		if(Flags["IdleChecking"] || !getState("Idle"))
+		{
+			return;
+		}
+		
+		Flags["IdleChecking"] = true;
+		
+		setTimeout(() =>
+		{
+			if (getState("Idle"))
+			{
+				game.trigger("idle");
+			}
+
+			Flags["IdleChecking"] = false;
+			
+		}, 5000);
+		
+	}, 5000);
+	
+	log(character.name + " StandardBot loaded!");
 	
 	setState("Idle");
+}
+
+function onStateChanged(newState)
+{
+	log("State changed to: " + getState());
+
+	switch (newState)
+	{
+		case "NeedPotions":
+			buyPotions(Settings["PotionStock"], Settings["PotionStock"]);
+			break;
+		case "Farming":
+			startCombatInterval();
+			break;
+		case "Idle":
+			if (Flags["Farming"])
+			{
+				beginFarming();
+			}
+			break;
+	}
+}
+
+function onIdle()
+{
+	if(!isInTown())
+	{
+		goToTown();		
+	}
+}
+
+function checkPotions()
+{
+	if(getState("NeedPotions") || getState("Traveling"))
+	{
+		return;
+	}
+	
+	let hPots = Settings["PotionStock"] - quantity("hpot1");
+	let mPots = Settings["PotionStock"] - quantity("mpot1");
+	let thresh = Settings["PotionStock"] - Settings["LowPotionThreshold"];
+	
+	if(hPots > thresh || mPots > thresh)
+	{
+		let merchant = getOnlineMerchant();
+
+		if (merchant && character.name !== merchant.name)
+		{
+			//log(character.name + " requesting potions from merchant.");
+			let cm = {
+				message: "NeedPotions",
+				hpots: hPots,
+				mpots: mPots,
+				location: {map: character.map, x: character.x, y: character.y}
+			};
+			let storeMessage = !checkIfMessageSent(merchant.name, "NeedPotions");
+			sendCodeMessage(merchant.name, cm, storeMessage);
+		} 
+		else
+		{
+			setState("NeedPotions");
+		}
+	}
+}
+
+function buyPotions(hpots, mpots)
+{
+	log("Buying Potions");
+	
+	if(!isInTown())
+	{
+		goToTown();
+	}
+	else if(getState("NeedPotions"))
+	{
+		let h =  hpots - quantity("hpot1");
+		
+		if(h > 0)
+		{
+			log("Buying " + h + " health potions.");
+			buy_with_gold("hpot1", h);			
+		}
+		
+		let m = mpots - quantity("mpot1");
+		
+		if(m > 0)
+		{
+			log("Buying " + m + " mana potions.");
+			buy_with_gold("mpot1", m);			
+		}
+
+		setState("Idle");
+	}
+}
+
+function goToTown(onComplete=()=>{})
+{
+	setState("Traveling");
+	stop();
+	stopCombatInterval();
+	use_skill("use_town");
+	setTimeout(()=>
+	{
+		travelTo("main", null, onComplete);		
+	}, 8000);
+}
+
+function isInTown()
+{
+	return (character.map === "main" && distance(character, {x:0, y:0}) < 150);
 }
 
 function usePotions()
@@ -33,7 +177,7 @@ function usePotions()
 		return;
 	}
 
-	let hPotRecovery = 500;//G.items[Potions[0]].gives.hp;
+	let hPotRecovery = 400;//G.items[Potions[0]].gives.hp;
 	let mPotRecovery = 500;//G.items[Potions[1]].gives.mp;
 
 	if ((character.hp <= (character.max_hp - hPotRecovery) || character.mp <= (character.max_mp - mPotRecovery)) || getState("Idle") )
@@ -56,7 +200,7 @@ function startCombatInterval()
 	{
 		let target = findTarget(Settings["FarmMonster"]);
 		
-		if(target)
+		if(target && !is_on_cooldown("attack"))
 		{
 			if(characterCombat(target))
 			{
@@ -161,6 +305,15 @@ function findTarget(mtype)
 
 function beginFarming()
 {
+	Flags["Farming"] = true;
+	
+	checkPotions();
+	
+	if(getState("NeedPotions"))
+	{
+		return;
+	}
+	
 	log("Traveling to farming location.");
 	travelTo(Settings["FarmMap"], getFarmLocation(), ()=>
 	{
@@ -193,11 +346,22 @@ function travelTo(map, coords=null, onComplete=()=>{})
 	} 
 	else
 	{
-		smart_move(coords, () =>
+		if(coords == null)
 		{
-			setState("Traveling", false);
-			onComplete();
-		});
+			smart_move(map, () =>
+			{
+				setState("Traveling", false);
+				onComplete();
+			});			
+		}
+		else
+		{
+			smart_move(coords, () =>
+			{
+				setState("Traveling", false);
+				onComplete();
+			});		
+		}
 	}	
 }
 
@@ -216,18 +380,6 @@ function getFarmLocation()
 	return coords;
 }
 
-function onStateChanged(newState)
-{
-	log("State changed to: " + newState);
-	
-	switch (newState)
-	{
-		case "Farming":
-			startCombatInterval();
-			break;
-	}
-}
-
 function setState(state, isTrue=true)
 {
 	if(isTrue)
@@ -236,20 +388,25 @@ function setState(state, isTrue=true)
 		{
 			State[s] = false;
 		}
-
-		game.trigger("stateChanged", state);
 	}
 	
 	State[state] = isTrue;
+	
+	if(!isTrue)
+	{
+		State["Idle"] = true;
+	}
+	
+	game.trigger("stateChanged", state);
 }
 
-function getState(state)
+function getState(state=null)
 {
-	if(!state)
+	if(state == null)
 	{
 		for (let s in State)
 		{
-			if(State[s])
+			if(State[s] === true)
 			{
 				return s;
 			}
@@ -259,6 +416,8 @@ function getState(state)
 	{
 		return State[state];
 	}
+	
+	return false;
 }
 
 function loadSettings(settings)
