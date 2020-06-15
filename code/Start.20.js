@@ -7,9 +7,15 @@ load_code("Positioning");
 load_code(character.name);
 
 map_key("1", "snippet", "xpReport()");
+map_key("2", "snippet", "reloadCharacter()");
 map_key("3", "snippet", "reloadCharacters()");
-map_key("6", "snippet", "stopRunners()");
-map_key("7", "snippet", "loadAllRunners()");
+map_key("4", "snippet", "stopRunners()");
+map_key("5", "snippet", "loadAllRunners()");
+map_key("6", "snippet", "");
+map_key("7", "snippet", "");
+map_key("8", "snippet", "");
+map_key("9", "snippet", "");
+map_key("0", "snippet", "");
 
 loadCharacter();
 

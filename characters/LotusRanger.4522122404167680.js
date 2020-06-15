@@ -3,14 +3,15 @@
 function loadCharacter()
 {
 	let settings =
-		{
-			"FarmMap": "main",
-			"FarmMonster": "croc",
-			"FarmSpawn": 6,
-			"Avoid": ["bigbird"],
-			"Party":["LotusRanger","RangerLotus","LotusMage","LotusMerch"],
-			"TetherRadius": 100
-		};
+	{
+		"FarmMap": "cave",
+		"FarmMonster": "bat",
+		"FarmSpawn": 6,
+		"PriorityTargets": ["phoenix","goldenbat"],
+		"Avoid": ["bigbird"],
+		"Party":["LotusRanger","RangerLotus","LotusMage","LotusMerch"],
+		"TetherRadius": 100
+	};
 
 	startBotCore(settings);
 	load_code("RangerLotus");

@@ -241,6 +241,11 @@ function reloadCharacters()
 
 function reloadCharacter(name)
 {
+	if(!name)
+	{
+		name = character.name;
+	}
+	
 	if (name === character.name)
 	{
 		say("/pure_eval setTimeout(()=>{parent.start_runner()}, 500)");
@@ -270,7 +275,8 @@ function loadAllRunners()
 	for (let i = 0; i < Settings["Party"].length; i++)
 	{
 		let name = Settings["Party"][i];
-		if (name !== character.name)
+		let online = parent.X.characters.filter((x) => { return x.name === name && x.online > 0; }).length > 0;
+		if (name !== character.name && !get_active_characters()[name] && !online)
 		{
 			start_character(name, "Start");
 		}

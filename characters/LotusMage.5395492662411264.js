@@ -3,13 +3,14 @@
 function loadCharacter()
 {
 	let settings =
-		{
-			"FarmMap": "main",
-			"FarmMonster": "poisio",
-			"FarmSpawn": 5,
-			"Party": ["LotusRanger", "RangerLotus", "LotusMage", "LotusMerch"],
-			"TetherRadius": 100
-		};
+	{
+		"FarmMap": "main",
+		"FarmMonster": "scorpion",
+		"FarmSpawn": 6,
+		"PriorityTargets": ["phoenix"],
+		"Party": ["LotusRanger", "RangerLotus", "LotusMage", "LotusMerch"],
+		"TetherRadius": 100
+	};
 
 	startBotCore(settings);
 	Flags["Farming"] = true;

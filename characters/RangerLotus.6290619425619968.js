@@ -5,8 +5,9 @@ function loadCharacter()
 	let settings = 
 	{
 		"FarmMap":"main",
-		"FarmMonster":"bee",
-		"FarmSpawn":5,
+		"FarmMonster":"snake",
+		"FarmSpawn":6,
+		"PriorityTargets": ["phoenix"],
 		"Party": ["LotusRanger", "RangerLotus", "LotusMage", "LotusMerch"],
 		"TetherRadius":100
 	};
@@ -57,14 +58,14 @@ function useThreeShot(target, avoidTargets = [])
 	for (let e in parent.entities)
 	{
 		let t = parent.entities[e];
-		if (((t.level > 1 && target.mtype === t.mtype) || avoidTargets.includes(t.mtype)) && is_in_range(t, "attack"))
+		if (((t.level > 1 && target.mtype === t.mtype) || avoidTargets.includes(t.mtype) || Settings["PriorityTargets"].includes(t.mtype)) && is_in_range(t, "attack"))
 		{
 			return false;
-		}
+		} 
 		else if (target.mtype === t.mtype && is_in_range(t, "attack"))
 		{
 			targets.push(t);
-		} 
+		}
 	}
 
 	if (targets.length >= 2)
@@ -73,7 +74,7 @@ function useThreeShot(target, avoidTargets = [])
 		reduce_cooldown("3shot", character.ping);
 		return true;
 	}
-	
+
 	return false;
 }
 

@@ -3,7 +3,8 @@
 function loadCharacter()
 {
 	let defaultUpgradeLevel = 8;
-	let upgradeList = 
+	let defaultCompoundLevel = 2;
+	let upgradeList =
 		{
 			"wattire": defaultUpgradeLevel,
 			"wshoes": defaultUpgradeLevel,
@@ -14,15 +15,19 @@ function loadCharacter()
 			"shoes": defaultUpgradeLevel,
 			"pants": defaultUpgradeLevel,
 			"helmet": defaultUpgradeLevel,
-			"gloves": defaultUpgradeLevel
+			"gloves": defaultUpgradeLevel,
+			"quiver": defaultUpgradeLevel
 		};
-	let compoundList = 
-		[
-			
-		];
+	let compoundList =
+		{
+			"intearring": defaultCompoundLevel,
+			"dexearring": defaultCompoundLevel,
+			"strearring": defaultCompoundLevel,
+			"wbook0": defaultCompoundLevel
+		};
 	let vendorTrash = 
 		[
-			"stinger","beewings","poison","sstinger", "ringsj", "cclaw", "hpamulet", "hpbelt", "vitring", "vitearring", "vitscroll", "cshell"
+			"stinger","beewings","poison","sstinger", "ringsj", "cclaw", "hpamulet", "hpbelt", "vitring", "vitearring", "vitscroll", "cshell", "bwing"
 		];
 	let pontyList = 
 		[

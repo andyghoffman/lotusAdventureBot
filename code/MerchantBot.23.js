@@ -91,7 +91,8 @@ function townInterval()
 	if ((is_moving(character) || smart.moving) && parent.stand)
 	{
 		parent.close_merchant();
-	} else if (!parent.stand && !(is_moving(character) || smart.moving))
+	} 
+	else if (!parent.stand && !(is_moving(character) && smart.moving))
 	{
 		parent.open_merchant(locate_item("stand0"));
 	}
@@ -99,7 +100,7 @@ function townInterval()
 	if (!character.q.upgrade && !character.q.compound)
 	{
 		craftUpgrades();
-		// craftCompounds();
+		craftCompounds();
 	}
 	
 	sellVendorTrash();
@@ -153,11 +154,9 @@ function stopTownInterval()
 
 function deliverPotions(sender, data)
 {
-	checkPotions();
-	
 	let target = get_player(sender);
 
-	if (getState("Delivering") && !is_moving(character) && !smart.moving)
+	if (getState("Delivering") && Flags["DeliverTarget"] === sender && !is_moving(character) && !smart.moving)
 	{
 		writeToLog("Delivering potions to " + sender);
 		
@@ -167,24 +166,8 @@ function deliverPotions(sender, data)
 		}
 		else
 		{
+			stop();
 			approach(target);
-
-			if (distance(character, target) < 50)
-			{
-				if(data.hpots > 0)
-				{
-					writeToLog("Delivering " + data.hpots + " health potions to " + sender);
-					send_item(sender, locate_item("hpot1"), data.hpots);			
-				}
-
-				if(data.mpots > 0)
-				{
-					writeToLog("Delivering " + data.mpots + " mana potions to " + sender);
-					send_item(sender, locate_item("mpot1"), data.mpots);					
-				}
-				
-				setState("Delivery", false);
-			}
 		}
 	} 
 	else if(!getState("Delivering") && !getState("NeedPotions") && !is_moving(character) && !smart.moving)
@@ -192,6 +175,25 @@ function deliverPotions(sender, data)
 		travelTo(data.location.map, {x: data.location.x, y: data.location.y}, () =>
 		{
 			setState("Delivering");
+			Flags["DeliverTarget"] = sender;
 		});
+	}
+
+	if (target && distance(character, target) < 100)
+	{
+		if (data.hpots > 0)
+		{
+			writeToLog("Delivering " + data.hpots + " health potions to " + sender);
+			send_item(sender, locate_item("hpot1"), data.hpots);
+		}
+
+		if (data.mpots > 0)
+		{
+			writeToLog("Delivering " + data.mpots + " mana potions to " + sender);
+			send_item(sender, locate_item("mpot1"), data.mpots);
+		}
+
+		Flags["DeliverTarget"] = null;
+		setState("Delivery", false);
 	}
 }

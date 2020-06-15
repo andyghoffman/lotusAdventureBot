@@ -275,7 +275,12 @@ function startCombatInterval()
 	{
 		positionRoutine();
 		
-		let target = findTarget(Settings["FarmMonster"]);
+		let target = findPriorityTarget();
+		
+		if(!target)
+		{
+			findTarget(Settings["FarmMonster"]);
+		}
 		
 		if(target && !is_on_cooldown("attack"))
 		{
@@ -355,6 +360,28 @@ function approach(target)
 	}
 }
 
+function findPriorityTarget()
+{
+	let currentTarget = get_nearest_monster({target: character});
+	if(currentTarget)
+	{
+		return currentTarget
+	}
+	
+	for(let index in Settings["PriorityTargets"])
+	{
+		let name = Settings["PriorityTargets"][index];
+		let target = findTarget(name);
+		
+		if(target)
+		{
+			return target;
+		}
+	}
+	
+	return false;
+}
+
 function findTarget(mtype)
 {
 	let target = get_targeted_monster();
@@ -381,8 +408,15 @@ function findTarget(mtype)
 		target = get_nearest_monster({type: mtype, no_target: true});
 	}
 	
-	change_target(target);
-	return target;
+	if(target)
+	{
+		change_target(target);
+		return target;		
+	}
+	else
+	{
+		return null;
+	}
 }
 
 function beginFarming()
@@ -405,6 +439,7 @@ function beginFarming()
 
 function travelTo(map, coords=null, onComplete=()=>{})
 {
+	stop();
 	setState("Traveling");
 	
 	if (character.map !== map)
