@@ -194,6 +194,6 @@ function deliverPotions(sender, data)
 		}
 
 		Flags["DeliverTarget"] = null;
-		setState("Delivery", false);
+		setState("Delivering", false);
 	}
 }

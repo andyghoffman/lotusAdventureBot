@@ -16,7 +16,7 @@ function loadCharacter()
 			"pants": defaultUpgradeLevel,
 			"helmet": defaultUpgradeLevel,
 			"gloves": defaultUpgradeLevel,
-			"quiver": defaultUpgradeLevel
+			"quiver": 7
 		};
 	let compoundList =
 		{
