@@ -13,6 +13,7 @@ function initBotComms()
 	});
 	
 	commsInterval = setInterval(commsLoop, 1000);
+	sendPartyInvites();
 }
 
 function commsLoop()
@@ -38,25 +39,43 @@ function on_cm(sender, data)
 
 	game.trigger("codeMessage", {sender:sender, data:data});
 	
-	if (!RecievedMessages[sender])
-	{
-		RecievedMessages[sender] = [data];
-	} 
-	else
-	{
-		RecievedMessages[sender].push(data);
-	}
+	// if (!RecievedMessages[sender])
+	// {
+	// 	RecievedMessages[sender] = [data];
+	// } 
+	// else
+	// {
+	// 	RecievedMessages[sender].push(data);
+	// }
 	
 	switch (data.message)
 	{
-		default:
-			// log(character.name + " recieved unexpected cm format from " + sender);
-			// show_json(data);
-			return;
+		case "party":
+			if(parent.party_list.length > 1)
+			{
+				send_party_invite(sender);
+			}
 	}
 }
 
-function sendCodeMessage(recipient, data, storeMessage = true)
+function on_party_invite(inviter)
+{
+	log(character.name + " recieved party invite from " + inviter);
+
+	if (WhiteList.includes(inviter))
+	{
+		if(parent.party_list.length <= 1)
+		{
+			accept_party_invite(inviter);
+		}
+		else if(Settings["Party"].includes(inviter))
+		{
+			send_party_invite(inviter);
+		}
+	}
+}
+
+function sendCodeMessage(recipient, data)
 {
 	if (!data.message || recipient === character.name)
 	{
@@ -65,21 +84,25 @@ function sendCodeMessage(recipient, data, storeMessage = true)
 		return;
 	}
 	
+	if(!data.location)
+	{
+		data.location = 
+			{
+				map: character.map,
+				position: {x: character.x, y: character.y}
+			}
+	}
+	
 	send_cm(recipient, data);
-	
-	if(!storeMessage)
-	{
-		return;
-	}
-	
-	if(!SentMessages[recipient])
-	{
-		SentMessages[recipient] = [data];
-	}
-	else
-	{
-		SentMessages[recipient].push(data);
-	}
+
+	// if(!SentMessages[recipient])
+	// {
+	// 	SentMessages[recipient] = [data];
+	// }
+	// else
+	// {
+	// 	SentMessages[recipient].push(data);
+	// }
 }
 
 function checkIfMessageSent(recipient, message)
@@ -144,8 +167,130 @@ function getOnlineCharacters()
 
 function getOnlineMerchant()
 {
-	return parent.X.characters.filter((x) =>
+	let merchants = parent.X.characters.filter((x) =>
 	{
 		return x.type === "merchant" && x.online > 0;
+	});
+	
+	if(merchants.length > 0)
+	{
+		return merchants[0];
+	}
+	else
+	{
+		return false;
+	}
+}
+
+function getOnlineMage()
+{
+	return parent.X.characters.filter((x) =>
+	{
+		return x.type === "mage" && x.online > 0;
 	})[0];
+}
+
+function requestMerchant(message)
+{
+	let merchant = getOnlineMerchant();
+	
+	if(merchant)
+	{
+		sendCodeMessage(merchant.name, message);		
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
+function sendPartyInvites()
+{
+	for(let index in Settings["Party"])
+	{
+		let name = Settings["Party"][index];
+		if(name === character.name)
+		{
+			continue;
+		}
+		
+		let cm = {message:"party"};
+		send_party_invite(name);
+		sendCodeMessage(name, cm);
+	}
+}
+
+function reloadCharacters()
+{
+	for (let i = 0; i < parent.X.characters.length; i++)
+	{
+		let name = parent.X.characters[i].name;
+		if (name !== character.name && get_active_characters()[name])
+		{
+			reloadCharacter(name);
+		}
+	}
+
+	setTimeout(() =>
+	{
+		reloadCharacter(character.name);
+	}, 1000);
+}
+
+function reloadCharacter(name)
+{
+	if (name === character.name)
+	{
+		say("/pure_eval setTimeout(()=>{parent.start_runner()}, 500)");
+		parent.stop_runner();
+	} 
+	else
+	{
+		command_character(name, "say(\"/pure_eval setTimeout(()=>{start_runner()}, 500)\")");
+		command_character(name, "say(\"/pure_eval stop_runner();\")");
+	}
+}
+
+function stopRunners()
+{
+	for (let i = 0; i < parent.X.characters.length; i++)
+	{
+		let name = parent.X.characters[i].name;
+		if (name !== character.name && get_active_characters()[name])
+		{
+			stop_character(name);
+		}
+	}
+}
+
+function loadAllRunners()
+{
+	for (let i = 0; i < Settings["Party"].length; i++)
+	{
+		let name = Settings["Party"][i];
+		if (name !== character.name)
+		{
+			start_character(name, "Start");
+		}
+	}
+}
+
+function xpReport()
+{
+	let output = []
+
+	for (let p of parent.X.characters)
+	{
+		let player = get_player(p);
+
+		if (player)
+		{
+			let percent = (player.xp / G.levels[player.level]) * 100;
+			output.push(player.name + ": L" + player.level + " with " + percent.toLocaleString(undefined, {maximumFractionDigits: 2}) + "%");
+		}
+	}
+
+	show_json(output);
 }

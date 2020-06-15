@@ -1,12 +1,31 @@
 ﻿//load_file("C:/GitHub/lotusAdventureBot/code/MerchantBot.23.js");
 
-let Deliveries = {};
-
 function startMerchantBot()
 {
+	Settings["PotionStock"] = 5000;
+	Settings["LowPotions"] = 1000;
+	
 	game.on("stateChanged", onMerchantStateChanged);
 	game.on("codeMessage", onMerchantCM);
 	game.on("idle", onMerchantIdle);
+	
+	Intervals["Mluck"] = setInterval(()=>
+	{
+		if (!checkMluck(character))
+		{
+			use_skill("mluck", character);
+		}
+
+		for (let e in parent.entities)
+		{
+			let entity = get_player(e);
+			if (entity && !checkMluck(entity) && is_in_range(entity, "mluck"))
+			{
+				use_skill("mluck", entity);
+			}
+		}
+		
+	}, 250);
 
 	log(character.name + " MerchantBot loaded!");
 }
@@ -16,21 +35,16 @@ function onMerchantCM(data)
 	let sender = data.sender;
 	data = data.data;
 	
-	// if (getState("Town") !== true && getState("Idle") !== true)
-	// {
-	// 	return;
-	// }
-
 	switch (data.message)
 	{
 		case "NeedPotions":
-			if(quantity("hpot1") >= Settings["PotionStock"] && quantity("mpot1") >= Settings["PotionStock"])
+			if(quantity("hpot1") >= Settings["LowPotions"] && quantity("mpot1") >= Settings["LowPotions"])
 			{
 				deliverPotions(sender, data);
 			}
 			else if(!getState("NeedPotions"))
 			{
-				setState("NeedPotions");				
+				setState("NeedPotions");	
 			}
 			break;
 	}
@@ -57,6 +71,21 @@ function onMerchantIdle()
 	}
 }
 
+
+function sellVendorTrash()
+{
+	for (let i = 0; i < character.items.length; i++)
+	{
+		let item = character.items[i];
+
+		if (item && Settings["VendorTrash"].includes(item.name) && !isShiny(item))
+		{
+			log("Selling " + item.name + " to vendor.");
+			sell(i, item.q);
+		}
+	}
+}
+
 function townInterval()
 {
 	if ((is_moving(character) || smart.moving) && parent.stand)
@@ -67,25 +96,13 @@ function townInterval()
 		parent.open_merchant(locate_item("stand0"));
 	}
 
-	if (!checkMluck(character))
-	{
-		use_skill("mluck", character);
-	}
-
-	for (let e in parent.entities)
-	{
-		let entity = get_player(e);
-		if (entity && !checkMluck(entity) && is_in_range(entity, "mluck"))
-		{
-			use_skill("mluck", entity);
-		}
-	}
-
 	if (!character.q.upgrade && !character.q.compound)
 	{
 		craftUpgrades();
-		craftCompounds();
+		// craftCompounds();
 	}
+	
+	sellVendorTrash();
 }
 
 function checkMluck(target)
@@ -102,7 +119,8 @@ function enterTownMode()
 		{
 			setState("Town");
 		});
-	} else
+	} 
+	else
 	{
 		if (distance(character, Settings["HomeCoords"]) > 200)
 		{
@@ -135,30 +153,41 @@ function stopTownInterval()
 
 function deliverPotions(sender, data)
 {
+	checkPotions();
+	
 	let target = get_player(sender);
 
 	if (getState("Delivering") && !is_moving(character) && !smart.moving)
 	{
-		log("Delivering potions...");
+		writeToLog("Delivering potions to " + sender);
 		
 		if(!target)
 		{
-			travelTo(data.location.map, {x: data.location.x, y: data.location.y});
+			travelTo(data.location.map, data.location.position);
 		}
 		else
 		{
 			approach(target);
 
-			if (distance(character, target) < 200)
+			if (distance(character, target) < 50)
 			{
-				send_item(sender, locate_item("hpot1"), data.hpots);
-				send_item(sender, locate_item("mpot1"), data.mpots);
+				if(data.hpots > 0)
+				{
+					writeToLog("Delivering " + data.hpots + " health potions to " + sender);
+					send_item(sender, locate_item("hpot1"), data.hpots);			
+				}
 
-				setState("Delivering", false);
+				if(data.mpots > 0)
+				{
+					writeToLog("Delivering " + data.mpots + " mana potions to " + sender);
+					send_item(sender, locate_item("mpot1"), data.mpots);					
+				}
+				
+				setState("Delivery", false);
 			}
 		}
 	} 
-	else if(!getState("Delivering") && !is_moving(character) && !smart.moving)
+	else if(!getState("Delivering") && !getState("NeedPotions") && !is_moving(character) && !smart.moving)
 	{
 		travelTo(data.location.map, {x: data.location.x, y: data.location.y}, () =>
 		{

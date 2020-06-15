@@ -2,18 +2,19 @@
 
 function loadCharacter()
 {
-	//load_code("RangerLotus");
-	
 	let settings =
 		{
-			"FarmMap": "winterland",
-			"FarmMonster": "arcticbee",
-			"FarmSpawn": 10,
+			"FarmMap": "main",
+			"FarmMonster": "croc",
+			"FarmSpawn": 6,
+			"Avoid": ["bigbird"],
+			"Party":["LotusRanger","RangerLotus","LotusMage","LotusMerch"],
 			"TetherRadius": 100
 		};
 
 	startBotCore(settings);
-	beginFarming();
+	load_code("RangerLotus");
+	Flags["Farming"] = true;
 }
 
 function characterCombat()

@@ -5,18 +5,19 @@ function loadCharacter()
 	let settings = 
 	{
 		"FarmMap":"main",
-		"FarmMonster":"crab",
-		"FarmSpawn":8,
+		"FarmMonster":"bee",
+		"FarmSpawn":5,
+		"Party": ["LotusRanger", "RangerLotus", "LotusMage", "LotusMerch"],
 		"TetherRadius":100
 	};
 	
 	startBotCore(settings);
-	beginFarming();
+	Flags["Farming"] = true;
 }
 
 function characterCombat(target)
 {
-	if(useThreeShot(target))
+	if(useThreeShot(target, Settings["Avoid"]))
 	{
 		return true;
 	}
@@ -56,14 +57,14 @@ function useThreeShot(target, avoidTargets = [])
 	for (let e in parent.entities)
 	{
 		let t = parent.entities[e];
-		if (target.mtype === t.mtype && is_in_range(t, "attack"))
-		{
-			targets.push(t);
-		} 
-		else if (avoidTargets.includes(t.mtype) && is_in_range(t, "attack"))
+		if (((t.level > 1 && target.mtype === t.mtype) || avoidTargets.includes(t.mtype)) && is_in_range(t, "attack"))
 		{
 			return false;
 		}
+		else if (target.mtype === t.mtype && is_in_range(t, "attack"))
+		{
+			targets.push(t);
+		} 
 	}
 
 	if (targets.length >= 2)

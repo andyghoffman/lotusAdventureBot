@@ -5,13 +5,14 @@ function loadCharacter()
 	let settings =
 		{
 			"FarmMap": "main",
-			"FarmMonster": "bee",
+			"FarmMonster": "poisio",
 			"FarmSpawn": 5,
+			"Party": ["LotusRanger", "RangerLotus", "LotusMage", "LotusMerch"],
 			"TetherRadius": 100
 		};
 
 	startBotCore(settings);
-	beginFarming();
+	Flags["Farming"] = true;
 }
 
 function characterCombat()

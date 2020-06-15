@@ -25,10 +25,10 @@ const XynTypes = ["gem", "box"]; //  item types to be exchanged with Xyn
 ///     
 const FullAuto = true;  //  if true will automatically start farming on connect & startup. set false to have player control on startup
 const FarmMode = "number";
-const FarmMonsterName = "crab";
-const FarmMap = "main";
-const FarmMonsterSpawnNumber = 8;
-const FarmRadius = 100;
+const FarmMonsterName = "arcticbee";
+const FarmMap = "winterland";
+const FarmMonsterSpawnNumber = 10;
+const FarmRadius = 150;
 const FarmCoords = { x: 1202, y: -782 };    //  only used if farmMode is 'coords'
 const SpecialMonsters = ["snowman", "phoenix", "goldenbat"];
 //  solo character settings (only used if solo character is set up)
@@ -55,7 +55,7 @@ const MerchantName = "LotusMerch";
 const MageName = "LotusMage";
 const RangerName = "LotusRanger", RangerTwoName = "RangerLotus";
 const PriestName = "LotusPriest";
-const PartyLeader = MageName;
+const PartyLeader = RangerTwoName;
 const PartyList = [RangerName, MageName, RangerTwoName];
 const SoloCharacter = ""//RangerTwoName;
 

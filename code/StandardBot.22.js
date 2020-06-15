@@ -5,6 +5,9 @@ let Settings =
 		"PotionStock":1000,
 		"LowPotionThreshold":100,
 		"Wallet":250000,
+		"HoldItems":["tracker","hpot1","mpot1"],
+		"Party":[],
+		"LowInventory":14,
 	};
 let State = {};
 let Intervals = {};
@@ -14,23 +17,37 @@ function startBotCore(settings)
 {
 	game.on("stateChanged", onStateChanged);
 	game.on("idle", onIdle);
-
-	initBotComms();
+	game.on("death", onDeath);
+	game.on("level_up", onLevelUp);
+	
 	loadSettings(settings);
+	initBotComms();
 	
 	Intervals["Loot"] = setInterval(()=>
 	{
+		if(character.rip) { return; }
 		loot();
 	}, 100);
 
 	Intervals["UsePotions"] = setInterval(() =>
 	{
+		if (character.rip) { return; }
 		usePotions();
 	}, 100);
 	
 	Intervals["CheckPotions"] = setInterval(()=>
 	{
+		if (character.rip) { return; }
 		checkPotions();
+	}, 5000);
+	
+	Intervals["InventoryManagement"] = setInterval(()=>
+	{
+		let merchant = getOnlineMerchant();
+		if(get_player(merchant.name))
+		{
+			sendItemsAndGoldToMerchant();
+		}
 	}, 5000);
 	
 	Intervals["IdleCheck"] = setInterval(() =>
@@ -50,10 +67,10 @@ function startBotCore(settings)
 			}
 
 			Flags["IdleChecking"] = false;
-			
+
 		}, 5000);
 		
-	}, 5000);
+	}, 3000);
 	
 	log(character.name + " StandardBot loaded!");
 	
@@ -73,19 +90,79 @@ function onStateChanged(newState)
 			startCombatInterval();
 			break;
 		case "Idle":
-			if (Flags["Farming"])
+			break;
+		case "Dead":
+			stopCombatInterval();
+			Intervals["Respawn"] = setInterval(()=>
 			{
-				beginFarming();
-			}
+				if(character.rip)
+				{
+					respawn();
+				}
+				else
+				{
+					setState("Idle");
+					clearInterval(Intervals["Respawn"]);
+				}
+			}, 1000);
 			break;
 	}
 }
 
 function onIdle()
 {
-	if(!isInTown())
+	if (Flags["Farming"])
+	{
+		beginFarming();
+	}
+	else if(!isInTown())
 	{
 		goToTown();		
+	}
+}
+
+function onDeath(data)
+{
+	if (data.id === character.name)
+	{
+		writeToLog(data.id + " died!");
+		setState("Dead");
+	}
+}
+
+function onLevelUp(data)
+{
+	if (character.name === data.name)
+	{
+		writeToLog(data.name + " is now level " + data.level + "!");
+	}
+}
+
+function sendItemsAndGoldToMerchant()
+{
+	let merchant = get_player(getOnlineMerchant().name);
+	
+	if(character.name === merchant.name)
+	{
+		return;
+	}
+	
+	if(merchant && distance(character, merchant) < 200 && character.gold > Settings["Wallet"])
+	{
+		let gold = character.gold - Settings["Wallet"];
+		writeToLog(character.name + " sending " + gold + " gold to " + merchant.name);
+		send_gold(merchant.name, gold);
+		
+		for(let i = 0; i < character.items.length; i++)
+		{
+			let item = character.items[i];
+			
+			if(item && !Settings["HoldItems"].includes(item.name))
+			{
+				writeToLog(character.name + " sending " + G.items[item.name].name + " to " + merchant.name);
+				send_item(merchant.name, i, item.q);
+			}
+		}
 	}
 }
 
@@ -104,21 +181,19 @@ function checkPotions()
 	{
 		let merchant = getOnlineMerchant();
 
-		if (merchant && character.name !== merchant.name)
+		if(quantity("hpot1") === 0 || quantity("mpot1") === 0)
 		{
-			//log(character.name + " requesting potions from merchant.");
-			let cm = {
+			writeToLog(character.name + " needs to buy potions!");
+			setState("NeedPotions");
+		}
+		else if (merchant && character.name !== merchant.name)
+		{
+			let message = {
 				message: "NeedPotions",
 				hpots: hPots,
 				mpots: mPots,
-				location: {map: character.map, x: character.x, y: character.y}
 			};
-			let storeMessage = !checkIfMessageSent(merchant.name, "NeedPotions");
-			sendCodeMessage(merchant.name, cm, storeMessage);
-		} 
-		else
-		{
-			setState("NeedPotions");
+			requestMerchant(message);
 		}
 	}
 }
@@ -137,7 +212,7 @@ function buyPotions(hpots, mpots)
 		
 		if(h > 0)
 		{
-			log("Buying " + h + " health potions.");
+			writeToLog("Buying " + h + " health potions.");
 			buy_with_gold("hpot1", h);			
 		}
 		
@@ -145,7 +220,7 @@ function buyPotions(hpots, mpots)
 		
 		if(m > 0)
 		{
-			log("Buying " + m + " mana potions.");
+			writeToLog("Buying " + m + " mana potions.");
 			buy_with_gold("mpot1", m);			
 		}
 
@@ -198,6 +273,8 @@ function startCombatInterval()
 
 	Intervals["Combat"] = setInterval(() =>
 	{
+		positionRoutine();
+		
 		let target = findTarget(Settings["FarmMonster"]);
 		
 		if(target && !is_on_cooldown("attack"))
@@ -262,6 +339,11 @@ function approach(target)
 		adjustment.x = character.x + (target.x - character.x) * 0.3;
 		adjustment.y = character.y + (target.y - character.y) * 0.3;
 		
+		if(!can_move_to(adjustment.x, adjustment.y))
+		{
+			return;
+		}
+		
 		if(distance(character, adjustment) < character.range)
 		{
 			move(adjustment.x, adjustment.y);
@@ -306,7 +388,7 @@ function findTarget(mtype)
 function beginFarming()
 {
 	Flags["Farming"] = true;
-	
+
 	checkPotions();
 	
 	if(getState("NeedPotions"))
