@@ -4,10 +4,10 @@ function loadCharacter()
 {
 	let settings = 
 	{
-		"FarmMap":"main",
-		"FarmMonster":"snake",
-		"FarmSpawn":6,
-		"PriorityTargets": ["phoenix"],
+		"FarmMap":"cave",
+		"FarmMonster":"bat",
+		"FarmSpawn":8,
+		"PriorityTargets": ["phoenix","goldenbat"],
 		"Party": ["LotusRanger", "RangerLotus", "LotusMage", "LotusMerch"],
 		"TetherRadius":100
 	};

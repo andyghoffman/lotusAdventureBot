@@ -278,6 +278,7 @@ function loadAllRunners()
 		let online = parent.X.characters.filter((x) => { return x.name === name && x.online > 0; }).length > 0;
 		if (name !== character.name && !get_active_characters()[name] && !online)
 		{
+			log("Loading " + name + " as code runner");
 			start_character(name, "Start");
 		}
 	}

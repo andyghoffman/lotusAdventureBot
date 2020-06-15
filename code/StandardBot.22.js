@@ -439,6 +439,13 @@ function beginFarming()
 
 function travelTo(map, coords=null, onComplete=()=>{})
 {
+	let log = character.name + " traveling to " + map;
+	if(coords != null)
+	{
+		log += " (" + coords.x +", " + coords.y + ")";
+	}
+	writeToLog(log);
+	
 	stop();
 	setState("Traveling");
 	

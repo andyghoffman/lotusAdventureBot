@@ -18,9 +18,10 @@ function startMerchantBot()
 
 		for (let e in parent.entities)
 		{
-			let entity = get_player(e);
-			if (entity && !checkMluck(entity) && is_in_range(entity, "mluck"))
+			let entity = parent.entities[e];
+			if (entity && entity.player && !entity.npc && !checkMluck(entity) && is_in_range(entity, "mluck"))
 			{
+				log("Mlucking " + entity.name);
 				use_skill("mluck", entity);
 			}
 		}
@@ -88,11 +89,11 @@ function sellVendorTrash()
 
 function townInterval()
 {
-	if ((is_moving(character) || smart.moving) && parent.stand)
+	if (is_moving(character) || smart.moving)
 	{
 		parent.close_merchant();
 	} 
-	else if (!parent.stand && !(is_moving(character) && smart.moving))
+	else if (!parent.stand && !is_moving(character) && !smart.moving)
 	{
 		parent.open_merchant(locate_item("stand0"));
 	}
@@ -116,21 +117,22 @@ function enterTownMode()
 {
 	if (character.map !== Settings["HomeMap"])
 	{
-		travelTo(Settings["HomeMap"], () =>
+		travelTo(Settings["HomeMap"], null,() =>
 		{
 			setState("Town");
 		});
 	} 
 	else
 	{
-		if (distance(character, Settings["HomeCoords"]) > 200)
+		if (!isInTown())
 		{
 			use_skill("use_town");
 			setTimeout(() =>
 			{
 				enterTownMode();
 			}, 7500);
-		} else
+		} 
+		else
 		{
 			smart_move(Settings["HomeCoords"], () =>
 			{
@@ -156,29 +158,6 @@ function deliverPotions(sender, data)
 {
 	let target = get_player(sender);
 
-	if (getState("Delivering") && Flags["DeliverTarget"] === sender && !is_moving(character) && !smart.moving)
-	{
-		writeToLog("Delivering potions to " + sender);
-		
-		if(!target)
-		{
-			travelTo(data.location.map, data.location.position);
-		}
-		else
-		{
-			stop();
-			approach(target);
-		}
-	} 
-	else if(!getState("Delivering") && !getState("NeedPotions") && !is_moving(character) && !smart.moving)
-	{
-		travelTo(data.location.map, {x: data.location.x, y: data.location.y}, () =>
-		{
-			setState("Delivering");
-			Flags["DeliverTarget"] = sender;
-		});
-	}
-
 	if (target && distance(character, target) < 100)
 	{
 		if (data.hpots > 0)
@@ -194,6 +173,30 @@ function deliverPotions(sender, data)
 		}
 
 		Flags["DeliverTarget"] = null;
-		setState("Delivering", false);
+		setState("Town");
+		return;
+	}
+
+	if (getState("Delivering") && Flags["DeliverTarget"] === sender && !is_moving(character) && !smart.moving)
+	{
+		writeToLog("Delivering potions to " + sender);
+		
+		if(!target)
+		{
+			travelTo(data.location.map, data.location.position);
+		}
+		else
+		{
+			stop();
+			approach(target);
+		}
+	} 
+	else if(!target && !getState("Delivering") && !getState("NeedPotions") && !is_moving(character) && !smart.moving)
+	{
+		travelTo(data.location.map, data.location.position, () =>
+		{
+			setState("Delivering");
+			Flags["DeliverTarget"] = sender;
+		});
 	}
 }

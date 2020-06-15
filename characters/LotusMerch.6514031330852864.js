@@ -53,4 +53,9 @@ function loadCharacter()
 	
 	startBotCore(settings);
 	startMerchantBot();
+	
+	Intervals["Reload"] = setInterval(()=>
+	{
+		loadAllRunners();
+	}, 10000);
 }
