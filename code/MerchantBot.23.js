@@ -39,6 +39,10 @@ function onMerchantCM(data)
 	switch (data.message)
 	{
 		case "NeedPotions":
+			if(getState("Delivering"))
+			{
+				break;
+			}
 			if(quantity("hpot1") >= Settings["LowPotions"] && quantity("mpot1") >= Settings["LowPotions"])
 			{
 				deliverPotions(sender, data);
@@ -96,6 +100,11 @@ function townInterval()
 	else if (!parent.stand && !is_moving(character) && !smart.moving)
 	{
 		parent.open_merchant(locate_item("stand0"));
+	}
+	
+	if(!isInTown())
+	{
+		return;
 	}
 
 	if (!character.q.upgrade && !character.q.compound)
@@ -156,47 +165,50 @@ function stopTownInterval()
 
 function deliverPotions(sender, data)
 {
-	let target = get_player(sender);
-
-	if (target && distance(character, target) < 100)
+	if(getState("Delivering") || getState("NeedPotions") || is_moving(character) || smart.moving)
 	{
-		if (data.hpots > 0)
-		{
-			writeToLog("Delivering " + data.hpots + " health potions to " + sender);
-			send_item(sender, locate_item("hpot1"), data.hpots);
-		}
-
-		if (data.mpots > 0)
-		{
-			writeToLog("Delivering " + data.mpots + " mana potions to " + sender);
-			send_item(sender, locate_item("mpot1"), data.mpots);
-		}
-
-		Flags["DeliverTarget"] = null;
-		setState("Town");
 		return;
 	}
 
-	if (getState("Delivering") && Flags["DeliverTarget"] === sender && !is_moving(character) && !smart.moving)
+
+
+	travelTo(data.location.map, data.location.position, () =>
 	{
 		writeToLog("Delivering potions to " + sender);
-		
-		if(!target)
+		Flags["DeliverTarget"] = sender;
+		setState("Delivering");
+
+		Intervals["Deliver"] = setInterval(() =>
 		{
-			travelTo(data.location.map, data.location.position);
-		}
-		else
-		{
-			stop();
+			let target = get_player(sender);
 			approach(target);
-		}
-	} 
-	else if(!target && !getState("Delivering") && !getState("NeedPotions") && !is_moving(character) && !smart.moving)
-	{
-		travelTo(data.location.map, data.location.position, () =>
-		{
-			setState("Delivering");
-			Flags["DeliverTarget"] = sender;
-		});
-	}
+
+			if (target && distance(character, target) < 100)
+			{
+				if (data.hpots > 0)
+				{
+					writeToLog("Delivering " + data.hpots + " health potions to " + sender);
+					send_item(sender, locate_item("hpot1"), data.hpots);
+				}
+
+				if (data.mpots > 0)
+				{
+					writeToLog("Delivering " + data.mpots + " mana potions to " + sender);
+					send_item(sender, locate_item("mpot1"), data.mpots);
+				}
+
+				Flags["DeliverTarget"] = null;
+				setState("Delivering", false);
+				clearInterval(Intervals["Deliver"]);
+				return;
+			}
+
+			if (!is_moving(character) && !smart.moving && !target)
+			{
+				stop();
+				travelTo(data.location.map, data.location.position);
+			}
+
+		}, 1000);
+	});
 }
