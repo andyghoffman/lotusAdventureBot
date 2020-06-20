@@ -11,6 +11,11 @@ function startMerchantBot()
 	
 	Intervals["Mluck"] = setInterval(()=>
 	{
+		if(character.rip)
+		{
+			return;
+		}
+		
 		if (!checkMluck(character))
 		{
 			use_skill("mluck", character);
@@ -33,6 +38,11 @@ function startMerchantBot()
 
 function onMerchantCM(data)
 {
+	if(character.rip)
+	{
+		return;
+	}
+	
 	let sender = data.sender;
 	data = data.data;
 	
@@ -64,6 +74,13 @@ function onMerchantStateChanged(newState)
 	{
 		case "Town":
 			enterTownMode();
+			break;
+		case "Dead":
+			if(Intervals["Deliver"])
+			{
+				Flags["DeliverTarget"] = null;
+				clearInterval(Intervals["Deliver"]);				
+			}
 			break;
 	}
 }
@@ -169,11 +186,15 @@ function deliverPotions(sender, data)
 	{
 		return;
 	}
-
-
-
+	
 	travelTo(data.location.map, data.location.position, () =>
 	{
+		if(!get_player(sender))
+		{
+			deliverPotions(sender,data);
+			return;
+		}
+		
 		writeToLog("Delivering potions to " + sender);
 		Flags["DeliverTarget"] = sender;
 		setState("Delivering");
@@ -181,8 +202,16 @@ function deliverPotions(sender, data)
 		Intervals["Deliver"] = setInterval(() =>
 		{
 			let target = get_player(sender);
-			approach(target);
+			
+			if(!target)
+			{
+				Flags["DeliverTarget"] = null;
+				setState("Delivering", false);
+				clearInterval(Intervals["Deliver"]);
+				return;
+			}
 
+			approach(target);
 			if (target && distance(character, target) < 100)
 			{
 				if (data.hpots > 0)

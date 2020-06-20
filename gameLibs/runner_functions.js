@@ -33,6 +33,7 @@ game={
 	html:!parent.no_html, // if game.html is false, this character is loaded in [CODE] mode
 };
 character.bot=parent.is_bot;
+character.cli=parent.is_cli;
 
 //#NOTE: Most new features are experimental - for #feedback + suggestions: https://discord.gg/X4MpntA [05/01/18]
 
@@ -1079,28 +1080,31 @@ for (var key in localStorage)
 	}
 }
 
-setInterval(function(){
-	var activity=localStorage.getItem("activity"),messages=[];
+function local_cm_logic()
+{
+	// Warning: localStorage is very slow, with a localStorage that's filled with MB's of data, this routine might take 8-9ms each time
+	var activity=localStorage.getItem("activity"),messages=[],start=new Date();
 	activity=activity&&JSON.parse(activity)||{};
 	if(!activity.heartbeat) activity.heartbeat={};
 	if(activity.cm) delete activity.cm;
-	if(!activity.heartbeat[character.name] || mssince(new Date(activity.heartbeat[character.name]))>200)
+	if(!activity.heartbeat[character.name] || mssince(new Date(activity.heartbeat[character.name]))>320)
 	{
 		activity.heartbeat[character.name]=(new Date()).toString();
 		localStorage.setItem("activity",JSON.stringify(activity));
 	}
 
-	for (var key in localStorage)
-	{
-		if(key.startsWith("cm_"+character.name+"_"))
+	Object.keys(localStorage).forEach(function(key){ // 2x faster than for(key in localStorage)
 		{
-			var data=localStorage.getItem(key);
-			localStorage.removeItem(key);
-			data=JSON.parse(data);
-			data[2]=new Date(data[2]);
-			messages.push(data);
+			if(key.startsWith("cm_"+character.name+"_"))
+			{
+				var data=localStorage.getItem(key);
+				localStorage.removeItem(key);
+				data=JSON.parse(data);
+				data[2]=new Date(data[2]);
+				messages.push(data);
+			}
 		}
-	}
+	});
 
 	messages.sort(function(a,b){
 		if(!(a[2]-b[2]))
@@ -1109,12 +1113,18 @@ setInterval(function(){
 			return a[2]-b[2];
 	});
 
-	if(messages.length) console.log(messages);
-
 	messages.forEach(function(cm){
-		character.trigger("cm",{name:cm[0],message:cm[1],date:cm[2],local:true});
+		try{
+			character.trigger("cm",{name:cm[0],message:cm[1],date:cm[2],local:true});
+		}catch(e){
+			game_log("CM Error, From: "+cm[0]);
+			log(e);
+			log(e.stack);
+		}
 	});
-},10);
+	setTimeout(local_cm_logic,min(120,max(16,mssince(start)*10)));
+}
+setTimeout(local_cm_logic,10);
 
 var local_m_num=0;
 function send_local_cm(name,data)
@@ -1126,7 +1136,7 @@ function is_character_local(name)
 {
 	var activity=localStorage.getItem("activity");
 	activity=activity&&JSON.parse(activity)||{};
-	if(activity.heartbeat && activity.heartbeat[name] && mssince(new Date(activity.heartbeat[name]))<2400)
+	if(activity.heartbeat && activity.heartbeat[name] && mssince(new Date(activity.heartbeat[name]))<2880)
 		return true;
 	return false;
 }
@@ -1472,9 +1482,31 @@ function start_pathfinding()
 	smart.start_x=character.real_x;
 	smart.start_y=character.real_y;
 	queue=[],visited={},start=0,best=null;
-	qpush({x:character.real_x,y:character.real_y,map:character.map,i:-1});
-	game_log("Searching for a path...","#89D4A2");
-	bfs();
+	if(character.cli)
+	{
+		parent.CLI_OUT.push({"type":"smart_move",G:G,start_x:smart.start_x,start_y:smart.start_y,start_map:character.map,x:smart.x,y:smart.y,map:smart.map});
+	}
+	else
+	{
+		qpush({x:character.real_x,y:character.real_y,map:character.map,i:-1});
+		game_log("Searching for a path...","#89D4A2");
+		bfs();
+	}
+}
+
+function cli_smart_move_result(data)
+{
+	if(data.found)
+	{
+		smart.found=true;
+		smart.plot=data.plot;
+	}
+	else
+	{
+		game_log("CLI: Path not found!","#CF575F");
+		smart.moving=false;
+		smart.on_done(false,"failed");
+	}
 }
 
 function continue_pathfinding()
@@ -1489,12 +1521,13 @@ function smart_move_logic()
 	{
 		start_pathfinding();
 	}
+	else if(!smart.found && character.cli) { /* Just wait */ }
 	else if(!smart.found)
 	{
 		if(Math.random()<0.1)
 		{
 			move(character.real_x+Math.random()*0.0002-0.0001,character.real_y+Math.random()*0.0002-0.0001);
-			parent.d_text(shuffle(["Hmm","...","???","Definitely left","No right!","Is it?","I can do this!","I think ...","What If","Should be","I'm Sure","Nope","Wait a min!","Oh my"])[0],character,{color:shuffle(["#68B3D1","#d06f99","#6ED5A3","#D2CF5A"])[0]});
+			parent.d_text(shuffle(["Hmm","...","???","Definitely left","No right!","Is it?","I can do this!","I think ...","What If","Should be","I'm Sure","Nope","Wait a min!","Oh my"])[0],character,{color:shuffle(["#68B3D1","#D06F99","#6ED5A3","#D2CF5A"])[0]});
 		}
 		continue_pathfinding();
 	}

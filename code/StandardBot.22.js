@@ -48,6 +48,10 @@ function startBotCore(settings)
 		{
 			sendItemsAndGoldToMerchant();
 		}
+		if(character.esize < Settings["LowInventory"] && getState("Farming"))
+		{
+			goToTown();
+		}
 	}, 5000);
 	
 	Intervals["IdleCheck"] = setInterval(() =>
@@ -236,7 +240,7 @@ function goToTown(onComplete=()=>{})
 	use_skill("use_town");
 	setTimeout(()=>
 	{
-		travelTo("main", null, onComplete);		
+		travelTo("main", null, onComplete);
 	}, 8000);
 }
 
@@ -332,8 +336,13 @@ function autoAttack(target)
 
 function approach(target)
 {
-	if(is_moving(character) || smart.moving)
+	if(is_moving(character) || smart.moving || !target)
 	{
+		if(!target)
+		{
+			writeToLog(character.name + " attempted to appraoch a non-present target");
+		}
+		
 		return;
 	}
 	
@@ -344,12 +353,7 @@ function approach(target)
 		adjustment.x = character.x + (target.x - character.x) * 0.3;
 		adjustment.y = character.y + (target.y - character.y) * 0.3;
 		
-		if(!can_move_to(adjustment.x, adjustment.y))
-		{
-			return;
-		}
-		
-		if(distance(character, adjustment) < character.range)
+		if(distance(character, adjustment) < character.range && can_move_to(adjustment.x, adjustment.y))
 		{
 			move(adjustment.x, adjustment.y);
 		}

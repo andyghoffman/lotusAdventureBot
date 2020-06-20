@@ -7,6 +7,11 @@ function positionRoutine()
 		return;
 	}
 	
+	if(get_targeted_monster() && Settings["PriorityTargets"].includes(get_targeted_monster().mtype))
+	{
+		return;
+	}
+	
 	let center = getFarmLocation();
 	let targetPos = {x:center.x,y:center.y};
 	let theta = Math.atan2(character.y - center.y, character.x - center.x) + (180/Math.PI);
