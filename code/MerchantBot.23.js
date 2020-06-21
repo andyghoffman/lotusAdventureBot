@@ -48,6 +48,12 @@ function onMerchantCM(data)
 	
 	switch (data.message)
 	{
+		case "NeedElixir":
+			if (getState("Delivering") || getElixirInventorySlot(data.elixir) == null)
+			{
+				break;
+			}
+			deliverElixir(sender, data);
 		case "NeedPotions":
 			if(getState("Delivering"))
 			{
@@ -182,53 +188,73 @@ function stopTownInterval()
 
 function deliverPotions(sender, data)
 {
-	if(getState("Delivering") || getState("NeedPotions") || is_moving(character) || smart.moving)
+	deliverTo(sender, data, ()=>
+	{
+		if (data.hpots > 0)
+		{
+			writeToLog("Delivering " + data.hpots + " health potions to " + sender);
+			send_item(sender, locate_item("hpot1"), data.hpots);
+		}
+
+		if (data.mpots > 0)
+		{
+			writeToLog("Delivering " + data.mpots + " mana potions to " + sender);
+			send_item(sender, locate_item("mpot1"), data.mpots);
+		}
+	});
+}
+
+function deliverElixir(deliverToName, data)
+{
+	deliverTo(deliverToName, data, ()=>
+	{
+		writeToLog("Delivering " + data.elixir + " to " + deliverToName);
+		send_item(deliverToName, getElixirInventorySlot(data.elixir), 1);
+	});
+}
+
+function deliverTo(deliverToName, data, deliverFunction)
+{
+	if (getState("Delivering") || getState("NeedPotions") || is_moving(character) || smart.moving || Intervals["Deliver"] != null)
 	{
 		return;
 	}
-	
+
 	travelTo(data.location.map, data.location.position, () =>
 	{
-		if(!get_player(sender))
+		if (!get_player(deliverToName))
 		{
-			deliverPotions(sender,data);
+			deliverPotions(deliverToName, data);
 			return;
 		}
-		
-		writeToLog("Delivering potions to " + sender);
-		Flags["DeliverTarget"] = sender;
+
+		writeToLog("Delivering to " + deliverToName);
+		Flags["DeliverTarget"] = deliverToName;
 		setState("Delivering");
 
 		Intervals["Deliver"] = setInterval(() =>
 		{
-			let target = get_player(sender);
-			
-			if(!target)
+			let target = get_player(deliverToName);
+
+			if (!target)
 			{
 				Flags["DeliverTarget"] = null;
 				setState("Delivering", false);
 				clearInterval(Intervals["Deliver"]);
+				Intervals["Deliver"] = null;
 				return;
 			}
 
 			approach(target);
+			
 			if (target && distance(character, target) < 100)
 			{
-				if (data.hpots > 0)
-				{
-					writeToLog("Delivering " + data.hpots + " health potions to " + sender);
-					send_item(sender, locate_item("hpot1"), data.hpots);
-				}
-
-				if (data.mpots > 0)
-				{
-					writeToLog("Delivering " + data.mpots + " mana potions to " + sender);
-					send_item(sender, locate_item("mpot1"), data.mpots);
-				}
-
+				deliverFunction();
+				
 				Flags["DeliverTarget"] = null;
 				setState("Delivering", false);
 				clearInterval(Intervals["Deliver"]);
+				Intervals["Deliver"] = null;
 				return;
 			}
 

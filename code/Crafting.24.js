@@ -17,7 +17,7 @@ function craftUpgrade(targetUpgradeLevel)
 	{
 		let item = character.items[i];
 
-		if (item && Settings["UpgradeList"][item.name] && item.level < Settings["UpgradeList"][item.name] && !isShiny(item))
+		if (item && item.level < targetUpgradeLevel && Settings["UpgradeList"][item.name] && item.level < Settings["UpgradeList"][item.name] && !isShiny(item))
 		{
 			log("Upgrading " + G.items[item.name].name + "...");
 
@@ -51,7 +51,7 @@ function craftUpgrade(targetUpgradeLevel)
 	return false;
 }
 
-function craftCompounds(levelToStop = 2)
+function craftCompounds(levelToStop = 3)
 {
 	for (let i = 0; i < levelToStop; i++)
 	{
@@ -75,7 +75,7 @@ function craftCompound(levelToUse)
 		for (let k = 0; k < character.items.length; k++)
 		{
 			let item = character.items[k];
-			if (item && item.name === targetItemName && item.level === levelToUse && count < 3 && !isShiny(item))
+			if (item && item.name === targetItemName && item.level === levelToUse && item.level <= Settings["CompoundList"][item.name] && count < 3 && !isShiny(item))
 			{
 				triple[count] = k;
 				count++;

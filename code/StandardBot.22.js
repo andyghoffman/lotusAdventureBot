@@ -39,6 +39,7 @@ function startBotCore(settings)
 	{
 		if (character.rip) { return; }
 		checkPotions();
+		checkElixirBuff();
 	}, 5000);
 	
 	Intervals["InventoryManagement"] = setInterval(()=>
@@ -140,6 +141,93 @@ function onLevelUp(data)
 	{
 		writeToLog(data.name + " is now level " + data.level + "!");
 	}
+}
+
+function checkElixirBuff()
+{
+	if(character.ctype === "merchant")
+	{
+		return;
+	}
+	
+	let buffToExpect = null;
+
+	if (character.ctype === "priest" || character.ctype === "mage")
+	{
+		buffToExpect = "elixirint";
+	}
+	else if (character.ctype === "ranger" || character.ctype === "rogue")
+	{
+		buffToExpect = "elixirdex";
+	}
+	else if (character.ctype === "warrior")
+	{
+		buffToExpect = "elixirstr";
+	}
+	
+	//	need elixir buff
+	if (!character.slots.elixir)
+	{
+		//	find an elixir in your inventory
+		let elixir = getElixirInventorySlot(buffToExpect);
+
+		//	if you have an elixir, drink it
+		if (elixir != null && elixir > -1)
+		{
+			log("Drinking " + G.items[character.items[elixir].name].name);
+			use(elixir);
+			return true;
+		}
+		//	if not, ask the merchant for one
+		else
+		{
+			let merchant = getOnlineMerchant();
+			
+			if (merchant && character.name !== merchant.name)
+			{
+				let message = {
+					message: "NeedElixir",
+					elixir: buffToExpect
+				};
+				requestMerchant(message);
+			}
+			return false;
+		}
+	}
+
+	return true;
+}
+
+//	if requesting a specific level, will return null if it's not found, otherwise will return first found, checking lower levels first
+function getElixirInventorySlot(elixirBaseName, elixirLevel = -1)
+{
+	let elixir = null;
+
+	if (elixirLevel > -1)
+	{
+		elixir = locate_item(elixirBaseName + elixirLevel);
+		if (elixir > -1)
+		{
+			return elixir;
+		} 
+		else
+		{
+			return null;
+		}
+	}
+
+	for (let i = 0; i <= 2; i++)
+	{
+		elixir = locate_item(elixirBaseName + i);
+
+		if (elixir > -1)
+		{
+			log(elixirBaseName + i);
+			return elixir;
+		}
+	}
+
+	return null;
 }
 
 function sendItemsAndGoldToMerchant()

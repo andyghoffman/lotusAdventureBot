@@ -26,7 +26,7 @@ function loadCharacter()
 			"intearring": defaultCompoundLevel,
 			"dexearring": defaultCompoundLevel,
 			"strearring": defaultCompoundLevel,
-			"wbook0": defaultCompoundLevel
+			"wbook0": 3
 		};
 	let vendorTrash = 
 		[
